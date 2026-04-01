@@ -4,23 +4,27 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAccount } from "wagmi";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { useMiniPay } from "@/hooks/useMiniPay";
 
 export default function Home() {
   const { isConnected } = useAccount();
   const router = useRouter();
+  const { isInMiniPay, miniPayAddress, loading } = useMiniPay();
+
+  const isReady = isConnected || !!miniPayAddress;
 
   useEffect(() => {
-    if (isConnected) {
+    if (isReady) {
       router.prefetch("/quiz");
     }
-  }, [isConnected, router]);
+  }, [isReady, router]);
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center bg-[#1A1A2E] px-6">
 
       {/* Logo */}
       <div className="mb-8 flex flex-col items-center">
-        <div className="w-32 h-32 rounded-full bg-[#FBCD00] flex items-center justify-center mb-4 shadow-lg">
+        <div className="w-32 h-32 rounded-full bg-[#FBCD00] flex items-center justify-center mb-4">
           <span className="text-6xl font-black text-white">Q</span>
         </div>
         <h1 className="text-5xl font-black text-white tracking-tight">
@@ -47,16 +51,30 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Connect Wallet */}
-      <div className="mb-6">
-        <ConnectButton label="Connect Wallet to Play" />
-      </div>
+      {/* MiniPay detected */}
+      {isInMiniPay && miniPayAddress && (
+        <div className="bg-[#35D07F]/20 border border-[#35D07F]/40 rounded-2xl px-6 py-3 mb-6 text-center">
+          <p className="text-[#35D07F] font-bold text-sm">
+            MiniPay detected
+          </p>
+          <p className="text-white/60 text-xs mt-1">
+            {miniPayAddress.slice(0, 6)}...{miniPayAddress.slice(-4)}
+          </p>
+        </div>
+      )}
+
+      {/* Connect Wallet — seulement si pas dans MiniPay */}
+      {!loading && !isInMiniPay && (
+        <div className="mb-6">
+          <ConnectButton label="Connect Wallet to Play" />
+        </div>
+      )}
 
       {/* Play Button */}
-      {isConnected && (
+      {isReady && (
         <button
           onClick={() => router.push("/quiz")}
-          className="w-full max-w-xs bg-[#FBCD00] hover:bg-[#f0c000] text-[#1A1A2E] font-black text-xl py-4 rounded-2xl transition-all active:scale-95 shadow-lg"
+          className="w-full max-w-xs bg-[#FBCD00] hover:bg-[#f0c000] text-[#1A1A2E] font-black text-xl py-4 rounded-2xl transition-all active:scale-95"
         >
           Play Now 🎮
         </button>

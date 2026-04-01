@@ -30,7 +30,7 @@ export const config = getDefaultConfig({
   ssr: true,
 });
 
-export const CONTRACT_ADDRESS = "0x50b20728ba0ad803679b5428f267c89aede9a378";
+export const CONTRACT_ADDRESS = "0x50b20728ba0ad803679b5428f267c89aede9a378" as const;
 
 export const CONTRACT_ABI = [
   {
@@ -74,3 +74,29 @@ export const CONTRACT_ABI = [
     outputs: [{ type: "uint256" }],
   },
 ] as const;
+
+// ── MiniPay Hook ──────────────────────────────────────────
+type EthereumProvider = {
+  request: (args: { method: string }) => Promise<string[]>;
+};
+
+type WindowWithEthereum = Window & {
+  ethereum?: EthereumProvider;
+};
+
+export function isMiniPay(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.navigator.userAgent.includes("MiniPay");
+}
+
+export async function getMiniPayAccount(): Promise<string | null> {
+  if (!isMiniPay()) return null;
+  try {
+    const ethereum = (window as WindowWithEthereum).ethereum;
+    if (!ethereum) return null;
+    const accounts = await ethereum.request({ method: "eth_requestAccounts" });
+    return accounts[0] ?? null;
+  } catch {
+    return null;
+  }
+}
