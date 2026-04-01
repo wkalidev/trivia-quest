@@ -5,6 +5,8 @@ import { useAccount } from "wagmi";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useMiniPay } from "@/hooks/useMiniPay";
+import { Logo } from "@/components/Logo";
+
 
 export default function Home() {
   const { isConnected } = useAccount();
@@ -24,15 +26,13 @@ export default function Home() {
 
       {/* Logo */}
       <div className="mb-8 flex flex-col items-center">
-        <div className="w-32 h-32 rounded-full bg-[#FBCD00] flex items-center justify-center mb-4">
-          <span className="text-6xl font-black text-white">Q</span>
-        </div>
-        <h1 className="text-5xl font-black text-white tracking-tight">
-          Trivia<span className="text-[#FBCD00]">Q</span>
+         <Logo size={128} />
+        <h1 className="text-5xl font-black text-white tracking-tight mt-4">
+              Trivia<span className="text-[#FBCD00]">Q</span>
         </h1>
         <p className="text-[#35D07F] mt-2 text-lg font-medium">
-          Play. Learn. Earn on Celo.
-        </p>
+              Play. Learn. Earn on Celo.
+           </p>
       </div>
 
       {/* Stats */}
