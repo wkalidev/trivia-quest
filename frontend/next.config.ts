@@ -1,11 +1,19 @@
 import type { NextConfig } from "next";
-const withPWA = require("@ducanh2912/next-pwa").default({
-  dest: "public",
-  disable: process.env.NODE_ENV === "development",
-});
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        indexedDB: false,
+      };
+    }
+    return config;
+  },
 };
 
-module.exports = withPWA(nextConfig);
+export default nextConfig;

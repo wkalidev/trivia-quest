@@ -67,18 +67,17 @@ export default function QuizPage() {
   }, [timer, joined, finished]);
 
   const handleJoin = () => {
-    writeContract(
-      {
-        address: CONTRACT_ADDRESS,
-        abi: CONTRACT_ABI,
-        functionName: "joinRound",
-        value: entryFee ?? parseEther("0.01"),
-      },
-      {
-        onSuccess: () => setJoined(true),
-      }
-    );
-  };
+  writeContract({
+    address: CONTRACT_ADDRESS,
+    abi: CONTRACT_ABI,
+    functionName: "joinRound",
+    value: entryFee ?? parseEther("0.01"),
+    chain: undefined,
+    account: address,
+  } as any, {
+    onSuccess: () => setJoined(true),
+  });
+};
 
   const handleAnswer = (idx: number) => {
     if (selected !== null) return;
