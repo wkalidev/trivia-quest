@@ -17,6 +17,7 @@
     "@safe-global/safe-apps-sdk": "^9.1.0",
     "@tanstack/react-query": "^5.96.0",
     "@walletconnect/ethereum-provider": "^2.23.9",
+    "framer-motion": "^12.38.0",
     "next": "16.2.1",
     "next-intl": "^4.9.0",
     "porto": "^0.2.37",

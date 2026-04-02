@@ -8,6 +8,7 @@ import { CONTRACT_ADDRESS, CONTRACT_ABI } from "@/lib/web3";
 import { getRandomQuestions } from "@/lib/questions";
 import type { Question } from "@/lib/questions";
 import { useTranslations } from "next-intl";
+import { motion, AnimatePresence } from "framer-motion";
 
 type WriteContractParams = {
   address: `0x${string}`;
@@ -46,6 +47,7 @@ export default function QuizPage() {
   const [totalPoints, setTotalPoints] = useState(0);
   const [showBonus, setShowBonus] = useState(false);
   const [bonusText, setBonusText] = useState("");
+  const [isCorrectAnswer, setIsCorrectAnswer] = useState<boolean | null>(null);
 
   const { writeContract, isPending } = useWriteContract();
 
@@ -68,6 +70,7 @@ export default function QuizPage() {
     setSelected((prev) => {
       const isCorrect = prev === questions[current]?.answer;
       setTimer(15);
+      setIsCorrectAnswer(null);
       if (current + 1 >= questions.length) {
         setFinished(true);
         router.push(
@@ -107,6 +110,7 @@ export default function QuizPage() {
     if (selected !== null || questions.length === 0) return;
     setSelected(idx);
     const isCorrect = idx === questions[current].answer;
+    setIsCorrectAnswer(isCorrect);
 
     if (isCorrect) {
       const newStreak = streak + 1;
@@ -130,7 +134,11 @@ export default function QuizPage() {
 
   if (!joined) {
     return (
-      <main className="min-h-screen flex flex-col items-center justify-center bg-[#1A1A2E] px-6">
+      <motion.main
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="min-h-screen flex flex-col items-center justify-center bg-[#1A1A2E] px-6"
+      >
         <div className="bg-white/10 rounded-3xl p-8 max-w-sm w-full text-center">
           <div className="text-5xl mb-4">🎮</div>
           <h2 className="text-white font-black text-2xl mb-2">{t("joinTitle")}</h2>
@@ -151,14 +159,18 @@ export default function QuizPage() {
             {isPending ? t("loading") : t("playButton")}
           </button>
         </div>
-      </main>
+      </motion.main>
     );
   }
 
   if (questions.length === 0) {
     return (
       <main className="min-h-screen flex items-center justify-center bg-[#1A1A2E]">
-        <p className="text-white">Chargement...</p>
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ repeat: Infinity, duration: 1 }}
+          className="w-12 h-12 border-4 border-[#FBCD00] border-t-transparent rounded-full"
+        />
       </main>
     );
   }
@@ -169,46 +181,94 @@ export default function QuizPage() {
   return (
     <main className="min-h-screen flex flex-col bg-[#1A1A2E] px-6 pt-10 relative overflow-hidden">
 
+      {/* Flash background on answer */}
+      <AnimatePresence>
+        {isCorrectAnswer !== null && (
+          <motion.div
+            key={isCorrectAnswer ? "correct" : "wrong"}
+            initial={{ opacity: 0.4 }}
+            animate={{ opacity: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.6 }}
+            className={`absolute inset-0 z-10 pointer-events-none ${
+              isCorrectAnswer ? "bg-green-500" : "bg-red-500"
+            }`}
+          />
+        )}
+      </AnimatePresence>
+
       {/* Bonus popup */}
-      {showBonus && (
-        <div className="absolute top-20 left-1/2 -translate-x-1/2 z-50 animate-bounce">
-          <div className="bg-[#FBCD00] text-[#1A1A2E] font-black text-lg px-6 py-3 rounded-2xl shadow-lg">
-            {bonusText}
-          </div>
-        </div>
-      )}
+      <AnimatePresence>
+        {showBonus && (
+          <motion.div
+            initial={{ opacity: 0, y: -20, scale: 0.8 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -40, scale: 0.8 }}
+            className="absolute top-20 left-1/2 -translate-x-1/2 z-50"
+          >
+            <div className="bg-[#FBCD00] text-[#1A1A2E] font-black text-lg px-6 py-3 rounded-2xl shadow-lg">
+              {bonusText}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Header */}
       <div className="flex justify-between items-center mb-3">
         <span className="text-white/60 text-sm">
           {t("question")} {current + 1}/{questions.length}
         </span>
-        <div className={`w-12 h-12 rounded-full flex items-center justify-center font-black text-xl ${timer <= 5 ? "bg-red-500" : "bg-[#FBCD00]"} text-[#1A1A2E]`}>
+        <motion.div
+          key={timer}
+          animate={timer <= 5 ? { scale: [1, 1.2, 1] } : {}}
+          transition={{ duration: 0.3 }}
+          className={`w-12 h-12 rounded-full flex items-center justify-center font-black text-xl ${
+            timer <= 5 ? "bg-red-500" : "bg-[#FBCD00]"
+          } text-[#1A1A2E]`}
+        >
           {timer}
-        </div>
+        </motion.div>
         <div className="flex flex-col items-end">
           <span className="text-[#35D07F] font-bold text-sm">{t("score")}: {score}</span>
-          <span className="text-[#FBCD00] text-xs font-bold">{totalPoints} pts</span>
+          <motion.span
+            key={totalPoints}
+            initial={{ scale: 1.3, color: "#FBCD00" }}
+            animate={{ scale: 1 }}
+            className="text-[#FBCD00] text-xs font-bold"
+          >
+            {totalPoints} pts
+          </motion.span>
         </div>
       </div>
 
       {/* Streak bar */}
-      <div className="flex items-center gap-2 mb-3">
+      <AnimatePresence>
         {streak > 0 && (
-          <div className={`flex items-center gap-1 px-3 py-1 rounded-full text-sm font-bold ${
-            multiplier >= 3 ? "bg-red-500 text-white" :
-            multiplier >= 2 ? "bg-orange-500 text-white" :
-            "bg-white/10 text-white"
-          }`}>
-            {getStreakLabel(streak)} — {streak} combo
-          </div>
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            className="flex items-center gap-2 mb-3"
+          >
+            <div className={`flex items-center gap-1 px-3 py-1 rounded-full text-sm font-bold ${
+              multiplier >= 3 ? "bg-red-500 text-white" :
+              multiplier >= 2 ? "bg-orange-500 text-white" :
+              "bg-white/10 text-white"
+            }`}>
+              {getStreakLabel(streak)} — {streak} combo
+            </div>
+            {multiplier > 1 && (
+              <motion.div
+                animate={{ scale: [1, 1.1, 1] }}
+                transition={{ repeat: Infinity, duration: 0.8 }}
+                className="bg-[#FBCD00] text-[#1A1A2E] px-2 py-1 rounded-full text-xs font-black"
+              >
+                x{multiplier}
+              </motion.div>
+            )}
+          </motion.div>
         )}
-        {multiplier > 1 && (
-          <div className="bg-[#FBCD00] text-[#1A1A2E] px-2 py-1 rounded-full text-xs font-black">
-            x{multiplier}
-          </div>
-        )}
-      </div>
+      </AnimatePresence>
 
       {/* Catégorie */}
       <div className="mb-3">
@@ -219,38 +279,58 @@ export default function QuizPage() {
 
       {/* Progress bar */}
       <div className="w-full bg-white/10 rounded-full h-2 mb-6">
-        <div
-          className="bg-[#FBCD00] h-2 rounded-full transition-all"
-          style={{ width: `${(current / questions.length) * 100}%` }}
+        <motion.div
+          className="bg-[#FBCD00] h-2 rounded-full"
+          animate={{ width: `${(current / questions.length) * 100}%` }}
+          transition={{ duration: 0.5 }}
         />
       </div>
 
       {/* Question */}
-      <div className="bg-white/10 rounded-3xl p-6 mb-6">
-        <p className="text-white font-bold text-xl leading-relaxed">
-          {q.question}
-        </p>
-      </div>
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={current}
+          initial={{ opacity: 0, x: 50 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -50 }}
+          transition={{ duration: 0.3 }}
+          className="bg-white/10 rounded-3xl p-6 mb-6"
+        >
+          <p className="text-white font-bold text-xl leading-relaxed">
+            {q.question}
+          </p>
+        </motion.div>
+      </AnimatePresence>
 
       {/* Options */}
-      <div className="space-y-3">
-        {q.options.map((opt, idx) => {
-          let style = "bg-white/10 text-white";
-          if (selected !== null) {
-            if (idx === q.answer) style = "bg-[#35D07F] text-white";
-            else if (idx === selected) style = "bg-red-500 text-white";
-          }
-          return (
-            <button
-              key={idx}
-              onClick={() => handleAnswer(idx)}
-              className={`w-full ${style} font-medium text-left px-6 py-4 rounded-2xl transition-all active:scale-95`}
-            >
-              {opt}
-            </button>
-          );
-        })}
-      </div>
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={current}
+          className="space-y-3"
+        >
+          {q.options.map((opt, idx) => {
+            let style = "bg-white/10 text-white hover:bg-white/20";
+            if (selected !== null) {
+              if (idx === q.answer) style = "bg-[#35D07F] text-white";
+              else if (idx === selected) style = "bg-red-500 text-white";
+              else style = "bg-white/5 text-white/40";
+            }
+            return (
+              <motion.button
+                key={idx}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: idx * 0.08 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => handleAnswer(idx)}
+                className={`w-full ${style} font-medium text-left px-6 py-4 rounded-2xl transition-all`}
+              >
+                {opt}
+              </motion.button>
+            );
+          })}
+        </motion.div>
+      </AnimatePresence>
     </main>
   );
 }
