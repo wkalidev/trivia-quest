@@ -87,6 +87,14 @@ export default function Home() {
         </button>
       )}
 
+      {/* Leaderboard button */}
+       <button
+            onClick={() => router.push("/leaderboard")}
+            className="mt-4 text-white/40 hover:text-white/70 text-sm underline transition-all"
+        >
+            🏆 Leaderboard
+        </button>
+
       {/* Footer */}
       <p className="mt-12 text-white/30 text-sm">
         {t("poweredBy")}

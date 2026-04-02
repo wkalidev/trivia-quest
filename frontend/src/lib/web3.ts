@@ -8,7 +8,7 @@ export const config = getDefaultConfig({
   ssr: true,
 });
 
-export const CONTRACT_ADDRESS = "0x1b006fab43cc79b3a091c6b0a9e1761f035340b0" as const;
+export const CONTRACT_ADDRESS = "0xb215c82de33f98b270455f21f7edb7780da0d47d" as const;
 
 export const CONTRACT_ABI = [
   {
@@ -50,6 +50,60 @@ export const CONTRACT_ABI = [
     stateMutability: "view",
     inputs: [{ name: "player", type: "address" }],
     outputs: [{ type: "uint256" }],
+  },
+  {
+    name: "getLeaderboard",
+    type: "function",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [
+      {
+        type: "tuple[]",
+        components: [
+          { name: "player", type: "address" },
+          { name: "totalPoints", type: "uint256" },
+          { name: "bestScore", type: "uint256" },
+          { name: "gamesPlayed", type: "uint256" },
+        ],
+      },
+    ],
+  },
+  {
+    name: "getPlayerStats",
+    type: "function",
+    stateMutability: "view",
+    inputs: [{ name: "player", type: "address" }],
+    outputs: [
+      {
+        type: "tuple",
+        components: [
+          { name: "score", type: "uint256" },
+          { name: "totalWinnings", type: "uint256" },
+          { name: "totalPoints", type: "uint256" },
+          { name: "gamesPlayed", type: "uint256" },
+          { name: "bestScore", type: "uint256" },
+          { name: "exists", type: "bool" },
+        ],
+      },
+    ],
+  },
+  {
+    name: "getTotalPlayers",
+    type: "function",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [{ type: "uint256" }],
+  },
+  {
+    name: "submitScore",
+    type: "function",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "player", type: "address" },
+      { name: "score", type: "uint256" },
+      { name: "points", type: "uint256" },
+    ],
+    outputs: [],
   },
 ] as const;
 
