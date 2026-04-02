@@ -2,15 +2,73 @@
 
 > Play. Learn. Earn on Celo.
 
-Trivia Q is a blockchain-powered quiz game built on Celo where players earn real CELO rewards by answering questions about African culture, geography, and Web3.
+Trivia Q is a blockchain-powered quiz game built on Celo where players earn real CELO rewards by answering questions about African culture, geography, Web3, science, sports, and general knowledge.
 
 ## 🌍 Why Africa?
 
 Celo's mission is financial inclusion for the unbanked. With 57% of African adults lacking bank accounts but owning smartphones, MiniPay is the perfect gateway. Trivia Q brings fun, education, and real micro-rewards to this audience.
 
-## 🌍 Multi-Language Support
+## 🚀 Live Demo
 
-Trivia Q supports 4 languages:
+👉 [trivia-quest-eight.vercel.app](https://trivia-quest-eight.vercel.app)
+
+## 🎮 Game Features
+
+- ✅ 446 questions dans 6 catégories
+- ✅ 10 questions aléatoires par partie
+- ✅ Timer de 15 secondes par question
+- ✅ Système de Streak x2 / x3 multiplicateur de points
+- ✅ Animations Framer Motion
+- ✅ Sons & feedback audio (🔊/🔇 toggle)
+- ✅ Leaderboard on-chain en temps réel
+- ✅ Support 4 langues : 🇫🇷 FR / 🇬🇧 EN / 🇪🇸 ES / 🇮🇹 IT
+- ✅ MiniPay compatible (détection automatique)
+- ✅ PWA installable sur Android
+
+## 📚 Question Categories
+
+| Catégorie | Nb questions |
+|---|---|
+| 🌍 Géographie Africaine | ~80 |
+| 💰 Web3 & Crypto | ~100 |
+| 📖 Histoire & Culture | ~60 |
+| 🔬 Science & Tech | ~80 |
+| ⚽ Sports | ~40 |
+| 🌐 Culture Générale | ~86 |
+
+## 🏗️ Architecture
+
+- **Smart Contract** — Solidity 0.8.20 + OpenZeppelin sur Celo Mainnet
+- **Frontend** — Next.js 16 + TypeScript + TailwindCSS
+- **Animations** — Framer Motion
+- **Wallet** — RainbowKit + Wagmi + Viem + MiniPay hook
+- **i18n** — next-intl (FR, EN, ES, IT)
+- **Deploy** — Vercel
+
+## 🔗 Smart Contracts
+
+| Network | Address |
+|---|---|
+| Celo Mainnet | `0xb215c82de33f98b270455f21f7edb7780da0d47d` |
+| Celo Sepolia (testnet) | `0x50b20728ba0ad803679b5428f267c89aede9a378` |
+
+## 📱 MiniPay Compatible
+
+Trivia Q detects MiniPay automatically and connects the wallet without any popup — seamless UX for mobile users in Africa.
+
+## 🔥 Streak System
+
+| Streak | Multiplicateur | Points par bonne réponse |
+|---|---|---|
+| 0-2 | x1 | 100 pts |
+| 3-4 | x2 🔥🔥 | 200 pts |
+| 5+ | x3 🔥🔥🔥 | 300 pts |
+
+## 🏆 Leaderboard On-Chain
+
+Le leaderboard est stocké directement sur la blockchain Celo. Chaque joueur accumule des points, et les 10 meilleurs sont affichés en temps réel.
+
+## 🌍 Multi-Language Support
 
 | Language | Code |
 |---|---|
@@ -18,43 +76,6 @@ Trivia Q supports 4 languages:
 | 🇬🇧 English | en |
 | 🇪🇸 Español | es |
 | 🇮🇹 Italiano | it |
-
-Language is saved in a cookie and persists across sessions.
-
-## 🏗️ Architecture
-
-- **Smart Contract** — Solidity on Celo Mainnet (TriviaQuest.sol)
-- **Frontend** — Next.js 16 + TailwindCSS
-- **Wallet** — RainbowKit + Wagmi + MiniPay hook
-- **Deploy** — Vercel (PWA-ready)
-
-## 🚀 Live Demo
-
-👉 [trivia-quest-eight.vercel.app](https://trivia-quest-eight.vercel.app)
-
-## 📱 MiniPay Compatible
-
-Trivia Q detects MiniPay automatically and connects the wallet without any popup — seamless UX for mobile users in Africa.
-
-## 🔗 Smart Contracts
-
-| Network | Address |
-|---|---|
-| Celo Mainnet | `0x1b006fab43cc79b3a091c6b0a9e1761f035340b0` |
-| Celo Sepolia (testnet) | `0x50b20728ba0ad803679b5428f267c89aede9a378` |
-
-## 🎯 Quiz Features
-
-- ✅ 446 questions dans 6 catégories
-- ✅ Géographie Africaine
-- ✅ Web3 & Crypto
-- ✅ Histoire & Culture
-- ✅ Science & Tech
-- ✅ Sports
-- ✅ Culture Générale
-- ✅ 10 questions aléatoires par partie
-- ✅ Timer de 15 secondes par question
-- ✅ Récompenses en CELO pour les meilleurs
 
 ## 🛠️ Local Setup
 ```bash
@@ -88,7 +109,9 @@ npx hardhat compile
 | Smart Contract | Solidity 0.8.20 + OpenZeppelin |
 | Frontend | Next.js 16 + TypeScript |
 | Styling | TailwindCSS |
+| Animations | Framer Motion |
 | Web3 | Wagmi + Viem + RainbowKit |
+| i18n | next-intl |
 | Deploy | Vercel |
 
 ## 👤 Author

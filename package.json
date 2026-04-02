@@ -1,0 +1,35 @@
+{
+  "name": "@wkalidev/trivia-quest-sdk",
+  "version": "1.0.0",
+  "description": "SDK for TriviaQuest - Blockchain quiz game on Celo",
+  "main": "sdk/index.js",
+  "types": "sdk/index.d.ts",
+  "files": [
+    "sdk"
+  ],
+  "scripts": {
+    "build:sdk": "tsc -p tsconfig.sdk.json"
+  },
+  "keywords": [
+    "celo",
+    "blockchain",
+    "quiz",
+    "web3",
+    "trivia",
+    "minipay",
+    "gamefi"
+  ],
+  "author": "wkalidev",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wkalidev/trivia-quest.git"
+  },
+  "homepage": "https://trivia-quest-eight.vercel.app",
+  "peerDependencies": {
+    "viem": "^2.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}
