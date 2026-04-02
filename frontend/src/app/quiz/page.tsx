@@ -9,6 +9,7 @@ import { getRandomQuestions } from "@/lib/questions";
 import type { Question } from "@/lib/questions";
 import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
+import { useGameSounds } from "@/hooks/useGameSounds";
 
 type WriteContractParams = {
   address: `0x${string}`;
@@ -48,6 +49,9 @@ export default function QuizPage() {
   const [showBonus, setShowBonus] = useState(false);
   const [bonusText, setBonusText] = useState("");
   const [isCorrectAnswer, setIsCorrectAnswer] = useState<boolean | null>(null);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+
+  const { playCorrect, playWrong, playStreak, playTick } = useGameSounds();
 
   const { writeContract, isPending } = useWriteContract();
 
@@ -89,9 +93,10 @@ export default function QuizPage() {
       handleNext();
       return;
     }
-    const t = setTimeout(() => setTimer((v) => v - 1), 1000);
-    return () => clearTimeout(t);
-  }, [timer, joined, finished, questions, handleNext]);
+    if (timer <= 5 && soundEnabled) playTick();
+    const tick = setTimeout(() => setTimer((v) => v - 1), 1000);
+    return () => clearTimeout(tick);
+  }, [timer, joined, finished, questions, handleNext, playTick, soundEnabled]);
 
   const handleJoin = () => {
     writeContract({
@@ -121,11 +126,15 @@ export default function QuizPage() {
       setScore((s) => s + 1);
 
       if (multiplier > 1) {
+        if (soundEnabled) playStreak();
         setBonusText(`+${points} pts ${getStreakLabel(newStreak)}`);
         setShowBonus(true);
         setTimeout(() => setShowBonus(false), 1500);
+      } else {
+        if (soundEnabled) playCorrect();
       }
     } else {
+      if (soundEnabled) playWrong();
       setStreak(0);
     }
 
@@ -181,7 +190,15 @@ export default function QuizPage() {
   return (
     <main className="min-h-screen flex flex-col bg-[#1A1A2E] px-6 pt-10 relative overflow-hidden">
 
-      {/* Flash background on answer */}
+      {/* Sound toggle */}
+      <button
+        onClick={() => setSoundEnabled(!soundEnabled)}
+        className="absolute top-4 right-4 text-white/40 hover:text-white text-xl z-20"
+      >
+        {soundEnabled ? "🔊" : "🔇"}
+      </button>
+
+      {/* Flash background */}
       <AnimatePresence>
         {isCorrectAnswer !== null && (
           <motion.div
@@ -304,10 +321,7 @@ export default function QuizPage() {
 
       {/* Options */}
       <AnimatePresence mode="wait">
-        <motion.div
-          key={current}
-          className="space-y-3"
-        >
+        <motion.div key={current} className="space-y-3">
           {q.options.map((opt, idx) => {
             let style = "bg-white/10 text-white hover:bg-white/20";
             if (selected !== null) {
