@@ -1,0 +1,37 @@
+{
+  "home": {
+    "title": "TriviaQ",
+    "tagline": "Play. Learn. Earn on Celo.",
+    "prizePool": "Prize Pool",
+    "winners": "Winners",
+    "daysLeft": "Days left",
+    "connectWallet": "Connect Wallet to Play",
+    "playNow": "Play Now 🎮",
+    "poweredBy": "Powered by Celo blockchain",
+    "miniPayDetected": "MiniPay detected"
+  },
+  "quiz": {
+    "joinTitle": "Join the game",
+    "entryFee": "Entry fee",
+    "feature1": "10 random questions from 446",
+    "feature2": "15 seconds per question",
+    "feature3": "CELO rewards for top players",
+    "feature4": "6 categories: Africa, Web3, Science...",
+    "playButton": "Play for 0.01 CELO",
+    "loading": "Transaction...",
+    "question": "Question",
+    "score": "Score"
+  },
+  "results": {
+    "perfect": "Perfect! 🏆",
+    "excellent": "Excellent! 🎉",
+    "good": "Well played! 👏",
+    "keepGoing": "Keep going! 💪",
+    "correctAnswers": "You answered {score} question(s) correctly out of {total}",
+    "eligible": "You are eligible for rewards!",
+    "eligibleDesc": "Rewards are distributed at the end of the round to top players.",
+    "playAgain": "Play Again 🎮",
+    "home": "Home"
+  },
+  "language": "Language"
+}

@@ -8,6 +8,19 @@ Trivia Q is a blockchain-powered quiz game built on Celo where players earn real
 
 Celo's mission is financial inclusion for the unbanked. With 57% of African adults lacking bank accounts but owning smartphones, MiniPay is the perfect gateway. Trivia Q brings fun, education, and real micro-rewards to this audience.
 
+## 🌍 Multi-Language Support
+
+Trivia Q supports 4 languages:
+
+| Language | Code |
+|---|---|
+| 🇫🇷 Français | fr |
+| 🇬🇧 English | en |
+| 🇪🇸 Español | es |
+| 🇮🇹 Italiano | it |
+
+Language is saved in a cookie and persists across sessions.
+
 ## 🏗️ Architecture
 
 - **Smart Contract** — Solidity on Celo Mainnet (TriviaQuest.sol)

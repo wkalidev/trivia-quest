@@ -3,21 +3,23 @@
 import { useSearchParams, useRouter } from "next/navigation";
 import { useAccount } from "wagmi";
 import { Suspense } from "react";
+import { useTranslations } from "next-intl";
 
 function ResultsContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { address } = useAccount();
+  const t = useTranslations("results");
 
   const score = parseInt(searchParams.get("score") ?? "0");
-  const total = parseInt(searchParams.get("total") ?? "5");
+  const total = parseInt(searchParams.get("total") ?? "10");
   const percentage = Math.round((score / total) * 100);
 
   const getMessage = () => {
-    if (percentage === 100) return { text: "Parfait ! 🏆", color: "text-[#FBCD00]" };
-    if (percentage >= 80) return { text: "Excellent ! 🎉", color: "text-[#35D07F]" };
-    if (percentage >= 60) return { text: "Bien joué ! 👏", color: "text-blue-400" };
-    return { text: "Continue ! 💪", color: "text-white" };
+    if (percentage === 100) return { text: t("perfect"), color: "text-[#FBCD00]" };
+    if (percentage >= 80) return { text: t("excellent"), color: "text-[#35D07F]" };
+    if (percentage >= 60) return { text: t("good"), color: "text-blue-400" };
+    return { text: t("keepGoing"), color: "text-white" };
   };
 
   const msg = getMessage();
@@ -37,17 +39,17 @@ function ResultsContent() {
         </h2>
 
         <p className="text-white/60 mb-8 text-sm">
-          Tu as répondu correctement à {score} question{score > 1 ? "s" : ""} sur {total}
+          {t("correctAnswers", { score, total })}
         </p>
 
         {/* Récompense estimée */}
         {percentage >= 60 && (
           <div className="bg-[#35D07F]/20 border border-[#35D07F]/40 rounded-2xl p-4 mb-8">
             <p className="text-[#35D07F] font-bold text-sm mb-1">
-              🎯 Tu es éligible aux récompenses !
+              🎯 {t("eligible")}
             </p>
             <p className="text-white/60 text-xs">
-              Les récompenses sont distribuées en fin de round aux meilleurs joueurs.
+              {t("eligibleDesc")}
             </p>
           </div>
         )}
@@ -65,13 +67,13 @@ function ResultsContent() {
             onClick={() => router.push("/quiz")}
             className="w-full bg-[#FBCD00] text-[#1A1A2E] font-black text-lg py-4 rounded-2xl active:scale-95 transition-all"
           >
-            Rejouer 🎮
+            {t("playAgain")}
           </button>
           <button
             onClick={() => router.push("/")}
             className="w-full bg-white/10 text-white font-bold text-lg py-4 rounded-2xl active:scale-95 transition-all"
           >
-            Accueil
+            {t("home")}
           </button>
         </div>
       </div>

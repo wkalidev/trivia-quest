@@ -1,6 +1,8 @@
 import "@/lib/polyfills";
 import type { Metadata, Viewport } from "next";
 import { Providers } from "./providers";
+import { getLocale, getMessages } from "next-intl/server";
+import { NextIntlClientProvider } from "next-intl";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -21,15 +23,20 @@ export const viewport: Viewport = {
   themeColor: "#FBCD00",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   return (
-    <html lang="en">
+    <html lang={locale}>
       <body>
-        <Providers>{children}</Providers>
+        <NextIntlClientProvider messages={messages}>
+          <Providers>{children}</Providers>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

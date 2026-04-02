@@ -7,6 +7,7 @@ import { parseEther } from "viem";
 import { CONTRACT_ADDRESS, CONTRACT_ABI } from "@/lib/web3";
 import { getRandomQuestions } from "@/lib/questions";
 import type { Question } from "@/lib/questions";
+import { useTranslations } from "next-intl";
 
 type WriteContractParams = {
   address: `0x${string}`;
@@ -20,6 +21,7 @@ type WriteContractParams = {
 export default function QuizPage() {
   const { address, isConnected } = useAccount();
   const router = useRouter();
+  const t = useTranslations("quiz");
   const [questions, setQuestions] = useState<Question[]>([]);
   const [current, setCurrent] = useState(0);
   const [score, setScore] = useState(0);
@@ -96,22 +98,22 @@ export default function QuizPage() {
       <main className="min-h-screen flex flex-col items-center justify-center bg-[#1A1A2E] px-6">
         <div className="bg-white/10 rounded-3xl p-8 max-w-sm w-full text-center">
           <div className="text-5xl mb-4">🎮</div>
-          <h2 className="text-white font-black text-2xl mb-2">Rejoindre la partie</h2>
+          <h2 className="text-white font-black text-2xl mb-2">{t("joinTitle")}</h2>
           <p className="text-white/60 mb-6">
-            Mise d&apos;entrée : <span className="text-[#FBCD00] font-bold">0.01 CELO</span>
+            {t("entryFee")} : <span className="text-[#FBCD00] font-bold">0.01 CELO</span>
           </p>
           <ul className="text-left text-white/70 text-sm mb-8 space-y-2">
-            <li>✅ 10 questions aléatoires parmi 446</li>
-            <li>✅ 15 secondes par question</li>
-            <li>✅ Récompenses en CELO pour les meilleurs</li>
-            <li>✅ 6 catégories : Afrique, Web3, Science...</li>
+            <li>✅ {t("feature1")}</li>
+            <li>✅ {t("feature2")}</li>
+            <li>✅ {t("feature3")}</li>
+            <li>✅ {t("feature4")}</li>
           </ul>
           <button
             onClick={handleJoin}
             disabled={isPending}
             className="w-full bg-[#FBCD00] text-[#1A1A2E] font-black text-lg py-4 rounded-2xl active:scale-95 transition-all disabled:opacity-50"
           >
-            {isPending ? "Transaction..." : "Jouer pour 0.01 CELO"}
+            {isPending ? t("loading") : t("playButton")}
           </button>
         </div>
       </main>
@@ -132,13 +134,13 @@ export default function QuizPage() {
     <main className="min-h-screen flex flex-col bg-[#1A1A2E] px-6 pt-12">
       <div className="flex justify-between items-center mb-4">
         <span className="text-white/60 text-sm">
-          Question {current + 1}/{questions.length}
+          {t("question")} {current + 1}/{questions.length}
         </span>
         <div className={`w-12 h-12 rounded-full flex items-center justify-center font-black text-xl ${timer <= 5 ? "bg-red-500" : "bg-[#FBCD00]"} text-[#1A1A2E]`}>
           {timer}
         </div>
         <span className="text-[#35D07F] font-bold">
-          Score: {score}
+          {t("score")}: {score}
         </span>
       </div>
 
