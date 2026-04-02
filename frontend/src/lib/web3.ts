@@ -7,9 +7,7 @@ export const config = getDefaultConfig({
   chains: [celo],
   ssr: true,
 });
-
-export const CONTRACT_ADDRESS = "0xb215c82de33f98b270455f21f7edb7780da0d47d" as const;
-
+export const CONTRACT_ADDRESS = "0xe679f3ec6042f63977064f9725da84aad75d2ff2" as const;
 export const CONTRACT_ABI = [
   {
     name: "joinRound",

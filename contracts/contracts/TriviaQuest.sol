@@ -5,11 +5,13 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 contract TriviaQuest is Ownable, ReentrancyGuard {
-    
-    // ── Types ──────────────────────────────────────────────
+
     struct Player {
         uint256 score;
         uint256 totalWinnings;
+        uint256 totalPoints;
+        uint256 gamesPlayed;
+        uint256 bestScore;
         bool exists;
     }
 
@@ -22,8 +24,14 @@ contract TriviaQuest is Ownable, ReentrancyGuard {
         bool finished;
     }
 
-    // ── State ──────────────────────────────────────────────
-    uint256 public entryFee = 0.01 ether;  // ~0.01 CELO
+    struct LeaderboardEntry {
+        address player;
+        uint256 totalPoints;
+        uint256 bestScore;
+        uint256 gamesPlayed;
+    }
+
+    uint256 public entryFee = 0.01 ether;
     uint256 public currentRoundId;
     uint256 public roundDuration = 1 days;
 
@@ -31,18 +39,18 @@ contract TriviaQuest is Ownable, ReentrancyGuard {
     mapping(uint256 => Round) public rounds;
     mapping(uint256 => mapping(address => uint256)) public roundScores;
 
-    // ── Events ─────────────────────────────────────────────
+    address[] public playerList;
+    uint256 public constant MAX_LEADERBOARD = 10;
+
     event PlayerJoined(address indexed player, uint256 roundId);
-    event ScoreSubmitted(address indexed player, uint256 score, uint256 roundId);
+    event ScoreSubmitted(address indexed player, uint256 score, uint256 points, uint256 roundId);
     event RoundFinished(uint256 roundId, address winner, uint256 prize);
     event NewRoundStarted(uint256 roundId);
 
-    // ── Constructor ────────────────────────────────────────
     constructor() Ownable(msg.sender) {
         _startNewRound();
     }
 
-    // ── Join a round ───────────────────────────────────────
     function joinRound() external payable nonReentrant {
         require(msg.value == entryFee, "Wrong entry fee");
         Round storage round = rounds[currentRoundId];
@@ -52,24 +60,73 @@ contract TriviaQuest is Ownable, ReentrancyGuard {
         round.prizePool += msg.value;
 
         if (!players[msg.sender].exists) {
-            players[msg.sender] = Player(0, 0, true);
+            players[msg.sender] = Player(0, 0, 0, 0, 0, true);
+            playerList.push(msg.sender);
         }
 
-        roundScores[currentRoundId][msg.sender] = 1; // marque comme inscrit
-
+        roundScores[currentRoundId][msg.sender] = 1;
         emit PlayerJoined(msg.sender, currentRoundId);
     }
 
-    // ── Submit score (owner only pour sécurité) ────────────
-    function submitScore(address player, uint256 score) external onlyOwner {
+    function submitScore(address player, uint256 score, uint256 points) external onlyOwner {
         require(roundScores[currentRoundId][player] > 0, "Player not in round");
         roundScores[currentRoundId][player] = score;
         players[player].score = score;
-
-        emit ScoreSubmitted(player, score, currentRoundId);
+        players[player].totalPoints += points;
+        players[player].gamesPlayed += 1;
+        if (score > players[player].bestScore) {
+            players[player].bestScore = score;
+        }
+        emit ScoreSubmitted(player, score, points, currentRoundId);
     }
 
-    // ── Finish round & pay winner ──────────────────────────
+    function getLeaderboard() external view returns (LeaderboardEntry[] memory) {
+        if (playerList.length == 0) {
+            return new LeaderboardEntry[](0);
+        }
+
+        uint256 count = playerList.length < MAX_LEADERBOARD ? playerList.length : MAX_LEADERBOARD;
+        LeaderboardEntry[] memory entries = new LeaderboardEntry[](count);
+
+        for (uint256 i = 0; i < playerList.length; i++) {
+            address p = playerList[i];
+            LeaderboardEntry memory entry = LeaderboardEntry({
+                player: p,
+                totalPoints: players[p].totalPoints,
+                bestScore: players[p].bestScore,
+                gamesPlayed: players[p].gamesPlayed
+            });
+
+            if (i < count) {
+                entries[i] = entry;
+                for (uint256 j = i; j > 0; j--) {
+                    if (entries[j].totalPoints > entries[j-1].totalPoints) {
+                        LeaderboardEntry memory temp = entries[j-1];
+                        entries[j-1] = entries[j];
+                        entries[j] = temp;
+                    } else {
+                        break;
+                    }
+                }
+            } else {
+                if (entry.totalPoints > entries[count-1].totalPoints) {
+                    entries[count-1] = entry;
+                    for (uint256 j = count-1; j > 0; j--) {
+                        if (entries[j].totalPoints > entries[j-1].totalPoints) {
+                            LeaderboardEntry memory temp = entries[j-1];
+                            entries[j-1] = entries[j];
+                            entries[j] = temp;
+                        } else {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        return entries;
+    }
+
     function finishRound(address winner) external onlyOwner nonReentrant {
         Round storage round = rounds[currentRoundId];
         require(!round.finished, "Already finished");
@@ -85,11 +142,9 @@ contract TriviaQuest is Ownable, ReentrancyGuard {
         payable(winner).transfer(prize);
 
         emit RoundFinished(currentRoundId, winner, prize);
-
         _startNewRound();
     }
 
-    // ── Internal: start new round ──────────────────────────
     function _startNewRound() internal {
         currentRoundId++;
         rounds[currentRoundId] = Round({
@@ -100,11 +155,9 @@ contract TriviaQuest is Ownable, ReentrancyGuard {
             winner: address(0),
             finished: false
         });
-
         emit NewRoundStarted(currentRoundId);
     }
 
-    // ── Admin ──────────────────────────────────────────────
     function setEntryFee(uint256 fee) external onlyOwner {
         entryFee = fee;
     }
@@ -113,12 +166,19 @@ contract TriviaQuest is Ownable, ReentrancyGuard {
         roundDuration = duration;
     }
 
-    // ── Getters ────────────────────────────────────────────
     function getCurrentRound() external view returns (Round memory) {
         return rounds[currentRoundId];
     }
 
     function getPlayerScore(address player) external view returns (uint256) {
         return roundScores[currentRoundId][player];
+    }
+
+    function getPlayerStats(address player) external view returns (Player memory) {
+        return players[player];
+    }
+
+    function getTotalPlayers() external view returns (uint256) {
+        return playerList.length;
     }
 }
