@@ -43,9 +43,15 @@ contract TriviaQuest is Ownable, ReentrancyGuard {
     uint256 public constant MAX_LEADERBOARD = 10;
 
     event PlayerJoined(address indexed player, uint256 roundId);
+<<<<<<< HEAD
     event ScoreSubmitted(address indexed player, uint256 score, uint256 points, uint256 roundId);
     event RoundFinished(uint256 roundId, address winner, uint256 prize);
+=======
+    event ScoreSubmitted(address indexed player, uint256 score, uint256 roundId);
+    event RoundFinished(uint256 roundId, address[] winners, uint256[] prizes);
+>>>>>>> 3be4c1b73d80a2a70ba0178abc56e20d41eec661
     event NewRoundStarted(uint256 roundId);
+    
 
     constructor() Ownable(msg.sender) {
         _startNewRound();
@@ -141,7 +147,12 @@ contract TriviaQuest is Ownable, ReentrancyGuard {
         players[winner].totalWinnings += prize;
         payable(winner).transfer(prize);
 
+<<<<<<< HEAD
         emit RoundFinished(currentRoundId, winner, prize);
+=======
+       emit RoundFinished(currentRoundId, winners, prizes);
+
+>>>>>>> 3be4c1b73d80a2a70ba0178abc56e20d41eec661
         _startNewRound();
     }
 
@@ -173,6 +184,7 @@ contract TriviaQuest is Ownable, ReentrancyGuard {
     function getPlayerScore(address player) external view returns (uint256) {
         return roundScores[currentRoundId][player];
     }
+<<<<<<< HEAD
 
     function getPlayerStats(address player) external view returns (Player memory) {
         return players[player];
@@ -182,3 +194,6 @@ contract TriviaQuest is Ownable, ReentrancyGuard {
         return playerList.length;
     }
 }
+=======
+}
+>>>>>>> 3be4c1b73d80a2a70ba0178abc56e20d41eec661
