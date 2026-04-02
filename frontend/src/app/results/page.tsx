@@ -2,7 +2,7 @@
 
 import { useSearchParams, useRouter } from "next/navigation";
 import { useAccount } from "wagmi";
-import { Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 
 function ResultsContent() {
@@ -10,11 +10,31 @@ function ResultsContent() {
   const router = useRouter();
   const { address } = useAccount();
   const t = useTranslations("results");
+  const [submitted, setSubmitted] = useState(false);
 
   const score = parseInt(searchParams.get("score") ?? "0");
   const total = parseInt(searchParams.get("total") ?? "10");
   const points = parseInt(searchParams.get("points") ?? "0");
   const percentage = Math.round((score / total) * 100);
+
+  useEffect(() => {
+    if (!address || submitted) return;
+
+    const submitScore = async () => {
+      try {
+        await fetch("/api/submit-score", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ player: address, score, points }),
+        });
+        setSubmitted(true);
+      } catch (error) {
+        console.error("Failed to submit score:", error);
+      }
+    };
+
+    submitScore();
+  }, [address, score, points, submitted]);
 
   const getMessage = () => {
     if (percentage === 100) return { text: t("perfect"), color: "text-[#FBCD00]" };
@@ -51,6 +71,15 @@ function ResultsContent() {
           {t("correctAnswers", { score, total })}
         </p>
 
+        {/* Submitted indicator */}
+        {submitted && (
+          <div className="bg-[#35D07F]/20 border border-[#35D07F]/40 rounded-2xl p-3 mb-4">
+            <p className="text-[#35D07F] font-bold text-xs">
+              ✅ Score enregistré sur la blockchain !
+            </p>
+          </div>
+        )}
+
         {percentage >= 60 && (
           <div className="bg-[#35D07F]/20 border border-[#35D07F]/40 rounded-2xl p-4 mb-6">
             <p className="text-[#35D07F] font-bold text-sm mb-1">
@@ -76,8 +105,14 @@ function ResultsContent() {
             {t("playAgain")}
           </button>
           <button
-            onClick={() => router.push("/")}
+            onClick={() => router.push("/leaderboard")}
             className="w-full bg-white/10 text-white font-bold text-lg py-4 rounded-2xl active:scale-95 transition-all"
+          >
+            🏆 Leaderboard
+          </button>
+          <button
+            onClick={() => router.push("/")}
+            className="w-full bg-white/5 text-white/60 font-bold py-3 rounded-2xl active:scale-95 transition-all"
           >
             {t("home")}
           </button>
