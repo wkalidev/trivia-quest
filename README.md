@@ -10,7 +10,7 @@ Celo's mission is financial inclusion for the unbanked. With 57% of African adul
 
 ## 🏗️ Architecture
 
-- **Smart Contract** — Solidity on Celo Sepolia (TriviaQuest.sol)
+- **Smart Contract** — Solidity on Celo Mainnet (TriviaQuest.sol)
 - **Frontend** — Next.js 16 + TailwindCSS
 - **Wallet** — RainbowKit + Wagmi + MiniPay hook
 - **Deploy** — Vercel (PWA-ready)
@@ -23,11 +23,25 @@ Celo's mission is financial inclusion for the unbanked. With 57% of African adul
 
 Trivia Q detects MiniPay automatically and connects the wallet without any popup — seamless UX for mobile users in Africa.
 
-## 🔗 Smart Contract
+## 🔗 Smart Contracts
 
-- **Network**: Celo Sepolia Testnet
-- **Address**: `0x50b20728ba0ad803679b5428f267c89aede9a378`
-- **Explorer**: [View on CeloScan](https://sepolia.celoscan.io/address/0x50b20728ba0ad803679b5428f267c89aede9a378)
+| Network | Address |
+|---|---|
+| Celo Mainnet | `0x1b006fab43cc79b3a091c6b0a9e1761f035340b0` |
+| Celo Sepolia (testnet) | `0x50b20728ba0ad803679b5428f267c89aede9a378` |
+
+## 🎯 Quiz Features
+
+- ✅ 446 questions dans 6 catégories
+- ✅ Géographie Africaine
+- ✅ Web3 & Crypto
+- ✅ Histoire & Culture
+- ✅ Science & Tech
+- ✅ Sports
+- ✅ Culture Générale
+- ✅ 10 questions aléatoires par partie
+- ✅ Timer de 15 secondes par question
+- ✅ Récompenses en CELO pour les meilleurs
 
 ## 🛠️ Local Setup
 ```bash
@@ -49,15 +63,15 @@ npx hardhat compile
 ## 🎯 Proof of Ship Checklist
 
 - ✅ Build For MiniPay — MiniPay hook integrated
-- ✅ Deploy On Celo — Smart contract on Celo Sepolia
-- ⬜ Prove Your Humanity — Self / Worldcoin / Coinbase
-- ⬜ Submit Your Project
+- ✅ Deploy On Celo — Smart contract on Celo Mainnet
+- ✅ Prove Your Humanity — Coinbase Verification
+- ✅ Submit Your Project
 
 ## 📋 Tech Stack
 
 | Layer | Tech |
 |---|---|
-| Blockchain | Celo Sepolia |
+| Blockchain | Celo Mainnet |
 | Smart Contract | Solidity 0.8.20 + OpenZeppelin |
 | Frontend | Next.js 16 + TypeScript |
 | Styling | TailwindCSS |

@@ -1,42 +1,26 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAccount, useWriteContract, useReadContract } from "wagmi";
 import { useRouter } from "next/navigation";
 import { parseEther } from "viem";
 import { CONTRACT_ADDRESS, CONTRACT_ABI } from "@/lib/web3";
+import { getRandomQuestions } from "@/lib/questions";
+import type { Question } from "@/lib/questions";
 
-const QUESTIONS = [
-  {
-    question: "Quelle est la capitale du Nigeria ?",
-    options: ["Lagos", "Abuja", "Kano", "Ibadan"],
-    answer: 1,
-  },
-  {
-    question: "Quel pays africain a le plus grand PIB ?",
-    options: ["Nigeria", "Afrique du Sud", "Égypte", "Kenya"],
-    answer: 0,
-  },
-  {
-    question: "Qu'est-ce que le cUSD sur Celo ?",
-    options: ["Un NFT", "Un stablecoin", "Un token de gouvernance", "Un validateur"],
-    answer: 1,
-  },
-  {
-    question: "Combien de pays composent l'Afrique ?",
-    options: ["48", "52", "54", "58"],
-    answer: 2,
-  },
-  {
-    question: "Quel est le fleuve le plus long d'Afrique ?",
-    options: ["Congo", "Niger", "Zambèze", "Nil"],
-    answer: 3,
-  },
-];
+type WriteContractParams = {
+  address: `0x${string}`;
+  abi: typeof CONTRACT_ABI;
+  functionName: "joinRound";
+  value: bigint;
+  chain: undefined;
+  account: `0x${string}` | undefined;
+};
 
 export default function QuizPage() {
   const { address, isConnected } = useAccount();
   const router = useRouter();
+  const [questions, setQuestions] = useState<Question[]>([]);
   const [current, setCurrent] = useState(0);
   const [score, setScore] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
@@ -57,46 +41,54 @@ export default function QuizPage() {
   }, [isConnected, router]);
 
   useEffect(() => {
-    if (!joined || finished) return;
+    setQuestions(getRandomQuestions(10));
+  }, []);
+
+  const handleNext = useCallback(() => {
+    if (questions.length === 0) return;
+    setSelected((prev) => {
+      const isCorrect = prev === questions[current]?.answer;
+      setTimer(15);
+      if (current + 1 >= questions.length) {
+        setFinished(true);
+        router.push(`/results?score=${score + (isCorrect ? 1 : 0)}&total=${questions.length}`);
+      } else {
+        setCurrent((c) => c + 1);
+      }
+      return null;
+    });
+  }, [questions, current, score, router]);
+
+  useEffect(() => {
+    if (!joined || finished || questions.length === 0) return;
     if (timer === 0) {
       handleNext();
       return;
     }
     const t = setTimeout(() => setTimer((v) => v - 1), 1000);
     return () => clearTimeout(t);
-  }, [timer, joined, finished]);
+  }, [timer, joined, finished, questions, handleNext]);
 
   const handleJoin = () => {
-  writeContract({
-    address: CONTRACT_ADDRESS,
-    abi: CONTRACT_ABI,
-    functionName: "joinRound",
-    value: entryFee ?? parseEther("0.01"),
-    chain: undefined,
-    account: address,
-  } as any, {
-    onSuccess: () => setJoined(true),
-  });
-};
+    writeContract({
+      address: CONTRACT_ADDRESS,
+      abi: CONTRACT_ABI,
+      functionName: "joinRound",
+      value: entryFee ?? parseEther("0.01"),
+      chain: undefined,
+      account: address,
+    } as WriteContractParams, {
+      onSuccess: () => setJoined(true),
+    });
+  };
 
   const handleAnswer = (idx: number) => {
-    if (selected !== null) return;
+    if (selected !== null || questions.length === 0) return;
     setSelected(idx);
-    if (idx === QUESTIONS[current].answer) {
+    if (idx === questions[current].answer) {
       setScore((s) => s + 1);
     }
     setTimeout(() => handleNext(), 1000);
-  };
-
-  const handleNext = () => {
-    setSelected(null);
-    setTimer(15);
-    if (current + 1 >= QUESTIONS.length) {
-      setFinished(true);
-      router.push(`/results?score=${score + (selected === QUESTIONS[current].answer ? 1 : 0)}&total=${QUESTIONS.length}`);
-    } else {
-      setCurrent((c) => c + 1);
-    }
   };
 
   if (!joined) {
@@ -106,12 +98,13 @@ export default function QuizPage() {
           <div className="text-5xl mb-4">🎮</div>
           <h2 className="text-white font-black text-2xl mb-2">Rejoindre la partie</h2>
           <p className="text-white/60 mb-6">
-            Mise d'entrée : <span className="text-[#FBCD00] font-bold">0.01 CELO</span>
+            Mise d&apos;entrée : <span className="text-[#FBCD00] font-bold">0.01 CELO</span>
           </p>
           <ul className="text-left text-white/70 text-sm mb-8 space-y-2">
-            <li>✅ 5 questions de culture générale</li>
+            <li>✅ 10 questions aléatoires parmi 446</li>
             <li>✅ 15 secondes par question</li>
             <li>✅ Récompenses en CELO pour les meilleurs</li>
+            <li>✅ 6 catégories : Afrique, Web3, Science...</li>
           </ul>
           <button
             onClick={handleJoin}
@@ -125,14 +118,21 @@ export default function QuizPage() {
     );
   }
 
-  const q = QUESTIONS[current];
+  if (questions.length === 0) {
+    return (
+      <main className="min-h-screen flex items-center justify-center bg-[#1A1A2E]">
+        <p className="text-white">Chargement...</p>
+      </main>
+    );
+  }
+
+  const q = questions[current];
 
   return (
     <main className="min-h-screen flex flex-col bg-[#1A1A2E] px-6 pt-12">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex justify-between items-center mb-4">
         <span className="text-white/60 text-sm">
-          Question {current + 1}/{QUESTIONS.length}
+          Question {current + 1}/{questions.length}
         </span>
         <div className={`w-12 h-12 rounded-full flex items-center justify-center font-black text-xl ${timer <= 5 ? "bg-red-500" : "bg-[#FBCD00]"} text-[#1A1A2E]`}>
           {timer}
@@ -142,22 +142,25 @@ export default function QuizPage() {
         </span>
       </div>
 
-      {/* Progress bar */}
+      <div className="mb-4">
+        <span className="text-xs text-white/40 bg-white/10 px-3 py-1 rounded-full">
+          {q.category}
+        </span>
+      </div>
+
       <div className="w-full bg-white/10 rounded-full h-2 mb-8">
         <div
           className="bg-[#FBCD00] h-2 rounded-full transition-all"
-          style={{ width: `${((current) / QUESTIONS.length) * 100}%` }}
+          style={{ width: `${(current / questions.length) * 100}%` }}
         />
       </div>
 
-      {/* Question */}
       <div className="bg-white/10 rounded-3xl p-6 mb-8">
         <p className="text-white font-bold text-xl leading-relaxed">
           {q.question}
         </p>
       </div>
 
-      {/* Options */}
       <div className="space-y-4">
         {q.options.map((opt, idx) => {
           let style = "bg-white/10 text-white";

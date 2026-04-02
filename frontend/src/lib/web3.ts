@@ -1,36 +1,14 @@
 import { getDefaultConfig } from "@rainbow-me/rainbowkit";
-import { defineChain } from "viem";
-
-export const celoSepolia = defineChain({
-  id: 11142220,
-  name: "Celo Sepolia",
-  nativeCurrency: {
-    name: "CELO",
-    symbol: "CELO",
-    decimals: 18,
-  },
-  rpcUrls: {
-    default: {
-      http: ["https://forno.celo-sepolia.celo-testnet.org"],
-    },
-  },
-  blockExplorers: {
-    default: {
-      name: "CeloScan",
-      url: "https://sepolia.celoscan.io",
-    },
-  },
-  testnet: true,
-});
+import { celo } from "viem/chains";
 
 export const config = getDefaultConfig({
   appName: "Trivia Q",
   projectId: "triviaquest123",
-  chains: [celoSepolia],
+  chains: [celo],
   ssr: true,
 });
 
-export const CONTRACT_ADDRESS = "0x50b20728ba0ad803679b5428f267c89aede9a378" as const;
+export const CONTRACT_ADDRESS = "0x1b006fab43cc79b3a091c6b0a9e1761f035340b0" as const;
 
 export const CONTRACT_ABI = [
   {
