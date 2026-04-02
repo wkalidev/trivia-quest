@@ -34,8 +34,9 @@ contract TriviaQuest is Ownable, ReentrancyGuard {
     // ── Events ─────────────────────────────────────────────
     event PlayerJoined(address indexed player, uint256 roundId);
     event ScoreSubmitted(address indexed player, uint256 score, uint256 roundId);
-    event RoundFinished(uint256 roundId, address winner, uint256 prize);
+    event RoundFinished(uint256 roundId, address[] winners, uint256[] prizes);
     event NewRoundStarted(uint256 roundId);
+    
 
     // ── Constructor ────────────────────────────────────────
     constructor() Ownable(msg.sender) {
@@ -84,7 +85,7 @@ contract TriviaQuest is Ownable, ReentrancyGuard {
         players[winner].totalWinnings += prize;
         payable(winner).transfer(prize);
 
-        emit RoundFinished(currentRoundId, winner, prize);
+       emit RoundFinished(currentRoundId, winners, prizes);
 
         _startNewRound();
     }
