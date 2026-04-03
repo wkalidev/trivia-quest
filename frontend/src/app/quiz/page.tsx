@@ -5,7 +5,7 @@ import { useAccount, useWriteContract, useReadContract } from "wagmi";
 import { useRouter } from "next/navigation";
 import { parseEther } from "viem";
 import { CONTRACT_ADDRESS, CONTRACT_ABI } from "@/lib/web3";
-import { getRandomQuestions } from "@/lib/questions";
+import { getRandomQuestions, getQuestionsByCategory, CATEGORIES } from "@/lib/questions";
 import type { Question } from "@/lib/questions";
 import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
@@ -33,11 +33,21 @@ function getStreakLabel(streak: number): string {
   return "";
 }
 
+function getCategoryEmoji(cat: string): string {
+  if (cat === "Géographie Africaine") return "🌍";
+  if (cat === "Web3 & Crypto") return "💰";
+  if (cat === "Histoire & Culture") return "📖";
+  if (cat === "Science & Tech") return "🔬";
+  if (cat === "Sports") return "⚽";
+  return "🧠";
+}
+
 export default function QuizPage() {
   const { address, isConnected } = useAccount();
   const router = useRouter();
   const t = useTranslations("quiz");
   const [questions, setQuestions] = useState<Question[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [current, setCurrent] = useState(0);
   const [score, setScore] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
@@ -52,7 +62,6 @@ export default function QuizPage() {
   const [soundEnabled, setSoundEnabled] = useState(true);
 
   const { playCorrect, playWrong, playStreak, playTick } = useGameSounds();
-
   const { writeContract, isPending } = useWriteContract();
 
   const { data: entryFee } = useReadContract({
@@ -66,8 +75,12 @@ export default function QuizPage() {
   }, [isConnected, router]);
 
   useEffect(() => {
-    setQuestions(getRandomQuestions(10));
-  }, []);
+    if (selectedCategory === "all") {
+      setQuestions(getRandomQuestions(10));
+    } else {
+      setQuestions(getQuestionsByCategory(selectedCategory, 10));
+    }
+  }, [selectedCategory]);
 
   const handleNext = useCallback(() => {
     if (questions.length === 0) return;
@@ -124,7 +137,6 @@ export default function QuizPage() {
       const points = 100 * multiplier;
       setTotalPoints((p) => p + points);
       setScore((s) => s + 1);
-
       if (multiplier > 1) {
         if (soundEnabled) playStreak();
         setBonusText(`+${points} pts ${getStreakLabel(newStreak)}`);
@@ -146,20 +158,54 @@ export default function QuizPage() {
       <motion.main
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="min-h-screen flex flex-col items-center justify-center bg-[#1A1A2E] px-6"
+        className="min-h-screen flex flex-col items-center justify-center bg-[#1A1A2E] px-6 py-12"
       >
         <div className="bg-white/10 rounded-3xl p-8 max-w-sm w-full text-center">
           <div className="text-5xl mb-4">🎮</div>
           <h2 className="text-white font-black text-2xl mb-2">{t("joinTitle")}</h2>
-          <p className="text-white/60 mb-6">
+          <p className="text-white/60 mb-4">
             {t("entryFee")} : <span className="text-[#FBCD00] font-bold">0.01 CELO</span>
           </p>
-          <ul className="text-left text-white/70 text-sm mb-8 space-y-2">
+
+          {/* Category selector */}
+          <div className="mb-6">
+            <p className="text-white/60 text-sm mb-3 text-left font-bold">
+              🎯 Choisir une catégorie :
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={() => setSelectedCategory("all")}
+                className={`px-3 py-2 rounded-xl text-sm font-bold transition-all ${
+                  selectedCategory === "all"
+                    ? "bg-[#FBCD00] text-[#1A1A2E]"
+                    : "bg-white/10 text-white/70 hover:bg-white/20"
+                }`}
+              >
+                🌐 Toutes
+              </button>
+              {CATEGORIES.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`px-3 py-2 rounded-xl text-xs font-bold transition-all text-left ${
+                    selectedCategory === cat
+                      ? "bg-[#FBCD00] text-[#1A1A2E]"
+                      : "bg-white/10 text-white/70 hover:bg-white/20"
+                  }`}
+                >
+                  {getCategoryEmoji(cat)} {cat.split(" ")[0]}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <ul className="text-left text-white/70 text-sm mb-6 space-y-2">
             <li>✅ {t("feature1")}</li>
             <li>✅ {t("feature2")}</li>
             <li>✅ {t("feature3")}</li>
             <li>🔥 Streak x2 / x3 bonus multiplier !</li>
           </ul>
+
           <button
             onClick={handleJoin}
             disabled={isPending}
@@ -287,10 +333,10 @@ export default function QuizPage() {
         )}
       </AnimatePresence>
 
-      {/* Catégorie */}
+      {/* Catégorie active */}
       <div className="mb-3">
         <span className="text-xs text-white/40 bg-white/10 px-3 py-1 rounded-full">
-          {q.category}
+          {getCategoryEmoji(q.category)} {q.category}
         </span>
       </div>
 
