@@ -95,6 +95,17 @@ export default function Home() {
             🏆 Leaderboard
         </button>
 
+        {/* Profile button */}
+        
+        {isConnected && (
+        <button
+          onClick={() => router.push("/profile")}
+          className="mt-2 text-white/40 hover:text-white/70 text-sm underline transition-all"
+       >
+            👤 Mon Profil
+        </button>
+    )}
+
       {/* Footer */}
       <p className="mt-12 text-white/30 text-sm">
         {t("poweredBy")}
