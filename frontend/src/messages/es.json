@@ -33,5 +33,10 @@
     "playAgain": "Jugar de nuevo 🎮",
     "home": "Inicio"
   },
+  "nav": {
+    "leaderboard": "Clasificación",
+    "profile": "Mi Perfil",
+    "playNow": "Jugar ahora 🎮"
+  },
   "language": "Idioma"
 }

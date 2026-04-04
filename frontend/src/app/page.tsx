@@ -15,6 +15,7 @@ export default function Home() {
   const router = useRouter();
   const { isInMiniPay, miniPayAddress, loading } = useMiniPay();
   const t = useTranslations("home");
+  const tNav = useTranslations("nav");
   const locale = useLocale() as Locale;
 
   const isReady = isConnected || !!miniPayAddress;
@@ -43,7 +44,7 @@ export default function Home() {
       </div>
 
       {/* Stats */}
-      <div className="flex gap-4 mb-10">
+      <div className="flex gap-4 mb-8">
         <div className="flex flex-col items-center bg-white/10 rounded-2xl px-5 py-4">
           <span className="text-2xl font-bold text-[#FBCD00]">$5,000</span>
           <span className="text-white/60 text-sm">{t("prizePool")}</span>
@@ -81,33 +82,32 @@ export default function Home() {
       {isReady && (
         <button
           onClick={() => router.push("/quiz")}
-          className="w-full max-w-xs bg-[#FBCD00] hover:bg-[#f0c000] text-[#1A1A2E] font-black text-xl py-4 rounded-2xl transition-all active:scale-95"
+          className="w-full max-w-xs bg-[#FBCD00] hover:bg-[#f0c000] text-[#1A1A2E] font-black text-xl py-4 rounded-2xl transition-all active:scale-95 mb-4"
         >
           {t("playNow")}
         </button>
       )}
 
-      {/* Leaderboard button */}
-       <button
-            onClick={() => router.push("/leaderboard")}
-            className="mt-4 text-white/40 hover:text-white/70 text-sm underline transition-all"
-        >
-            🏆 Leaderboard
-        </button>
-
-        {/* Profile button */}
-        
-        {isConnected && (
+      {/* Nav buttons */}
+      <div className="flex gap-3 mt-2">
         <button
-          onClick={() => router.push("/profile")}
-          className="mt-2 text-white/40 hover:text-white/70 text-sm underline transition-all"
-       >
-            👤 Mon Profil
+          onClick={() => router.push("/leaderboard")}
+          className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-5 py-3 rounded-2xl text-sm font-bold transition-all active:scale-95"
+        >
+          🏆 {tNav("leaderboard")}
         </button>
-    )}
+        {isConnected && (
+          <button
+            onClick={() => router.push("/profile")}
+            className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-5 py-3 rounded-2xl text-sm font-bold transition-all active:scale-95"
+          >
+            👤 {tNav("profile")}
+          </button>
+        )}
+      </div>
 
       {/* Footer */}
-      <p className="mt-12 text-white/30 text-sm">
+      <p className="mt-8 text-white/30 text-sm">
         {t("poweredBy")}
       </p>
     </main>

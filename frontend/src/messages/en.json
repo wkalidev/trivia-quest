@@ -33,5 +33,10 @@
     "playAgain": "Play Again 🎮",
     "home": "Home"
   },
+  "nav": {
+    "leaderboard": "Leaderboard",
+    "profile": "My Profile",
+    "playNow": "Play Now 🎮"
+  },
   "language": "Language"
 }
