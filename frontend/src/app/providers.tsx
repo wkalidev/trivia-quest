@@ -3,6 +3,7 @@
 import { RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { WagmiProvider } from "wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ThemeProvider } from "next-themes";
 import { config } from "@/lib/web3";
 import "@rainbow-me/rainbowkit/styles.css";
 import dynamic from "next/dynamic";
@@ -26,5 +27,9 @@ const Web3ProvidersNoSSR = dynamic(() => Promise.resolve(Web3Providers), {
 });
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  return <Web3ProvidersNoSSR>{children}</Web3ProvidersNoSSR>;
+  return (
+    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+      <Web3ProvidersNoSSR>{children}</Web3ProvidersNoSSR>
+    </ThemeProvider>
+  );
 }
