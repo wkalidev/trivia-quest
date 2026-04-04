@@ -20,7 +20,7 @@ contract TriviaQuest is Ownable, ReentrancyGuard {
         uint256 prizePool;
         uint256 startTime;
         uint256 endTime;
-        address winner;
+        address[] topWinners;
         bool finished;
     }
 
@@ -44,7 +44,7 @@ contract TriviaQuest is Ownable, ReentrancyGuard {
 
     event PlayerJoined(address indexed player, uint256 roundId);
     event ScoreSubmitted(address indexed player, uint256 score, uint256 points, uint256 roundId);
-    event RoundFinished(uint256 roundId, address winner, uint256 prize);
+    event RoundFinished(uint256 roundId, address[] winners, uint256[] prizes);
     event NewRoundStarted(uint256 roundId);
 
     constructor() Ownable(msg.sender) {
@@ -78,6 +78,46 @@ contract TriviaQuest is Ownable, ReentrancyGuard {
             players[player].bestScore = score;
         }
         emit ScoreSubmitted(player, score, points, currentRoundId);
+    }
+
+    // ── Multi-Winner: 50% / 30% / 20% ─────────────────────
+    function finishRound(address[] calldata topWinners) external onlyOwner nonReentrant {
+        require(topWinners.length > 0 && topWinners.length <= 3, "Need 1-3 winners");
+        Round storage round = rounds[currentRoundId];
+        require(!round.finished, "Already finished");
+        require(block.timestamp >= round.endTime, "Round not over yet");
+
+        round.finished = true;
+        round.topWinners = topWinners;
+
+        uint256 prize = round.prizePool;
+        round.prizePool = 0;
+
+        uint256[] memory prizes = new uint256[](topWinners.length);
+
+        if (topWinners.length == 1) {
+            prizes[0] = prize;
+            players[topWinners[0]].totalWinnings += prize;
+            payable(topWinners[0]).transfer(prize);
+        } else if (topWinners.length == 2) {
+            prizes[0] = (prize * 60) / 100;
+            prizes[1] = (prize * 40) / 100;
+            for (uint256 i = 0; i < 2; i++) {
+                players[topWinners[i]].totalWinnings += prizes[i];
+                payable(topWinners[i]).transfer(prizes[i]);
+            }
+        } else {
+            prizes[0] = (prize * 50) / 100;
+            prizes[1] = (prize * 30) / 100;
+            prizes[2] = (prize * 20) / 100;
+            for (uint256 i = 0; i < 3; i++) {
+                players[topWinners[i]].totalWinnings += prizes[i];
+                payable(topWinners[i]).transfer(prizes[i]);
+            }
+        }
+
+        emit RoundFinished(currentRoundId, topWinners, prizes);
+        _startNewRound();
     }
 
     function getLeaderboard() external view returns (LeaderboardEntry[] memory) {
@@ -127,32 +167,15 @@ contract TriviaQuest is Ownable, ReentrancyGuard {
         return entries;
     }
 
-    function finishRound(address winner) external onlyOwner nonReentrant {
-        Round storage round = rounds[currentRoundId];
-        require(!round.finished, "Already finished");
-        require(block.timestamp >= round.endTime, "Round not over yet");
-
-        round.finished = true;
-        round.winner = winner;
-
-        uint256 prize = round.prizePool;
-        round.prizePool = 0;
-
-        players[winner].totalWinnings += prize;
-        payable(winner).transfer(prize);
-
-        emit RoundFinished(currentRoundId, winner, prize);
-        _startNewRound();
-    }
-
     function _startNewRound() internal {
         currentRoundId++;
+        address[] memory emptyWinners;
         rounds[currentRoundId] = Round({
             id: currentRoundId,
             prizePool: 0,
             startTime: block.timestamp,
             endTime: block.timestamp + roundDuration,
-            winner: address(0),
+            topWinners: emptyWinners,
             finished: false
         });
         emit NewRoundStarted(currentRoundId);
@@ -166,8 +189,16 @@ contract TriviaQuest is Ownable, ReentrancyGuard {
         roundDuration = duration;
     }
 
-    function getCurrentRound() external view returns (Round memory) {
-        return rounds[currentRoundId];
+    function getCurrentRound() external view returns (
+        uint256 id,
+        uint256 prizePool,
+        uint256 startTime,
+        uint256 endTime,
+        address[] memory topWinners,
+        bool finished
+    ) {
+        Round storage r = rounds[currentRoundId];
+        return (r.id, r.prizePool, r.startTime, r.endTime, r.topWinners, r.finished);
     }
 
     function getPlayerScore(address player) external view returns (uint256) {

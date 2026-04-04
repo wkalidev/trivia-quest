@@ -1,4 +1,4 @@
-export declare const CONTRACT_ADDRESS_MAINNET: "0xb215c82de33f98b270455f21f7edb7780da0d47d";
+export declare const CONTRACT_ADDRESS_MAINNET: "0xe7faded5157341911a99cae5c49ad4c1eeb1116a";
 export declare const CONTRACT_ADDRESS_TESTNET: "0x50b20728ba0ad803679b5428f267c89aede9a378";
 export declare const CONTRACT_ABI: readonly [{
     readonly name: "joinRound";
@@ -148,7 +148,7 @@ export declare const CELO_MAINNET: {
     name: string;
     rpcUrl: string;
     explorerUrl: string;
-    contractAddress: "0xb215c82de33f98b270455f21f7edb7780da0d47d";
+    contractAddress: "0xe7faded5157341911a99cae5c49ad4c1eeb1116a";
 };
 export declare const CELO_TESTNET: {
     id: number;

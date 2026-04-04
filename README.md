@@ -49,7 +49,7 @@ Celo's mission is financial inclusion for the unbanked. With 57% of African adul
 
 | Network | Address |
 |---|---|
-| Celo Mainnet | `0xb215c82de33f98b270455f21f7edb7780da0d47d` |
+| Celo Mainnet v4 | `0xe7faded5157341911a99cae5c49ad4c1eeb1116a` |
 | Celo Sepolia (testnet) | `0x50b20728ba0ad803679b5428f267c89aede9a378` |
 
 ## 📱 MiniPay Compatible
@@ -67,6 +67,14 @@ Trivia Q detects MiniPay automatically and connects the wallet without any popup
 ## 🏆 Leaderboard On-Chain
 
 Le leaderboard est stocké directement sur la blockchain Celo. Chaque joueur accumule des points, et les 10 meilleurs sont affichés en temps réel.
+
+## 🏆 Prize Distribution (Multi-Winner)
+
+| Position | Share |
+|---|---|
+| 🥇 1st place | 50% |
+| 🥈 2nd place | 30% |
+| 🥉 3rd place | 20% |
 
 ## 🌍 Multi-Language Support
 
