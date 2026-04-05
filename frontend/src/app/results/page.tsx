@@ -19,7 +19,6 @@ function ResultsContent() {
 
   useEffect(() => {
     if (!address || submitted) return;
-
     const submitScore = async () => {
       try {
         await fetch("/api/submit-score", {
@@ -32,7 +31,6 @@ function ResultsContent() {
         console.error("Failed to submit score:", error);
       }
     };
-
     submitScore();
   }, [address, score, points, submitted]);
 
@@ -44,6 +42,17 @@ function ResultsContent() {
   };
 
   const msg = getMessage();
+
+  const shareOnTwitter = () => {
+    const emoji = percentage === 100 ? "🏆" : percentage >= 80 ? "🎉" : percentage >= 60 ? "👏" : "💪";
+    const text = `${emoji} Je viens de scorer ${score}/${total} (${percentage}%) sur TriviaQ!\n\n🔥 ${points} points gagnés sur @Celo\n🌍 Questions sur l'Afrique, le Web3 et la culture\n\nJoue et gagne du vrai $CELO 👇\ntrivia-quest-eight.vercel.app\n\n#Celo #Web3Africa #TriviaQ #GameFi`;
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, "_blank");
+  };
+
+  const shareOnWhatsApp = () => {
+    const text = `🎮 Je viens de scorer ${score}/${total} sur TriviaQ! Gagne du vrai CELO en jouant: trivia-quest-eight.vercel.app`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
+  };
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center bg-[#1A1A2E] px-6">
@@ -67,7 +76,7 @@ function ResultsContent() {
           {msg.text}
         </h2>
 
-        <p className="text-white/60 mb-6 text-sm">
+        <p className="text-white/60 mb-4 text-sm">
           {t("correctAnswers", { score, total })}
         </p>
 
@@ -81,7 +90,7 @@ function ResultsContent() {
         )}
 
         {percentage >= 60 && (
-          <div className="bg-[#35D07F]/20 border border-[#35D07F]/40 rounded-2xl p-4 mb-6">
+          <div className="bg-[#35D07F]/20 border border-[#35D07F]/40 rounded-2xl p-4 mb-4">
             <p className="text-[#35D07F] font-bold text-sm mb-1">
               🎯 {t("eligible")}
             </p>
@@ -91,8 +100,24 @@ function ResultsContent() {
           </div>
         )}
 
+        {/* Share buttons */}
+        <div className="flex gap-3 mb-4">
+          <button
+            onClick={shareOnTwitter}
+            className="flex-1 bg-black hover:bg-gray-900 text-white font-bold py-3 rounded-2xl flex items-center justify-center gap-2 transition-all active:scale-95"
+          >
+            𝕏 Twitter
+          </button>
+          <button
+            onClick={shareOnWhatsApp}
+            className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-2xl flex items-center justify-center gap-2 transition-all active:scale-95"
+          >
+            💬 WhatsApp
+          </button>
+        </div>
+
         {address && (
-          <p className="text-white/30 text-xs mb-6 break-all">
+          <p className="text-white/30 text-xs mb-4 break-all">
             {address.slice(0, 6)}...{address.slice(-4)}
           </p>
         )}
@@ -106,7 +131,7 @@ function ResultsContent() {
           </button>
           <button
             onClick={() => router.push("/leaderboard")}
-            className="w-full bg-white/10 text-white font-bold text-lg py-4 rounded-2xl active:scale-95 transition-all"
+            className="w-full bg-white/10 text-white font-bold py-3 rounded-2xl active:scale-95 transition-all"
           >
             🏆 Leaderboard
           </button>
