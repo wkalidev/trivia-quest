@@ -27,12 +27,10 @@ export default function Home() {
   return (
     <main className="min-h-screen flex flex-col items-center justify-center bg-[#1A1A2E] px-6">
 
-      {/* Language switcher */}
       <div className="absolute top-4 right-4">
         <LanguageSwitcher currentLocale={locale} />
       </div>
 
-      {/* Logo */}
       <div className="mb-8 flex flex-col items-center">
         <Logo size={128} />
         <h1 className="text-5xl font-black text-white tracking-tight mt-4">
@@ -43,7 +41,6 @@ export default function Home() {
         </p>
       </div>
 
-      {/* Stats */}
       <div className="flex gap-4 mb-8">
         <div className="flex flex-col items-center bg-white/10 rounded-2xl px-5 py-4">
           <span className="text-2xl font-bold text-[#FBCD00]">$5,000</span>
@@ -59,26 +56,21 @@ export default function Home() {
         </div>
       </div>
 
-      {/* MiniPay detected */}
       {isInMiniPay && miniPayAddress && (
         <div className="bg-[#35D07F]/20 border border-[#35D07F]/40 rounded-2xl px-6 py-3 mb-6 text-center">
-          <p className="text-[#35D07F] font-bold text-sm">
-            {t("miniPayDetected")}
-          </p>
+          <p className="text-[#35D07F] font-bold text-sm">{t("miniPayDetected")}</p>
           <p className="text-white/60 text-xs mt-1">
             {miniPayAddress.slice(0, 6)}...{miniPayAddress.slice(-4)}
           </p>
         </div>
       )}
 
-      {/* Connect Wallet */}
       {!loading && !isInMiniPay && (
         <div className="mb-6">
           <ConnectButton label={t("connectWallet")} />
         </div>
       )}
 
-      {/* Play Button */}
       {isReady && (
         <button
           onClick={() => router.push("/quiz")}
@@ -88,7 +80,6 @@ export default function Home() {
         </button>
       )}
 
-      {/* Nav buttons */}
       <div className="flex gap-3 mt-2">
         <button
           onClick={() => router.push("/leaderboard")}
@@ -106,10 +97,21 @@ export default function Home() {
         )}
       </div>
 
-      {/* Footer */}
-      <p className="mt-8 text-white/30 text-sm">
-        {t("poweredBy")}
-      </p>
+      <div className="mt-8 flex flex-col items-center gap-3">
+        <p className="text-white/30 text-sm">{t("poweredBy")}</p>
+        <div className="flex gap-4 flex-wrap justify-center">
+          <a href="https://twitter.com/willycodexwar" target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-white transition-all text-sm">
+            X @willycodexwar
+          </a>
+          <a href="https://warpcast.com/willywarrior" target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-white transition-all text-sm">
+            🟣 willywarrior
+          </a>
+          <a href="https://github.com/wkalidev" target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-white transition-all text-sm">
+            🐙 wkalidev
+          </a>
+        </div>
+      </div>
+
     </main>
   );
 }
