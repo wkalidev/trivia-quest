@@ -5,24 +5,13 @@ import { useRouter } from "next/navigation";
 import { CONTRACT_ADDRESS, CONTRACT_ABI } from "@/lib/web3";
 import { motion } from "framer-motion";
 
-function getRank(totalPoints: bigint): string {
-  const pts = Number(totalPoints);
-  if (pts >= 5000) return "🏆 Légende";
-  if (pts >= 3000) return "💎 Diamant";
-  if (pts >= 2000) return "🥇 Or";
-  if (pts >= 1000) return "🥈 Argent";
-  if (pts >= 500) return "🥉 Bronze";
-  return "🌱 Débutant";
-}
-
-function getRankColor(totalPoints: bigint): string {
-  const pts = Number(totalPoints);
-  if (pts >= 5000) return "text-[#FBCD00]";
-  if (pts >= 3000) return "text-blue-400";
-  if (pts >= 2000) return "text-yellow-400";
-  if (pts >= 1000) return "text-gray-300";
-  if (pts >= 500) return "text-orange-400";
-  return "text-green-400";
+function getRank(pts: number) {
+  if (pts >= 5000) return { label: "Legend", emoji: "🏆", color: "text-[#FBCD00]", next: null };
+  if (pts >= 3000) return { label: "Diamond", emoji: "💎", color: "text-blue-400", next: 5000 };
+  if (pts >= 2000) return { label: "Gold", emoji: "🥇", color: "text-yellow-400", next: 3000 };
+  if (pts >= 1000) return { label: "Silver", emoji: "🥈", color: "text-gray-300", next: 2000 };
+  if (pts >= 500) return { label: "Bronze", emoji: "🥉", color: "text-orange-400", next: 1000 };
+  return { label: "Rookie", emoji: "🌱", color: "text-green-400", next: 500 };
 }
 
 export default function ProfilePage() {
@@ -39,155 +28,134 @@ export default function ProfilePage() {
 
   if (!isConnected) {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-[#1A1A2E] px-6">
+      <main className="min-h-screen flex items-center justify-center px-4"
+        style={{ background: "#0a0b0f" }}
+      >
         <div className="text-center">
-          <p className="text-white font-bold text-xl mb-4">Connecte ton wallet pour voir ton profil</p>
-          <button
-            onClick={() => router.push("/")}
-            className="bg-[#FBCD00] text-[#1A1A2E] font-black px-8 py-4 rounded-2xl"
-          >
-            Retour
-          </button>
+          <p className="text-white font-bold text-lg mb-4">Connect your wallet</p>
+          <button onClick={() => router.push("/")}
+            className="bg-[#FBCD00] text-[#0a0b0f] font-black px-8 py-3 rounded-2xl"
+          >Go Back</button>
         </div>
       </main>
     );
   }
 
+  const pts = Number(stats?.totalPoints ?? BigInt(0));
+  const rank = getRank(pts);
+  const prevThreshold = [0, 500, 1000, 2000, 3000, 5000].findLast((t) => pts >= t) ?? 0;
+  const progress = rank.next
+    ? Math.min(((pts - prevThreshold) / (rank.next - prevThreshold)) * 100, 100)
+    : 100;
+
+  const statCards = [
+    { label: "Total Points", value: pts.toLocaleString(), color: "text-[#FBCD00]", sub: "pts" },
+    { label: "Games Played", value: stats?.gamesPlayed?.toString() ?? "0", color: "text-[#35D07F]", sub: "games" },
+    { label: "Best Score", value: `${stats?.bestScore?.toString() ?? "0"}/10`, color: "text-white", sub: "score" },
+    { label: "CELO Won", value: stats?.totalWinnings ? (Number(stats.totalWinnings) / 1e18).toFixed(4) : "0", color: "text-purple-400", sub: "CELO" },
+  ];
+
   return (
-    <main className="min-h-screen flex flex-col bg-[#1A1A2E] px-6 pt-12 pb-8">
+    <main className="min-h-screen flex flex-col px-4 pt-6 pb-8 relative"
+      style={{ background: "radial-gradient(ellipse 80% 60% at 50% -10%, #1a2744 0%, #0a0b0f 60%)" }}
+    >
+      <div className="absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage: "linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)",
+          backgroundSize: "40px 40px"
+        }}
+      />
 
-      <div className="flex items-center gap-4 mb-8">
-        <button
-          onClick={() => router.push("/")}
-          className="text-white/60 hover:text-white text-2xl"
-        >
-          ←
-        </button>
-        <h1 className="text-white font-black text-3xl">Mon Profil 👤</h1>
-      </div>
-
-      {isLoading && (
-        <div className="flex justify-center py-12">
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ repeat: Infinity, duration: 1 }}
-            className="w-12 h-12 border-4 border-[#FBCD00] border-t-transparent rounded-full"
-          />
+      <div className="max-w-md mx-auto w-full z-10">
+        {/* Header */}
+        <div className="flex items-center gap-4 mb-6">
+          <button onClick={() => router.push("/")}
+            className="w-9 h-9 rounded-xl border border-white/10 flex items-center justify-center text-white/50 hover:text-white transition-all"
+            style={{ background: "rgba(255,255,255,0.04)" }}
+          >←</button>
+          <h1 className="text-white font-black text-2xl tracking-tight">My Profile</h1>
         </div>
-      )}
 
-      {!isLoading && (
-        <div className="space-y-4">
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-white/10 rounded-3xl p-6 text-center"
-          >
-            <div className="w-24 h-24 rounded-full bg-[#FBCD00] flex items-center justify-center mx-auto mb-4">
-              <span className="text-4xl font-black text-[#1A1A2E]">
-                {address?.slice(2, 4).toUpperCase()}
-              </span>
-            </div>
-            <p className="text-white font-bold text-lg">
-              {address?.slice(0, 6)}...{address?.slice(-4)}
-            </p>
-            <p className={`font-black text-2xl mt-2 ${getRankColor(stats?.totalPoints ?? BigInt(0))}`}>
-              {getRank(stats?.totalPoints ?? BigInt(0))}
-            </p>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="grid grid-cols-2 gap-4"
-          >
-            <div className="bg-white/10 rounded-2xl p-4 text-center">
-              <p className="text-[#FBCD00] font-black text-3xl">
-                {stats?.totalPoints?.toString() ?? "0"}
-              </p>
-              <p className="text-white/60 text-sm">Points totaux</p>
-            </div>
-            <div className="bg-white/10 rounded-2xl p-4 text-center">
-              <p className="text-[#35D07F] font-black text-3xl">
-                {stats?.gamesPlayed?.toString() ?? "0"}
-              </p>
-              <p className="text-white/60 text-sm">Parties jouées</p>
-            </div>
-            <div className="bg-white/10 rounded-2xl p-4 text-center">
-              <p className="text-white font-black text-3xl">
-                {stats?.bestScore?.toString() ?? "0"}/10
-              </p>
-              <p className="text-white/60 text-sm">Meilleur score</p>
-            </div>
-            <div className="bg-white/10 rounded-2xl p-4 text-center">
-              <p className="text-purple-400 font-black text-3xl">
-                {stats?.totalWinnings
-                  ? (Number(stats.totalWinnings) / 1e18).toFixed(3)
-                  : "0"}
-              </p>
-              <p className="text-white/60 text-sm">CELO gagnés</p>
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="bg-white/10 rounded-2xl p-4"
-          >
-            <p className="text-white font-bold mb-3">Progression vers le rang suivant</p>
-            {(() => {
-              const pts = Number(stats?.totalPoints ?? BigInt(0));
-              const thresholds = [0, 500, 1000, 2000, 3000, 5000];
-              const labels = ["🌱", "🥉", "🥈", "🥇", "💎", "🏆"];
-              const currentIdx = thresholds.findLastIndex((t) => pts >= t);
-              const nextThreshold = thresholds[currentIdx + 1];
-              const currentThreshold = thresholds[currentIdx];
-              const progress = nextThreshold
-                ? Math.min(((pts - currentThreshold) / (nextThreshold - currentThreshold)) * 100, 100)
-                : 100;
-              return (
-                <div>
-                  <div className="flex justify-between text-sm text-white/60 mb-2">
-                    <span>{labels[currentIdx]} {pts} pts</span>
-                    <span>{nextThreshold ? `${labels[currentIdx + 1]} ${nextThreshold} pts` : "MAX"}</span>
-                  </div>
-                  <div className="w-full bg-white/10 rounded-full h-3">
-                    <motion.div
-                      className="bg-[#FBCD00] h-3 rounded-full"
-                      initial={{ width: 0 }}
-                      animate={{ width: `${progress}%` }}
-                      transition={{ duration: 1, delay: 0.3 }}
-                    />
-                  </div>
+        {isLoading ? (
+          <div className="flex justify-center py-16">
+            <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1 }}
+              className="w-10 h-10 border-2 border-[#FBCD00] border-t-transparent rounded-full"
+            />
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {/* Identity card */}
+            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+              className="rounded-2xl border border-white/8 p-5"
+              style={{ background: "rgba(255,255,255,0.04)", backdropFilter: "blur(20px)" }}
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 rounded-2xl flex items-center justify-center font-black text-xl text-[#0a0b0f]"
+                  style={{ background: "linear-gradient(135deg, #FBCD00, #f0a500)" }}
+                >
+                  {address?.slice(2, 4).toUpperCase()}
                 </div>
-              );
-            })()}
-          </motion.div>
+                <div>
+                  <p className="text-white font-bold">{address?.slice(0, 6)}...{address?.slice(-4)}</p>
+                  <p className={`font-black text-lg ${rank.color}`}>{rank.emoji} {rank.label}</p>
+                </div>
+              </div>
+            </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="space-y-3"
-          >
-            <button
-              onClick={() => router.push("/quiz")}
-              className="w-full bg-[#FBCD00] text-[#1A1A2E] font-black text-lg py-4 rounded-2xl active:scale-95 transition-all"
+            {/* Stats grid */}
+            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+              className="grid grid-cols-2 gap-2"
             >
-              Jouer maintenant 🎮
-            </button>
-            <button
-              onClick={() => router.push("/leaderboard")}
-              className="w-full bg-white/10 text-white font-bold text-lg py-4 rounded-2xl active:scale-95 transition-all"
+              {statCards.map((s) => (
+                <div key={s.label} className="rounded-2xl border border-white/8 p-4"
+                  style={{ background: "rgba(255,255,255,0.04)" }}
+                >
+                  <p className={`font-black text-2xl ${s.color}`}>{s.value}</p>
+                  <p className="text-white/40 text-xs mt-0.5">{s.label}</p>
+                </div>
+              ))}
+            </motion.div>
+
+            {/* Progress */}
+            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
+              className="rounded-2xl border border-white/8 p-4"
+              style={{ background: "rgba(255,255,255,0.04)" }}
             >
-              🏆 Leaderboard
-            </button>
-          </motion.div>
-        </div>
-      )}
+              <div className="flex justify-between items-center mb-3">
+                <p className="text-white font-bold text-sm">Rank Progress</p>
+                <p className="text-white/40 text-xs">{rank.next ? `${rank.next - pts} pts to next` : "MAX RANK"}</p>
+              </div>
+              <div className="w-full rounded-full h-2 mb-1" style={{ background: "rgba(255,255,255,0.08)" }}>
+                <motion.div
+                  className="h-2 rounded-full"
+                  style={{ background: "linear-gradient(90deg, #FBCD00, #35D07F)" }}
+                  initial={{ width: 0 }}
+                  animate={{ width: `${progress}%` }}
+                  transition={{ duration: 1, delay: 0.4 }}
+                />
+              </div>
+              <div className="flex justify-between text-xs text-white/30 mt-1">
+                <span>{rank.emoji} {pts} pts</span>
+                <span>{rank.next ? `${rank.next} pts` : "LEGEND"}</span>
+              </div>
+            </motion.div>
+
+            {/* Actions */}
+            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
+              className="space-y-2"
+            >
+              <button onClick={() => router.push("/quiz")}
+                className="w-full font-black text-base py-4 rounded-2xl active:scale-95 transition-all"
+                style={{ background: "linear-gradient(135deg, #FBCD00 0%, #f0a500 100%)", color: "#0a0b0f" }}
+              >Play Now 🎮</button>
+              <button onClick={() => router.push("/leaderboard")}
+                className="w-full border border-white/10 text-white font-bold py-3 rounded-2xl active:scale-95 transition-all text-sm"
+                style={{ background: "rgba(255,255,255,0.04)" }}
+              >🏆 Leaderboard</button>
+            </motion.div>
+          </div>
+        )}
+      </div>
     </main>
   );
 }

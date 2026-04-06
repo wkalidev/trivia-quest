@@ -10,6 +10,7 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Logo } from "@/components/Logo";
 import type { Locale } from "@/i18n/navigation";
 import { formatUnits } from "viem";
+import { motion } from "framer-motion";
 
 const TRIVQ_ADDRESS = (process.env.NEXT_PUBLIC_TRIVQ_ADDRESS ?? "0x0") as `0x${string}`;
 const TRIVQ_ABI = [
@@ -22,13 +23,12 @@ const TRIVQ_ABI = [
   },
 ] as const;
 
-// ── Format: 500000000 → 500M ─────────────────────────────
 function formatTrivq(raw: bigint): string {
   const n = Number(formatUnits(raw, 18));
-  if (n >= 1_000_000_000) return `${(n / 1_000_000_000).toFixed(1)}B`;
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
-  return n.toFixed(0);
+  if (n >= 1_000_000_000) return `${(n / 1_000_000_000).toFixed(2)}B`;
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(2)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(2)}K`;
+  return n.toFixed(2);
 }
 
 export default function Home() {
@@ -50,113 +50,167 @@ export default function Home() {
     query: { enabled: !!walletAddress && TRIVQ_ADDRESS !== "0x0" },
   });
 
-  const trivqFormatted = trivqBalance ? formatTrivq(trivqBalance as bigint) : "0";
+  const trivqFormatted = trivqBalance ? formatTrivq(trivqBalance as bigint) : "—";
 
   useEffect(() => {
     if (isReady) router.prefetch("/quiz");
   }, [isReady, router]);
 
   return (
-    <main
-      className="min-h-screen flex flex-col items-center justify-center px-6"
-      style={{
-        background: "radial-gradient(ellipse at top, #1f1b4b 0%, #1A1A2E 60%)",
-      }}
+    <main className="min-h-screen flex flex-col items-center justify-center px-4 relative overflow-hidden"
+      style={{ background: "radial-gradient(ellipse 80% 60% at 50% -10%, #1a2744 0%, #0a0b0f 60%)" }}
     >
-      <div className="absolute top-4 right-4">
-        <LanguageSwitcher currentLocale={locale} />
+      {/* Grid background */}
+      <div className="absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage: "linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)",
+          backgroundSize: "40px 40px"
+        }}
+      />
+
+      {/* Top bar */}
+      <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-6 py-4 border-b border-white/5">
+        <div className="flex items-center gap-2">
+          <Logo size={28} />
+          <span className="text-white font-black text-lg tracking-tight">Trivia<span className="text-[#FBCD00]">Q</span></span>
+        </div>
+        <div className="flex items-center gap-3">
+          <LanguageSwitcher currentLocale={locale} />
+          {!loading && !isInMiniPay && (
+            <ConnectButton label={t("connectWallet")} showBalance={false} />
+          )}
+        </div>
       </div>
 
-      <div className="mb-8 flex flex-col items-center">
-        <Logo size={128} />
-        <h1 className="text-5xl font-black text-white tracking-tight mt-4">
-          Trivia<span className="text-[#FBCD00]">Q</span>
-        </h1>
-        <p className="text-[#35D07F] mt-2 text-lg font-medium">
-          {t("tagline")}
-        </p>
-      </div>
+      {/* Main card — DEX style */}
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-md mt-16 z-10"
+      >
+        {/* Token header */}
+        <div className="rounded-2xl border border-white/8 p-5 mb-3"
+          style={{ background: "rgba(255,255,255,0.04)", backdropFilter: "blur(20px)" }}
+        >
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <Logo size={40} />
+              <div>
+                <p className="text-white font-black text-xl tracking-tight">Trivia<span className="text-[#FBCD00]">Q</span></p>
+                <p className="text-white/40 text-xs">$TRIVQ · Celo Network</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-[#35D07F] font-black text-sm">● LIVE</p>
+              <p className="text-white/40 text-xs">Mainnet</p>
+            </div>
+          </div>
 
-      <div className="flex gap-4 mb-8 flex-wrap justify-center">
-        <div className="flex flex-col items-center bg-white/10 rounded-2xl px-5 py-4 backdrop-blur-sm">
-          <span className="text-2xl font-bold text-[#FBCD00]">$5,000</span>
-          <span className="text-white/60 text-sm">{t("prizePool")}</span>
-        </div>
-        <div className="flex flex-col items-center bg-white/10 rounded-2xl px-5 py-4 backdrop-blur-sm">
-          <span className="text-2xl font-bold text-[#35D07F]">50</span>
-          <span className="text-white/60 text-sm">{t("winners")}</span>
-        </div>
-        <div className="flex flex-col items-center bg-white/10 rounded-2xl px-5 py-4 backdrop-blur-sm">
-          <span className="text-2xl font-bold text-white">26</span>
-          <span className="text-white/60 text-sm">{t("daysLeft")}</span>
+          {/* Stats row */}
+          <div className="grid grid-cols-3 gap-2">
+            {[
+              { label: "Prize Pool", value: "$5,000", color: "text-[#FBCD00]" },
+              { label: "Winners", value: "50", color: "text-[#35D07F]" },
+              { label: "Days Left", value: "26", color: "text-white" },
+            ].map((s) => (
+              <div key={s.label} className="rounded-xl p-3 text-center"
+                style={{ background: "rgba(255,255,255,0.04)" }}
+              >
+                <p className={`font-black text-lg ${s.color}`}>{s.value}</p>
+                <p className="text-white/40 text-xs mt-0.5">{s.label}</p>
+              </div>
+            ))}
+          </div>
         </div>
 
+        {/* TRIVQ balance card */}
         {isReady && (
-          <div className="flex flex-col items-center bg-purple-500/20 border border-purple-500/30 rounded-2xl px-5 py-4 backdrop-blur-sm">
-            <span className="text-2xl font-bold text-purple-400">
-              {trivqFormatted}
-            </span>
-            <span className="text-white/60 text-sm">$TRIVQ</span>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="rounded-2xl border border-purple-500/20 p-4 mb-3 flex items-center justify-between"
+            style={{ background: "rgba(168,85,247,0.06)", backdropFilter: "blur(20px)" }}
+          >
+            <div>
+              <p className="text-white/50 text-xs mb-0.5">Your $TRIVQ Balance</p>
+              <p className="text-purple-300 font-black text-2xl">{trivqFormatted}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-white/30 text-xs">Rewards cap</p>
+              <p className="text-white/50 text-sm font-bold">500M total</p>
+            </div>
+          </motion.div>
+        )}
+
+        {/* MiniPay banner */}
+        {isInMiniPay && miniPayAddress && (
+          <div className="rounded-2xl border border-[#35D07F]/20 p-3 mb-3 flex items-center gap-3"
+            style={{ background: "rgba(53,208,127,0.06)" }}
+          >
+            <span className="text-xl">📱</span>
+            <div>
+              <p className="text-[#35D07F] font-bold text-sm">{t("miniPayDetected")}</p>
+              <p className="text-white/40 text-xs">{miniPayAddress.slice(0, 6)}...{miniPayAddress.slice(-4)}</p>
+            </div>
           </div>
         )}
-      </div>
 
-      {isInMiniPay && miniPayAddress && (
-        <div className="bg-[#35D07F]/20 border border-[#35D07F]/40 rounded-2xl px-6 py-3 mb-6 text-center">
-          <p className="text-[#35D07F] font-bold text-sm">{t("miniPayDetected")}</p>
-          <p className="text-white/60 text-xs mt-1">
-            {miniPayAddress.slice(0, 6)}...{miniPayAddress.slice(-4)}
-          </p>
-        </div>
-      )}
-
-      {/* ── Fix NaN CELO : showBalance={false} ── */}
-      {!loading && !isInMiniPay && (
-        <div className="mb-6">
-          <ConnectButton label={t("connectWallet")} showBalance={false} />
-        </div>
-      )}
-
-      {isReady && (
-        <button
-          onClick={() => router.push("/quiz")}
-          className="w-full max-w-xs bg-[#FBCD00] hover:bg-[#f0c000] text-[#1A1A2E] font-black text-xl py-4 rounded-2xl transition-all active:scale-95 mb-4 shadow-lg shadow-[#FBCD00]/20"
-        >
-          {t("playNow")}
-        </button>
-      )}
-
-      <div className="flex gap-3 mt-2">
-        <button
-          onClick={() => router.push("/leaderboard")}
-          className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-5 py-3 rounded-2xl text-sm font-bold transition-all active:scale-95 backdrop-blur-sm"
-        >
-          🏆 {tNav("leaderboard")}
-        </button>
-        {isConnected && (
+        {/* Play button */}
+        {isReady ? (
           <button
-            onClick={() => router.push("/profile")}
-            className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-5 py-3 rounded-2xl text-sm font-bold transition-all active:scale-95 backdrop-blur-sm"
+            onClick={() => router.push("/quiz")}
+            className="w-full font-black text-lg py-4 rounded-2xl transition-all active:scale-95 mb-3 relative overflow-hidden"
+            style={{ background: "linear-gradient(135deg, #FBCD00 0%, #f0a500 100%)", color: "#0a0b0f" }}
           >
-            👤 {tNav("profile")}
+            <span className="relative z-10">{t("playNow")} 🎮</span>
           </button>
+        ) : (
+          <div className="rounded-2xl border border-white/8 p-4 mb-3 text-center"
+            style={{ background: "rgba(255,255,255,0.04)" }}
+          >
+            <p className="text-white/40 text-sm mb-3">Connect your wallet to play</p>
+            {!loading && !isInMiniPay && (
+              <ConnectButton label={t("connectWallet")} showBalance={false} />
+            )}
+          </div>
         )}
-      </div>
 
-      <div className="mt-8 flex flex-col items-center gap-3">
-        <p className="text-white/30 text-sm">{t("poweredBy")}</p>
-        <div className="flex gap-4 flex-wrap justify-center">
-          <a href="https://twitter.com/willycodexwar" target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-white transition-all text-sm">
-            X @willycodexwar
-          </a>
-          <a href="https://warpcast.com/willywarrior" target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-white transition-all text-sm">
-            🟣 willywarrior
-          </a>
-          <a href="https://github.com/wkalidev" target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-white transition-all text-sm">
-            🐙 wkalidev
-          </a>
+        {/* Nav buttons */}
+        <div className="grid grid-cols-2 gap-2 mb-4">
+          <button
+            onClick={() => router.push("/leaderboard")}
+            className="flex items-center justify-center gap-2 py-3 rounded-2xl border border-white/8 text-white/70 hover:text-white hover:border-white/20 font-bold text-sm transition-all"
+            style={{ background: "rgba(255,255,255,0.04)" }}
+          >
+            🏆 {tNav("leaderboard")}
+          </button>
+          {isConnected && (
+            <button
+              onClick={() => router.push("/profile")}
+              className="flex items-center justify-center gap-2 py-3 rounded-2xl border border-white/8 text-white/70 hover:text-white hover:border-white/20 font-bold text-sm transition-all"
+              style={{ background: "rgba(255,255,255,0.04)" }}
+            >
+              👤 {tNav("profile")}
+            </button>
+          )}
         </div>
-      </div>
+
+        {/* Footer links */}
+        <div className="flex justify-center gap-5 flex-wrap">
+          {[
+            { href: "https://twitter.com/willycodexwar", label: "𝕏 Twitter" },
+            { href: "https://warpcast.com/willywarrior", label: "🟣 Farcaster" },
+            { href: "https://github.com/wkalidev", label: "🐙 GitHub" },
+          ].map((l) => (
+            <a key={l.label} href={l.href} target="_blank" rel="noopener noreferrer"
+              className="text-white/30 hover:text-white/60 text-xs transition-all"
+            >
+              {l.label}
+            </a>
+          ))}
+        </div>
+      </motion.div>
     </main>
   );
 }
