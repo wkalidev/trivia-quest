@@ -1,7 +1,7 @@
 "use client";
 
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { useAccount } from "wagmi";
+import { useAccount, useReadContract } from "wagmi"; // ← useReadContract ajouté
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useMiniPay } from "@/hooks/useMiniPay";
@@ -9,9 +9,23 @@ import { useTranslations, useLocale } from "next-intl";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Logo } from "@/components/Logo";
 import type { Locale } from "@/i18n/navigation";
+import { formatUnits } from "viem"; // ← ajouté
+
+// ── Adresses à remplir après déploiement ──────────────────────────────────
+const TRIVQ_ADDRESS = (process.env.NEXT_PUBLIC_TRIVQ_ADDRESS ?? "0x0") as `0x${string}`;
+const TRIVQ_ABI = [
+  {
+    name: "balanceOf",
+    type: "function",
+    stateMutability: "view",
+    inputs: [{ name: "account", type: "address" }],
+    outputs: [{ name: "", type: "uint256" }],
+  },
+] as const;
+// ─────────────────────────────────────────────────────────────────────────
 
 export default function Home() {
-  const { isConnected } = useAccount();
+  const { isConnected, address } = useAccount();
   const router = useRouter();
   const { isInMiniPay, miniPayAddress, loading } = useMiniPay();
   const t = useTranslations("home");
@@ -19,6 +33,21 @@ export default function Home() {
   const locale = useLocale() as Locale;
 
   const isReady = isConnected || !!miniPayAddress;
+  const walletAddress = address ?? miniPayAddress;
+
+  // ── Lecture solde TRIVQ ─────────────────────────────────────────────────
+  const { data: trivqBalance } = useReadContract({
+    address: TRIVQ_ADDRESS,
+    abi: TRIVQ_ABI,
+    functionName: "balanceOf",
+    args: walletAddress ? [walletAddress as `0x${string}`] : undefined,
+    query: { enabled: !!walletAddress && TRIVQ_ADDRESS !== "0x0" },
+  });
+
+  const trivqFormatted = trivqBalance
+    ? Number(formatUnits(trivqBalance, 18)).toFixed(0)
+    : "0";
+  // ────────────────────────────────────────────────────────────────────────
 
   useEffect(() => {
     if (isReady) router.prefetch("/quiz");
@@ -54,6 +83,17 @@ export default function Home() {
           <span className="text-2xl font-bold text-white">26</span>
           <span className="text-white/60 text-sm">{t("daysLeft")}</span>
         </div>
+
+        {/* ── AJOUT : badge TRIVQ (s'affiche uniquement si wallet connecté) ── */}
+        {isReady && (
+          <div className="flex flex-col items-center bg-white/10 rounded-2xl px-5 py-4">
+            <span className="text-2xl font-bold text-purple-400">
+              {trivqFormatted}
+            </span>
+            <span className="text-white/60 text-sm">$TRIVQ</span>
+          </div>
+        )}
+        {/* ─────────────────────────────────────────────────────────────────── */}
       </div>
 
       {isInMiniPay && miniPayAddress && (

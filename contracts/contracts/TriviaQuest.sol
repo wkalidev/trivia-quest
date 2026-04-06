@@ -3,8 +3,12 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import "./TriviaQToken.sol";
 
 contract TriviaQuest is Ownable, ReentrancyGuard {
+
+    TriviaQToken public trivqToken;
+    uint256 public constant TRIVQ_PER_POINT = 100 * 1e18;
 
     struct Player {
         uint256 score;
@@ -78,9 +82,16 @@ contract TriviaQuest is Ownable, ReentrancyGuard {
             players[player].bestScore = score;
         }
         emit ScoreSubmitted(player, score, points, currentRoundId);
+
+        if (
+            address(trivqToken) != address(0) &&
+            score > 0 &&
+            trivqToken.rewardsRemaining() >= score * TRIVQ_PER_POINT
+        ) {
+            trivqToken.mintReward(player, score * TRIVQ_PER_POINT);
+        }
     }
 
-    // ── Multi-Winner: 50% / 30% / 20% ─────────────────────
     function finishRound(address[] calldata topWinners) external onlyOwner nonReentrant {
         require(topWinners.length > 0 && topWinners.length <= 3, "Need 1-3 winners");
         Round storage round = rounds[currentRoundId];
@@ -187,6 +198,11 @@ contract TriviaQuest is Ownable, ReentrancyGuard {
 
     function setRoundDuration(uint256 duration) external onlyOwner {
         roundDuration = duration;
+    }
+
+    function setTrivqToken(address _trivqToken) external onlyOwner {
+        require(_trivqToken != address(0), "zero address");
+        trivqToken = TriviaQToken(_trivqToken);
     }
 
     function getCurrentRound() external view returns (

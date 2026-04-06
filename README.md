@@ -2,7 +2,7 @@
 
 > Play. Learn. Earn on Celo.
 
-Trivia Q is a blockchain-powered quiz game built on Celo where players earn real CELO rewards by answering questions about African culture, geography, Web3, science, sports, and general knowledge.
+Trivia Q is a blockchain-powered quiz game built on Celo where players earn real CELO rewards and $TRIVQ tokens by answering questions about African culture, geography, Web3, science, sports, and general knowledge.
 
 ## 🌍 Why Africa?
 
@@ -18,6 +18,7 @@ Celo's mission is financial inclusion for the unbanked. With 57% of African adul
 - ✅ 10 questions aléatoires par partie
 - ✅ Timer de 15 secondes par question
 - ✅ Système de Streak x2 / x3 multiplicateur de points
+- ✅ Récompenses $TRIVQ mintées on-chain à chaque partie
 - ✅ Animations Framer Motion
 - ✅ Sons & feedback audio (🔊/🔇 toggle)
 - ✅ Leaderboard on-chain en temps réel
@@ -38,7 +39,7 @@ Celo's mission is financial inclusion for the unbanked. With 57% of African adul
 
 ## 🏗️ Architecture
 
-- **Smart Contract** — Solidity 0.8.20 + OpenZeppelin sur Celo Mainnet
+- **Smart Contracts** — Solidity 0.8.20 + OpenZeppelin sur Celo Mainnet
 - **Frontend** — Next.js 16 + TypeScript + TailwindCSS
 - **Animations** — Framer Motion
 - **Wallet** — RainbowKit + Wagmi + Viem + MiniPay hook
@@ -47,10 +48,26 @@ Celo's mission is financial inclusion for the unbanked. With 57% of African adul
 
 ## 🔗 Smart Contracts
 
-| Network | Address |
-|---|---|
-| Celo Mainnet v4 | `0xe7faded5157341911a99cae5c49ad4c1eeb1116a` |
-| Celo Sepolia (testnet) | `0x50b20728ba0ad803679b5428f267c89aede9a378` |
+| Contract | Network | Address |
+|---|---|---|
+| TriviaQuest | Celo Mainnet | `0xedf1505c476a5a7de9e60f79844edb7774c03f0a` |
+| TriviaQToken ($TRIVQ) | Celo Mainnet | `0xf50afd22d5285f0398bf1be433252ce6a9fd9579` |
+| TriviaQuest | Celo Sepolia (testnet) | `0xa93422cb14278ac5d1a6f60f95b03aa723e6448e` |
+| TriviaQToken ($TRIVQ) | Celo Sepolia (testnet) | `0xa829214ea492f32818efa2c58cc7e9090572c17c` |
+
+## 💎 $TRIVQ Tokenomics
+
+| Allocation | Amount | % |
+|---|---|---|
+| 🎮 Player Rewards | 500,000,000 | 50% |
+| 💧 Liquidity | 200,000,000 | 20% |
+| 👥 Team | 150,000,000 | 15% |
+| 🌱 Ecosystem | 100,000,000 | 10% |
+| 📣 Marketing | 50,000,000 | 5% |
+
+- **Total Supply** : 1,000,000,000 $TRIVQ
+- **Reward Rate** : 100 TRIVQ par point marqué
+- **Minting** : uniquement par TriviaQuest (cap 500M)
 
 ## 📱 MiniPay Compatible
 
@@ -94,6 +111,7 @@ cd trivia-quest
 # Frontend
 cd frontend
 yarn install
+cp .env.example .env.local  # puis remplis les valeurs
 yarn dev
 
 # Contracts
@@ -102,10 +120,18 @@ npm install
 npx hardhat compile
 ```
 
+## ⚙️ Environment Variables
+```env
+NEXT_PUBLIC_TRIVQ_ADDRESS=0xf50afd22d5285f0398bf1be433252ce6a9fd9579
+NEXT_PUBLIC_GAME_ADDRESS=0xedf1505c476a5a7de9e60f79844edb7774c03f0a
+NEXT_PUBLIC_CHAIN_ID=42220
+```
+
 ## 🎯 Proof of Ship Checklist
 
 - ✅ Build For MiniPay — MiniPay hook integrated
-- ✅ Deploy On Celo — Smart contract on Celo Mainnet
+- ✅ Deploy On Celo — Smart contracts on Celo Mainnet
+- ✅ $TRIVQ Token — ERC20 reward token with 1B supply
 - ✅ Prove Your Humanity — Coinbase Verification
 - ✅ Submit Your Project
 
@@ -114,7 +140,7 @@ npx hardhat compile
 | Layer | Tech |
 |---|---|
 | Blockchain | Celo Mainnet |
-| Smart Contract | Solidity 0.8.20 + OpenZeppelin |
+| Smart Contracts | Solidity 0.8.20 + OpenZeppelin |
 | Frontend | Next.js 16 + TypeScript |
 | Styling | TailwindCSS |
 | Animations | Framer Motion |
@@ -124,4 +150,4 @@ npx hardhat compile
 
 ## 👤 Author
 
-Built by [@wkalidev](https://github.com/wkalidev) for Celo Proof of Ship — April 2026
+Built with 💙 by [@wkalidev](https://github.com/wkalidev) for Celo Proof of Ship — April 2026
