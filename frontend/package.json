@@ -8,8 +8,15 @@
     "start": "next start",
     "lint": "next lint"
   },
+  "resolutions": {
+    "@noble/hashes": "1.6.1",
+    "@noble/curves": "1.8.1",
+    "@scure/bip32": "1.6.2",
+    "@scure/bip39": "1.5.4"
+  },
   "dependencies": {
     "@base-org/account": "^2.5.3",
+    "@coinbase/onchainkit": "^1.1.2",
     "@coinbase/wallet-sdk": "^4.3.7",
     "@metamask/connect-evm": "^0.9.0",
     "@rainbow-me/rainbowkit": "^2.2.10",
@@ -26,7 +33,7 @@
     "react-dom": "19.2.4",
     "use-sound": "^5.0.0",
     "viem": "^2.47.6",
-    "wagmi": "^3.6.0"
+    "wagmi": "^2.14.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

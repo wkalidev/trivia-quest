@@ -50,7 +50,7 @@ export default function Home() {
     query: { enabled: !!walletAddress && TRIVQ_ADDRESS !== "0x0" },
   });
 
-  const trivqFormatted = trivqBalance ? formatTrivq(trivqBalance) : "0";
+  const trivqFormatted = trivqBalance ? formatTrivq(trivqBalance as bigint) : "0";
 
   useEffect(() => {
     if (isReady) router.prefetch("/quiz");

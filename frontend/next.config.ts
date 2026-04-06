@@ -9,12 +9,12 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   webpack: (config, { isServer }: { isServer: boolean }) => {
-    if (isServer) {
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        indexedDB: false,
-      };
-    }
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      "pino-pretty": false,
+      "@react-native-async-storage/async-storage": false,
+      ...(isServer && { indexedDB: false }),
+    };
     return config;
   },
 };
