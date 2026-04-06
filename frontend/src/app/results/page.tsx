@@ -49,9 +49,10 @@ function ResultsContent() {
     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, "_blank");
   };
 
-  const shareOnWhatsApp = () => {
-    const text = `🎮 Je viens de scorer ${score}/${total} sur TriviaQ! Gagne du vrai CELO en jouant: trivia-quest-eight.vercel.app`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
+  const shareOnFarcaster = () => {
+    const emoji = percentage === 100 ? "🏆" : percentage >= 80 ? "🎉" : percentage >= 60 ? "👏" : "💪";
+    const text = `${emoji} Je viens de scorer ${score}/${total} (${percentage}%) sur TriviaQ!\n\n🔥 ${points} points gagnés sur @celo\n🌍 Questions sur l'Afrique, le Web3 et la culture\n\nJoue et gagne du vrai $CELO 👇\ntrivia-quest-eight.vercel.app\n\n/celo /web3 /gamefi`;
+    window.open(`https://warpcast.com/~/compose?text=${encodeURIComponent(text)}`, "_blank");
   };
 
   return (
@@ -80,7 +81,6 @@ function ResultsContent() {
           {t("correctAnswers", { score, total })}
         </p>
 
-        {/* Submitted indicator */}
         {submitted && (
           <div className="bg-[#35D07F]/20 border border-[#35D07F]/40 rounded-2xl p-3 mb-4">
             <p className="text-[#35D07F] font-bold text-xs">
@@ -109,10 +109,10 @@ function ResultsContent() {
             𝕏 Twitter
           </button>
           <button
-            onClick={shareOnWhatsApp}
-            className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-2xl flex items-center justify-center gap-2 transition-all active:scale-95"
+            onClick={shareOnFarcaster}
+            className="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-2xl flex items-center justify-center gap-2 transition-all active:scale-95"
           >
-            💬 WhatsApp
+            🟣 Farcaster
           </button>
         </div>
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { useAccount, useReadContract } from "wagmi"; // ← useReadContract ajouté
+import { useAccount, useReadContract } from "wagmi";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useMiniPay } from "@/hooks/useMiniPay";
@@ -9,9 +9,8 @@ import { useTranslations, useLocale } from "next-intl";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Logo } from "@/components/Logo";
 import type { Locale } from "@/i18n/navigation";
-import { formatUnits } from "viem"; // ← ajouté
+import { formatUnits } from "viem";
 
-// ── Adresses à remplir après déploiement ──────────────────────────────────
 const TRIVQ_ADDRESS = (process.env.NEXT_PUBLIC_TRIVQ_ADDRESS ?? "0x0") as `0x${string}`;
 const TRIVQ_ABI = [
   {
@@ -22,7 +21,15 @@ const TRIVQ_ABI = [
     outputs: [{ name: "", type: "uint256" }],
   },
 ] as const;
-// ─────────────────────────────────────────────────────────────────────────
+
+// ── Format: 500000000 → 500M ─────────────────────────────
+function formatTrivq(raw: bigint): string {
+  const n = Number(formatUnits(raw, 18));
+  if (n >= 1_000_000_000) return `${(n / 1_000_000_000).toFixed(1)}B`;
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
+  return n.toFixed(0);
+}
 
 export default function Home() {
   const { isConnected, address } = useAccount();
@@ -35,7 +42,6 @@ export default function Home() {
   const isReady = isConnected || !!miniPayAddress;
   const walletAddress = address ?? miniPayAddress;
 
-  // ── Lecture solde TRIVQ ─────────────────────────────────────────────────
   const { data: trivqBalance } = useReadContract({
     address: TRIVQ_ADDRESS,
     abi: TRIVQ_ABI,
@@ -44,18 +50,19 @@ export default function Home() {
     query: { enabled: !!walletAddress && TRIVQ_ADDRESS !== "0x0" },
   });
 
-  const trivqFormatted = trivqBalance
-    ? Number(formatUnits(trivqBalance, 18)).toFixed(0)
-    : "0";
-  // ────────────────────────────────────────────────────────────────────────
+  const trivqFormatted = trivqBalance ? formatTrivq(trivqBalance) : "0";
 
   useEffect(() => {
     if (isReady) router.prefetch("/quiz");
   }, [isReady, router]);
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center bg-[#1A1A2E] px-6">
-
+    <main
+      className="min-h-screen flex flex-col items-center justify-center px-6"
+      style={{
+        background: "radial-gradient(ellipse at top, #1f1b4b 0%, #1A1A2E 60%)",
+      }}
+    >
       <div className="absolute top-4 right-4">
         <LanguageSwitcher currentLocale={locale} />
       </div>
@@ -70,30 +77,28 @@ export default function Home() {
         </p>
       </div>
 
-      <div className="flex gap-4 mb-8">
-        <div className="flex flex-col items-center bg-white/10 rounded-2xl px-5 py-4">
+      <div className="flex gap-4 mb-8 flex-wrap justify-center">
+        <div className="flex flex-col items-center bg-white/10 rounded-2xl px-5 py-4 backdrop-blur-sm">
           <span className="text-2xl font-bold text-[#FBCD00]">$5,000</span>
           <span className="text-white/60 text-sm">{t("prizePool")}</span>
         </div>
-        <div className="flex flex-col items-center bg-white/10 rounded-2xl px-5 py-4">
+        <div className="flex flex-col items-center bg-white/10 rounded-2xl px-5 py-4 backdrop-blur-sm">
           <span className="text-2xl font-bold text-[#35D07F]">50</span>
           <span className="text-white/60 text-sm">{t("winners")}</span>
         </div>
-        <div className="flex flex-col items-center bg-white/10 rounded-2xl px-5 py-4">
+        <div className="flex flex-col items-center bg-white/10 rounded-2xl px-5 py-4 backdrop-blur-sm">
           <span className="text-2xl font-bold text-white">26</span>
           <span className="text-white/60 text-sm">{t("daysLeft")}</span>
         </div>
 
-        {/* ── AJOUT : badge TRIVQ (s'affiche uniquement si wallet connecté) ── */}
         {isReady && (
-          <div className="flex flex-col items-center bg-white/10 rounded-2xl px-5 py-4">
+          <div className="flex flex-col items-center bg-purple-500/20 border border-purple-500/30 rounded-2xl px-5 py-4 backdrop-blur-sm">
             <span className="text-2xl font-bold text-purple-400">
               {trivqFormatted}
             </span>
             <span className="text-white/60 text-sm">$TRIVQ</span>
           </div>
         )}
-        {/* ─────────────────────────────────────────────────────────────────── */}
       </div>
 
       {isInMiniPay && miniPayAddress && (
@@ -105,16 +110,17 @@ export default function Home() {
         </div>
       )}
 
+      {/* ── Fix NaN CELO : showBalance={false} ── */}
       {!loading && !isInMiniPay && (
         <div className="mb-6">
-          <ConnectButton label={t("connectWallet")} />
+          <ConnectButton label={t("connectWallet")} showBalance={false} />
         </div>
       )}
 
       {isReady && (
         <button
           onClick={() => router.push("/quiz")}
-          className="w-full max-w-xs bg-[#FBCD00] hover:bg-[#f0c000] text-[#1A1A2E] font-black text-xl py-4 rounded-2xl transition-all active:scale-95 mb-4"
+          className="w-full max-w-xs bg-[#FBCD00] hover:bg-[#f0c000] text-[#1A1A2E] font-black text-xl py-4 rounded-2xl transition-all active:scale-95 mb-4 shadow-lg shadow-[#FBCD00]/20"
         >
           {t("playNow")}
         </button>
@@ -123,14 +129,14 @@ export default function Home() {
       <div className="flex gap-3 mt-2">
         <button
           onClick={() => router.push("/leaderboard")}
-          className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-5 py-3 rounded-2xl text-sm font-bold transition-all active:scale-95"
+          className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-5 py-3 rounded-2xl text-sm font-bold transition-all active:scale-95 backdrop-blur-sm"
         >
           🏆 {tNav("leaderboard")}
         </button>
         {isConnected && (
           <button
             onClick={() => router.push("/profile")}
-            className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-5 py-3 rounded-2xl text-sm font-bold transition-all active:scale-95"
+            className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-5 py-3 rounded-2xl text-sm font-bold transition-all active:scale-95 backdrop-blur-sm"
           >
             👤 {tNav("profile")}
           </button>
@@ -151,7 +157,6 @@ export default function Home() {
           </a>
         </div>
       </div>
-
     </main>
   );
 }
