@@ -25,10 +25,10 @@ const TRIVQ_ABI = [
 
 function formatTrivq(raw: bigint): string {
   const n = Number(formatUnits(raw, 18));
-  if (n >= 1_000_000_000) return `${(n / 1_000_000_000).toFixed(2)}B`;
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(2)}M`;
-  if (n >= 1_000) return `${(n / 1_000).toFixed(2)}K`;
-  return n.toFixed(2);
+  if (n >= 1_000_000_000) return `${Math.round(n / 1_000_000_000)}B`;
+  if (n >= 1_000_000) return `${Math.round(n / 1_000_000)}M`;
+  if (n >= 1_000) return `${Math.round(n / 1_000)}K`;
+  return Math.round(n).toString();
 }
 
 export default function Home() {
@@ -163,7 +163,7 @@ export default function Home() {
             className="w-full font-black text-lg py-4 rounded-2xl transition-all active:scale-95 mb-3 relative overflow-hidden"
             style={{ background: "linear-gradient(135deg, #FBCD00 0%, #f0a500 100%)", color: "#0a0b0f" }}
           >
-            <span className="relative z-10">{t("playNow")} 🎮</span>
+            <span className="relative z-10">{t("playNow")}</span>
           </button>
         ) : (
           <div className="rounded-2xl border border-white/8 p-4 mb-3 text-center"
