@@ -1,5 +1,6 @@
 "use client";
 
+import { sdk } from '@farcaster/miniapp-sdk'; 
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAccount, useReadContract } from "wagmi";
 import { useRouter } from "next/navigation";
@@ -53,6 +54,8 @@ export default function Home() {
   const trivqFormatted = trivqBalance ? formatTrivq(trivqBalance as bigint) : "—";
 
   useEffect(() => {
+    sdk.actions.ready();
+
     if (isReady) router.prefetch("/quiz");
   }, [isReady, router]);
 
