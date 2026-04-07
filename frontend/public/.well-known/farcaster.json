@@ -1,8 +1,8 @@
 {
   "accountAssociation": {
-    "header": "TODO",
-    "payload": "TODO",
-    "signature": "TODO"
+    "header": "eyJmaWQiOjkxNDc5MywidHlwZSI6Im...",
+    "payload": "eyJkb21haW4iOiJ0cml2aWEtcXVlc...",
+    "signature": "cuCUZWISh1sRn+qhywvTvxaW1mS..."
   },
   "frame": {
     "version": "1",
