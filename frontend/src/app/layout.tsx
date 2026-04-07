@@ -16,6 +16,12 @@ export const metadata: Metadata = {
   other: {
     "talentapp:project_verification": "37ab229ec7b57c297e0d4450f934b4bad9b287ea73370cc1cb258e84e4f9da6c38c5982849aa04cca1033f139ad77f56eb1d9e9fe442ccf043098fcdf80f4342",
     "base:app_id": "69d393ef87bcdc902b52fd27",
+
+    "fc:frame": "vNext",
+    "fc:frame:image": "https://trivia-quest-eight.vercel.app/og-image.png",
+    "fc:frame:button:1": "Jouer maintenant 🎮",
+    "fc:frame:button:1:action": "link",
+    "fc:frame:button:1:target": "https://trivia-quest-eight.vercel.app",
   },
 };
 

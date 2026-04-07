@@ -382,6 +382,17 @@
     ethereum-cryptography "^2.0.0"
     micro-ftch "^0.3.1"
 
+"@farcaster/frame-sdk@^0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@farcaster/frame-sdk/-/frame-sdk-0.2.0.tgz#599966a8bf557c7afc71cb5a36328c3f4f7af880"
+  integrity sha512-BEa8nCtH750cmrTipHC4X4LK/fAPPx+WWxKPiR0DlrAowLRNJV4HRppBA5l6GhCYeBOSEtSxu5mYJbnaqXC1aw==
+  dependencies:
+    "@farcaster/miniapp-sdk" "0.3.0"
+    "@farcaster/quick-auth" "0.0.8"
+    comlink "^4.4.2"
+    eventemitter3 "^5.0.1"
+    ox "^0.14.0"
+
 "@farcaster/miniapp-core@0.3.9":
   version "0.3.9"
   resolved "https://registry.yarnpkg.com/@farcaster/miniapp-core/-/miniapp-core-0.3.9.tgz#10d29cdacca161dfa99f46fbaad937fff1385d39"
@@ -390,6 +401,26 @@
     "@solana/web3.js" "^1.98.2"
     ox "^0.4.4"
     zod "^3.25.0"
+
+"@farcaster/miniapp-core@0.6.0":
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/@farcaster/miniapp-core/-/miniapp-core-0.6.0.tgz#1c4fa38b92f14af7558d11f4d1ef967030b0df1b"
+  integrity sha512-sgDQdU6fQDXYbNbjuvvwhww1rwf/S0JCnKsp/o2K+ubtboA3SOiy3Wrc+taBnAh56CCxVbZN9Hck3OpYh9wINw==
+  dependencies:
+    "@solana/web3.js" "^1.98.2"
+    ox "^0.14.0"
+    zod "^4.0.0"
+
+"@farcaster/miniapp-sdk@0.3.0":
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/@farcaster/miniapp-sdk/-/miniapp-sdk-0.3.0.tgz#6e37441c815d6d496d4237cca3190d434687f3e6"
+  integrity sha512-mxze24B5SSLwqpPqUmzthfsGGPeevJvDuOEbLJay1DDgPS/B0LswA0XXfz4d6pViA7Y4TkbeAPMAfuVZ9nIqgQ==
+  dependencies:
+    "@farcaster/miniapp-core" "0.6.0"
+    "@farcaster/quick-auth" "^0.0.6"
+    comlink "^4.4.2"
+    eventemitter3 "^5.0.1"
+    ox "^0.14.0"
 
 "@farcaster/miniapp-sdk@^0.1.8":
   version "0.1.10"
@@ -406,6 +437,14 @@
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/@farcaster/miniapp-wagmi-connector/-/miniapp-wagmi-connector-1.1.1.tgz#46f9d66206899868a907da873cc279f07dcf546d"
   integrity sha512-sdKhRRZcbM1XXl6Z49UTLlgRBYMmyxM6z4KE3LTWQtjRzlc0JwGaxmjvhjl3mZNZFnyUAlhpoU7RfCJ4c2aTGg==
+
+"@farcaster/quick-auth@0.0.8":
+  version "0.0.8"
+  resolved "https://registry.yarnpkg.com/@farcaster/quick-auth/-/quick-auth-0.0.8.tgz#b61a0c8b56f2434166bef0f24152649c9a16afb8"
+  integrity sha512-NRIq1BcbcQCC6xBF5owfckkY00xKQVpqhpLNl5rICVpl0xeDsiVbkenIrHaUuyjtCK2W28YVc2ZCFRyz9ERHKg==
+  dependencies:
+    jose "^5.8.0"
+    zod "^3.25.1"
 
 "@farcaster/quick-auth@^0.0.6":
   version "0.0.6"
@@ -5745,7 +5784,7 @@ jiti@^2.6.1:
   resolved "https://registry.yarnpkg.com/jiti/-/jiti-2.6.1.tgz#178ef2fc9a1a594248c20627cd820187a4d78d92"
   integrity sha512-ekilCSN1jwRvIbgeg/57YFh8qQDNbwDb9xT/qu2DAHbFFZUicIl4ygVaAvzveMhMVr3LnpSKTNnwt8PoOfmKhQ==
 
-jose@^5.2.3:
+jose@^5.2.3, jose@^5.8.0:
   version "5.10.0"
   resolved "https://registry.yarnpkg.com/jose/-/jose-5.10.0.tgz#c37346a099d6467c401351a9a0c2161e0f52c4be"
   integrity sha512-s+3Al/p9g32Iq+oqXxkW//7jk2Vig6FF1CFqzVXoTUXt2qz89YWbL+OwS17NFYEvxC35n0FKeGO2LGYSxeM2Gg==
@@ -6462,6 +6501,20 @@ ox@0.9.3:
     "@scure/bip32" "^1.7.0"
     "@scure/bip39" "^1.6.0"
     abitype "^1.0.9"
+    eventemitter3 "5.0.1"
+
+ox@^0.14.0:
+  version "0.14.10"
+  resolved "https://registry.yarnpkg.com/ox/-/ox-0.14.10.tgz#bdaf5d538e2fd5c318cbb60add85c0c0e478a4a5"
+  integrity sha512-PYsqEnSP7CrcxISS3uVBtw9yPy2gATAnWNptTI0pMnlrXLTiw0Xw/IIivJVHDFgGvKuRAtBSafhVjs+jis3CVA==
+  dependencies:
+    "@adraffy/ens-normalize" "^1.11.0"
+    "@noble/ciphers" "^1.3.0"
+    "@noble/curves" "1.9.1"
+    "@noble/hashes" "^1.8.0"
+    "@scure/bip32" "^1.7.0"
+    "@scure/bip39" "^1.6.0"
+    abitype "^1.2.3"
     eventemitter3 "5.0.1"
 
 ox@^0.4.4:
@@ -8113,7 +8166,7 @@ zod@^3.25.0, zod@^3.25.1, zod@^3.25.76:
   resolved "https://registry.yarnpkg.com/zod/-/zod-3.25.76.tgz#26841c3f6fd22a6a2760e7ccb719179768471e34"
   integrity sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==
 
-"zod@^3.25.0 || ^4.0.0", zod@^4.1.5:
+"zod@^3.25.0 || ^4.0.0", zod@^4.0.0, zod@^4.1.5:
   version "4.3.6"
   resolved "https://registry.yarnpkg.com/zod/-/zod-4.3.6.tgz#89c56e0aa7d2b05107d894412227087885ab112a"
   integrity sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==

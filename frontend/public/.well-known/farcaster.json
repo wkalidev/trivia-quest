@@ -1,0 +1,18 @@
+{
+  "accountAssociation": {
+    "header": "TODO",
+    "payload": "TODO",
+    "signature": "TODO"
+  },
+  "frame": {
+    "version": "1",
+    "name": "TriviaQ",
+    "iconUrl": "https://trivia-quest-eight.vercel.app/icon-512.png",
+    "homeUrl": "https://trivia-quest-eight.vercel.app",
+    "imageUrl": "https://trivia-quest-eight.vercel.app/og-image.png",
+    "buttonTitle": "Jouer maintenant 🎮",
+    "splashImageUrl": "https://trivia-quest-eight.vercel.app/icon-512.png",
+    "splashBackgroundColor": "#1A1A2E",
+    "webhookUrl": "https://trivia-quest-eight.vercel.app/api/farcaster/webhook"
+  }
+}
