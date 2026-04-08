@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@base-org/account": "^2.5.3",
+    "@celo/abis": "^14.0.1",
     "@celo/rainbowkit-celo": "^1.2.1",
     "@coinbase/onchainkit": "^1.1.2",
     "@coinbase/wallet-sdk": "^4.3.7",

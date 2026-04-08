@@ -191,6 +191,11 @@
     viem "^2.31.7"
     zustand "5.0.3"
 
+"@celo/abis@^14.0.1":
+  version "14.0.1"
+  resolved "https://registry.yarnpkg.com/@celo/abis/-/abis-14.0.1.tgz#3c45ebe69a9551432f6b8c0dcf5f0a967c0f50b8"
+  integrity sha512-O9NpfpvPxfTEtUd6ekcwDYuXp1PxSoXC/cVgdqo41qyuAAgr/DhQQBMf2xnYrYzJqV5AwYaT+8o5NmutPXONPA==
+
 "@celo/rainbowkit-celo@^1.2.1":
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/@celo/rainbowkit-celo/-/rainbowkit-celo-1.2.1.tgz#e717ec1caf3eb2e854dfca0c4cf030bc1effadf9"

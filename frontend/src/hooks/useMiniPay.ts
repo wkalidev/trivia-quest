@@ -1,7 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { isMiniPay, getMiniPayAccount } from "@/lib/web3";
+
+type EthereumProvider = {
+  request: (args: { method: string; params?: unknown[] }) => Promise<string[]>;
+  isMiniPay?: boolean;
+};
+
+type WindowWithEthereum = Window & {
+  ethereum?: EthereumProvider;
+};
 
 export function useMiniPay() {
   const [isInMiniPay, setIsInMiniPay] = useState(false);
@@ -10,13 +18,26 @@ export function useMiniPay() {
 
   useEffect(() => {
     const detect = async () => {
-      const detected = isMiniPay();
-      setIsInMiniPay(detected);
-
-      if (detected) {
-        const account = await getMiniPayAccount();
-        setMiniPayAddress(account);
+      if (typeof window === "undefined") {
+        setLoading(false);
+        return;
       }
+
+      const ethereum = (window as WindowWithEthereum).ethereum;
+
+      if (ethereum && ethereum.isMiniPay) {
+        setIsInMiniPay(true);
+        try {
+          const accounts = await ethereum.request({
+            method: "eth_requestAccounts",
+            params: [],
+          });
+          setMiniPayAddress(accounts[0] ?? null);
+        } catch {
+          setMiniPayAddress(null);
+        }
+      }
+
       setLoading(false);
     };
 
