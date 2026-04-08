@@ -1,4 +1,4 @@
-export const CONTRACT_ADDRESS = "0xe7faded5157341911a99cae5c49ad4c1eeb1116a" as const;
+export const CONTRACT_ADDRESS = "0xedf1505c476a5a7de9e60f79844edb7774c03f0a" as const;
 
 export const CONTRACT_ABI = [
   {
@@ -16,6 +16,15 @@ export const CONTRACT_ABI = [
       { name: "player", type: "address" },
       { name: "score", type: "uint256" },
       { name: "points", type: "uint256" },
+    ],
+    outputs: [],
+  },
+  {
+    name: "finishRound",
+    type: "function",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "topWinners", type: "address[]" },
     ],
     outputs: [],
   },
@@ -49,17 +58,12 @@ export const CONTRACT_ABI = [
     stateMutability: "view",
     inputs: [],
     outputs: [
-      {
-        type: "tuple",
-        components: [
-          { name: "id", type: "uint256" },
-          { name: "prizePool", type: "uint256" },
-          { name: "startTime", type: "uint256" },
-          { name: "endTime", type: "uint256" },
-          { name: "winner", type: "address" },
-          { name: "finished", type: "bool" },
-        ],
-      },
+      { name: "id", type: "uint256" },
+      { name: "prizePool", type: "uint256" },
+      { name: "startTime", type: "uint256" },
+      { name: "endTime", type: "uint256" },
+      { name: "topWinners", type: "address[]" },
+      { name: "finished", type: "bool" },
     ],
   },
   {

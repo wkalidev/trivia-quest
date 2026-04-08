@@ -1,0 +1,30 @@
+name: Auto Finish Round
+
+on:
+  schedule:
+    - cron: '0 * * * *'  # toutes les heures
+  workflow_dispatch:       # lancement manuel depuis GitHub
+
+jobs:
+  finish-round:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: contracts/package-lock.json
+
+      - name: Install dependencies
+        run: cd contracts && npm install
+
+      - name: Run finishRound script
+        run: cd contracts && npx hardhat run scripts/finishRound.ts --network celo
+        env:
+          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+          CELO_RPC: "https://forno.celo.org"
