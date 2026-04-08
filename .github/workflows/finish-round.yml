@@ -23,8 +23,8 @@ jobs:
       - name: Install dependencies
         run: cd contracts && npm install
 
-      - name: Run finishRound script
-        run: cd contracts && npx hardhat run scripts/finishRound.ts --network celo
+      - name: Run checkRound script
+        run: cd contracts && npx hardhat run scripts/checkRound.ts --network celo
         env:
           PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
           CELO_RPC: "https://forno.celo.org"
