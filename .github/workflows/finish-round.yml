@@ -2,8 +2,8 @@ name: Auto Finish Round
 
 on:
   schedule:
-    - cron: '0 * * * *'  # toutes les heures
-  workflow_dispatch:       # lancement manuel depuis GitHub
+    - cron: '0 * * * *'
+  workflow_dispatch:
 
 jobs:
   finish-round:
@@ -16,7 +16,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
           cache-dependency-path: contracts/package-lock.json
 
@@ -28,3 +28,5 @@ jobs:
         env:
           PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
           CELO_RPC: "https://forno.celo.org"
+          CELO_SEPOLIA_RPC: "https://alfajores-forno.celo-testnet.org"
+          ALFAJORES_RPC: "https://alfajores-forno.celo-testnet.org"
