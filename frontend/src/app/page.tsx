@@ -225,6 +225,13 @@ export default function Home() {
         )}
 
         {/* Nav buttons */}
+        <button
+         onClick={() => router.push("/checkin")}
+         className="flex items-center justify-center gap-2 py-3 rounded-2xl border border-[#FBCD00]/20 text-[#FBCD00] hover:border-[#FBCD00]/40 font-bold text-sm transition-all col-span-2"
+        style={{ background: "rgba(251,205,0,0.06)" }}
+     >
+             🔥 Daily Check-in & Earn TRIVQ
+        </button>
         <div className="grid grid-cols-2 gap-2 mb-4">
           <button
             onClick={() => router.push("/leaderboard")}
