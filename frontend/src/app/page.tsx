@@ -12,6 +12,7 @@ import { Logo } from "@/components/Logo";
 import type { Locale } from "@/i18n/navigation";
 import { formatUnits } from "viem";
 import { motion } from "framer-motion";
+import { CONTRACT_ADDRESS, CONTRACT_ABI } from "@/lib/contract";
 
 const TRIVQ_ADDRESS = (process.env.NEXT_PUBLIC_TRIVQ_ADDRESS ?? "0x0") as `0x${string}`;
 const TRIVQ_ABI = [
@@ -32,6 +33,23 @@ function formatTrivq(raw: bigint): string {
   return Math.round(n).toString();
 }
 
+function formatCelo(wei: bigint): string {
+  const n = Number(formatUnits(wei, 18));
+  if (n === 0) return "0";
+  if (n < 0.01) return "<0.01";
+  return n.toFixed(3);
+}
+
+function formatCountdown(endTime: bigint): string {
+  const now = Math.floor(Date.now() / 1000);
+  const diff = Number(endTime) - now;
+  if (diff <= 0) return "Expired";
+  const h = Math.floor(diff / 3600);
+  const m = Math.floor((diff % 3600) / 60);
+  if (h >= 24) return `${Math.floor(h / 24)}d ${h % 24}h`;
+  return `${h}h ${m}m`;
+}
+
 export default function Home() {
   const { isConnected, address } = useAccount();
   const router = useRouter();
@@ -43,6 +61,7 @@ export default function Home() {
   const isReady = isConnected || !!miniPayAddress;
   const walletAddress = address ?? miniPayAddress;
 
+  // ── TRIVQ balance ────────────────────────────────────────
   const { data: trivqBalance } = useReadContract({
     address: TRIVQ_ADDRESS,
     abi: TRIVQ_ABI,
@@ -51,11 +70,29 @@ export default function Home() {
     query: { enabled: !!walletAddress && TRIVQ_ADDRESS !== "0x0" },
   });
 
+  // ── Round data réelle depuis le contrat ──────────────────
+  const { data: currentRound } = useReadContract({
+    address: CONTRACT_ADDRESS,
+    abi: CONTRACT_ABI,
+    functionName: "getCurrentRound",
+    query: { refetchInterval: 30_000 }, // refresh toutes les 30s
+  });
+
+  const { data: totalPlayers } = useReadContract({
+    address: CONTRACT_ADDRESS,
+    abi: CONTRACT_ABI,
+    functionName: "getTotalPlayers",
+    query: { refetchInterval: 30_000 },
+  });
+
   const trivqFormatted = trivqBalance ? formatTrivq(trivqBalance as bigint) : "—";
+  const prizePool = currentRound ? formatCelo(currentRound[1]) : "0";
+  const endTime = currentRound ? currentRound[3] : BigInt(0);
+  const countdown = endTime > BigInt(0) ? formatCountdown(endTime) : "—";
+  const players = totalPlayers ? totalPlayers.toString() : "0";
 
   useEffect(() => {
     sdk.actions.ready();
-
     if (isReady) router.prefetch("/quiz");
   }, [isReady, router]);
 
@@ -85,7 +122,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Main card — DEX style */}
+      {/* Main card */}
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
@@ -110,20 +147,28 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Stats row */}
+          {/* Stats row — données réelles */}
           <div className="grid grid-cols-3 gap-2">
-            {[
-              { label: "Prize Pool", value: "$5,000", color: "text-[#FBCD00]" },
-              { label: "Winners", value: "50", color: "text-[#35D07F]" },
-              { label: "Days Left", value: "26", color: "text-white" },
-            ].map((s) => (
-              <div key={s.label} className="rounded-xl p-3 text-center"
-                style={{ background: "rgba(255,255,255,0.04)" }}
-              >
-                <p className={`font-black text-lg ${s.color}`}>{s.value}</p>
-                <p className="text-white/40 text-xs mt-0.5">{s.label}</p>
-              </div>
-            ))}
+            <div className="rounded-xl p-3 text-center"
+              style={{ background: "rgba(255,255,255,0.04)" }}
+            >
+              <p className="font-black text-lg text-[#FBCD00]">
+                {prizePool} <span className="text-xs">CELO</span>
+              </p>
+              <p className="text-white/40 text-xs mt-0.5">Prize Pool</p>
+            </div>
+            <div className="rounded-xl p-3 text-center"
+              style={{ background: "rgba(255,255,255,0.04)" }}
+            >
+              <p className="font-black text-lg text-[#35D07F]">{players}</p>
+              <p className="text-white/40 text-xs mt-0.5">Players</p>
+            </div>
+            <div className="rounded-xl p-3 text-center"
+              style={{ background: "rgba(255,255,255,0.04)" }}
+            >
+              <p className="font-black text-base text-white">{countdown}</p>
+              <p className="text-white/40 text-xs mt-0.5">Time Left</p>
+            </div>
           </div>
         </div>
 
