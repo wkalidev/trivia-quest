@@ -5,7 +5,22 @@ dotenv.config();
 
 const config: HardhatUserConfig = {
   plugins: [hardhatToolboxViem],
-  solidity: "0.8.20",
+  solidity: {
+    compilers: [
+      {
+        version: "0.8.24",
+        settings: {
+          evmVersion: "cancun",
+        },
+      },
+      {
+        version: "0.8.20",
+        settings: {
+          evmVersion: "paris",
+        },
+      },
+    ],
+  },
   networks: {
     celoSepolia: {
       type: "http",

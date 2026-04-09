@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <radialGradient id="bg-grad" cx="50%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#0a1520"/>
+      <stop offset="100%" stop-color="#0a0b0f"/>
+    </radialGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#38BDF8" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#38BDF8" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="badge-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38BDF8"/>
+      <stop offset="100%" stop-color="#0EA5E9"/>
+    </linearGradient>
+    <linearGradient id="text-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38BDF8"/>
+      <stop offset="100%" stop-color="#0369A1"/>
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="0" stdDeviation="10" flood-color="#38BDF8" flood-opacity="1.1"/>
+    </filter>
+    <filter id="glow-filter">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" fill="url(#bg-grad)" rx="24"/>
+
+  <!-- Background pattern -->
+  
+        <path d="M0,150 Q128,120 256,150 Q384,180 512,150" fill="none" stroke="#38BDF8" stroke-width="0.8" opacity="0.12"/>
+        <path d="M0,200 Q128,170 256,200 Q384,230 512,200" fill="none" stroke="#38BDF8" stroke-width="0.8" opacity="0.12"/>
+        <path d="M0,300 Q128,270 256,300 Q384,330 512,300" fill="none" stroke="#38BDF8" stroke-width="0.8" opacity="0.12"/>
+        <path d="M0,350 Q128,320 256,350 Q384,380 512,350" fill="none" stroke="#38BDF8" stroke-width="0.8" opacity="0.12"/>
+      
+
+  <!-- Ambient glow -->
+  <circle cx="256" cy="220" r="190" fill="url(#glow)"/>
+
+  <!-- Frame -->
+  
+        <polygon points="166,76 346,76 436,166 436,346 346,436 166,436 76,346 76,166"
+          fill="none" stroke="url(#badge-grad)" stroke-width="6" opacity="0.7"/>
+        <polygon points="176,96 336,96 416,176 416,336 336,416 176,416 96,336 96,176"
+          fill="none" stroke="url(#badge-grad)" stroke-width="4" opacity="0.4"/>
+      
+
+  <!-- Inner fill subtle -->
+  <circle cx="256" cy="220" r="120" fill="#38BDF8" opacity="0.05"/>
+
+  <!-- TRIVQ Token Symbol — toujours présent et central -->
+  
+    <!-- TRIVQ Token Symbol -->
+    <circle cx="256" cy="185" r="80" fill="url(#badge-grad)" opacity="0.9" filter="url(#shadow)"/>
+    <circle cx="256" cy="185" r="76" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/>
+    <text x="256" y="197" text-anchor="middle" 
+      font-size="44" font-weight="900" font-family="Arial Black, sans-serif"
+      fill="rgba(10,11,15,0.9)">Q</text>
+    <text x="256" y="165" text-anchor="middle"
+      font-size="17.6" font-weight="bold" font-family="Arial, sans-serif"
+      fill="rgba(10,11,15,0.7)">$TRIVQ</text>
+  
+
+  <!-- Category emoji -->
+  <text x="256" y="305" text-anchor="middle" font-size="32"
+    font-family="Apple Color Emoji, Segoe UI Emoji, sans-serif">🌍</text>
+
+  <!-- NFT Name -->
+  <text x="256" y="345" text-anchor="middle" font-size="20" font-weight="900"
+    font-family="Arial Black, sans-serif" fill="#38BDF8"
+    filter="url(#shadow)">Africa Explorer #024</text>
+
+  <!-- Category -->
+  <text x="256" y="368" text-anchor="middle" font-size="12"
+    font-family="Arial, sans-serif" fill="rgba(255,255,255,0.45)">Géographie Africaine</text>
+
+  <!-- Rarity badge -->
+  <rect x="176" y="380" width="160" height="24" rx="12"
+    fill="#38BDF8" opacity="0.15"/>
+  <rect x="176" y="380" width="160" height="24" rx="12"
+    fill="none" stroke="#38BDF8" stroke-width="1" opacity="0.4"/>
+  <text x="256" y="397" text-anchor="middle" font-size="11" font-weight="bold"
+    font-family="Arial, sans-serif" fill="#38BDF8">⬡ LEGENDARY</text>
+
+  <!-- Edition -->
+  <text x="256" y="430" text-anchor="middle" font-size="10"
+    font-family="Arial, sans-serif" fill="rgba(255,255,255,0.25)">#024 / 150</text>
+
+  <!-- TriviaQ watermark -->
+  <text x="256" y="455" text-anchor="middle" font-size="10"
+    font-family="Arial, sans-serif" fill="rgba(255,255,255,0.15)">TriviaQ · Celo Network</text>
+
+  <!-- Decorative stars -->
+  <text x="40" y="50" text-anchor="middle" font-size="12" fill="#38BDF8" opacity="0.4">✦</text>
+<text x="472" y="50" text-anchor="middle" font-size="12" fill="#38BDF8" opacity="0.4">✦</text>
+<text x="40" y="472" text-anchor="middle" font-size="12" fill="#38BDF8" opacity="0.4">✦</text>
+<text x="472" y="472" text-anchor="middle" font-size="12" fill="#38BDF8" opacity="0.4">✦</text>
+<text x="256" y="30" text-anchor="middle" font-size="12" fill="#38BDF8" opacity="0.4">✦</text>
+<text x="256" y="490" text-anchor="middle" font-size="12" fill="#38BDF8" opacity="0.4">✦</text>
+<text x="30" y="256" text-anchor="middle" font-size="12" fill="#38BDF8" opacity="0.4">✦</text>
+<text x="490" y="256" text-anchor="middle" font-size="12" fill="#38BDF8" opacity="0.4">✦</text>
+<text x="100" y="100" text-anchor="middle" font-size="12" fill="#38BDF8" opacity="0.4">✦</text>
+<text x="412" y="100" text-anchor="middle" font-size="12" fill="#38BDF8" opacity="0.4">✦</text>
+<text x="100" y="412" text-anchor="middle" font-size="12" fill="#38BDF8" opacity="0.4">✦</text>
+<text x="412" y="412" text-anchor="middle" font-size="12" fill="#38BDF8" opacity="0.4">✦</text>
+<text x="170" y="40" text-anchor="middle" font-size="12" fill="#38BDF8" opacity="0.4">✦</text>
+<text x="342" y="40" text-anchor="middle" font-size="12" fill="#38BDF8" opacity="0.4">✦</text>
+</svg>
