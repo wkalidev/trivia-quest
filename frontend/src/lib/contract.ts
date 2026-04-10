@@ -1,4 +1,4 @@
-export const CONTRACT_ADDRESS = "0xedf1505c476a5a7de9e60f79844edb7774c03f0a" as const;
+export const CONTRACT_ADDRESS = "0x002570e6fee3e4f0ab1708a1e8b3aaf7d6a5578f" as const;
 
 export const CONTRACT_ABI = [
   {
@@ -23,9 +23,7 @@ export const CONTRACT_ABI = [
     name: "finishRound",
     type: "function",
     stateMutability: "nonpayable",
-    inputs: [
-      { name: "topWinners", type: "address[]" },
-    ],
+    inputs: [{ name: "topWinners", type: "address[]" }],
     outputs: [],
   },
   {
@@ -98,5 +96,26 @@ export const CONTRACT_ABI = [
     stateMutability: "view",
     inputs: [],
     outputs: [{ type: "uint256" }],
+  },
+  {
+    name: "protocolFeeBps",
+    type: "function",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [{ type: "uint256" }],
+  },
+  {
+    name: "totalFeesCollected",
+    type: "function",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [{ type: "uint256" }],
+  },
+  {
+    name: "treasury",
+    type: "function",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [{ type: "address" }],
   },
 ] as const;

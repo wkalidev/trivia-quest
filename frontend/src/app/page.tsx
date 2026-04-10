@@ -225,6 +225,14 @@ export default function Home() {
         )}
 
         {/* Nav buttons */}
+           <button
+             onClick={() => router.push("/badges")}
+             className="flex items-center justify-center gap-2 py-3 rounded-2xl border border-purple-500/20 text-purple-300 hover:border-purple-500/40 font-bold text-sm transition-all"
+             style={{ background: "rgba(168,85,247,0.06)" }}
+      >
+              🎨 My Badges
+        </button>
+
         <button
          onClick={() => router.push("/checkin")}
          className="flex items-center justify-center gap-2 py-3 rounded-2xl border border-[#FBCD00]/20 text-[#FBCD00] hover:border-[#FBCD00]/40 font-bold text-sm transition-all col-span-2"

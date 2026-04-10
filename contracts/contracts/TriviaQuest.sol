@@ -10,6 +10,11 @@ contract TriviaQuest is Ownable, ReentrancyGuard {
     TriviaQToken public trivqToken;
     uint256 public constant TRIVQ_PER_POINT = 100 * 1e18;
 
+    // ── Protocol fee ──────────────────────────────────────
+    address public treasury;
+    uint256 public protocolFeeBps = 1000; // 10% (basis points)
+    uint256 public totalFeesCollected;
+
     struct Player {
         uint256 score;
         uint256 totalWinnings;
@@ -50,8 +55,12 @@ contract TriviaQuest is Ownable, ReentrancyGuard {
     event ScoreSubmitted(address indexed player, uint256 score, uint256 points, uint256 roundId);
     event RoundFinished(uint256 roundId, address[] winners, uint256[] prizes);
     event NewRoundStarted(uint256 roundId);
+    event FeeCollected(uint256 amount, address treasury);
+    event TreasuryUpdated(address oldTreasury, address newTreasury);
+    event ProtocolFeeUpdated(uint256 oldFee, uint256 newFee);
 
     constructor() Ownable(msg.sender) {
+        treasury = msg.sender;
         _startNewRound();
     }
 
@@ -61,7 +70,18 @@ contract TriviaQuest is Ownable, ReentrancyGuard {
         require(block.timestamp < round.endTime, "Round ended");
         require(roundScores[currentRoundId][msg.sender] == 0, "Already joined");
 
-        round.prizePool += msg.value;
+        // ── Protocol fee ──────────────────────────────────
+        uint256 fee = (msg.value * protocolFeeBps) / 10000;
+        uint256 netAmount = msg.value - fee;
+
+        if (fee > 0 && treasury != address(0)) {
+            totalFeesCollected += fee;
+            payable(treasury).transfer(fee);
+            emit FeeCollected(fee, treasury);
+        }
+
+        round.prizePool += netAmount;
+        // ─────────────────────────────────────────────────
 
         if (!players[msg.sender].exists) {
             players[msg.sender] = Player(0, 0, 0, 0, 0, true);
@@ -192,6 +212,8 @@ contract TriviaQuest is Ownable, ReentrancyGuard {
         emit NewRoundStarted(currentRoundId);
     }
 
+    // ── Admin ─────────────────────────────────────────────
+
     function setEntryFee(uint256 fee) external onlyOwner {
         entryFee = fee;
     }
@@ -204,6 +226,20 @@ contract TriviaQuest is Ownable, ReentrancyGuard {
         require(_trivqToken != address(0), "zero address");
         trivqToken = TriviaQToken(_trivqToken);
     }
+
+    function setTreasury(address _treasury) external onlyOwner {
+        require(_treasury != address(0), "zero address");
+        emit TreasuryUpdated(treasury, _treasury);
+        treasury = _treasury;
+    }
+
+    function setProtocolFee(uint256 _feeBps) external onlyOwner {
+        require(_feeBps <= 2000, "Max 20%");
+        emit ProtocolFeeUpdated(protocolFeeBps, _feeBps);
+        protocolFeeBps = _feeBps;
+    }
+
+    // ── Views ─────────────────────────────────────────────
 
     function getCurrentRound() external view returns (
         uint256 id,

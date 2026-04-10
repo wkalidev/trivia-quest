@@ -22,6 +22,8 @@ Celo's mission is financial inclusion for the unbanked. With 57% of African adul
 - ✅ Daily Check-in — 100 TRIVQ/jour + NFT badge unique
 - ✅ 7-day streak bonus — 2000 TRIVQ + badge Legendary
 - ✅ 150 NFT badges uniques (ERC-1155) sur Pinata IPFS
+- ✅ Page collection badges `/badges`
+- ✅ Protocol fee 10% sur chaque round
 - ✅ Animations Framer Motion
 - ✅ Sons & feedback audio (🔊/🔇 toggle)
 - ✅ Leaderboard on-chain en temps réel
@@ -55,7 +57,7 @@ Celo's mission is financial inclusion for the unbanked. With 57% of African adul
 
 | Contract | Network | Address |
 |---|---|---|
-| TriviaQuest | Celo Mainnet | `0xedf1505c476a5a7de9e60f79844edb7774c03f0a` |
+| TriviaQuest v2 (+ fee) | Celo Mainnet | `0x002570e6fee3e4f0ab1708a1e8b3aaf7d6a5578f` |
 | TriviaQToken ($TRIVQ) | Celo Mainnet | `0xf50afd22d5285f0398bf1be433252ce6a9fd9579` |
 | DailyCheckIn (ERC-1155) | Celo Mainnet | `0x12a76267fd15f013daaf4f20824295afa4ebcd91` |
 | TriviaQuest | Celo Sepolia (testnet) | `0xa93422cb14278ac5d1a6f60f95b03aa723e6448e` |
@@ -98,6 +100,14 @@ Chaque badge est unique grâce aux combinaisons de palettes, backgrounds et fram
 | Jour 1-6 | 100 TRIVQ + NFT badge |
 | Jour 7 🎁 | 100 TRIVQ + 2000 TRIVQ BONUS + NFT badge |
 | Reset | Si miss > 48h, streak repart à 0 |
+
+## 💰 Protocol Fee
+
+| Parameter | Value |
+|---|---|
+| Fee | 10% sur chaque entry fee |
+| Treasury | `0xdeacde6ec27fd0cd972c1232c4f0d4171dda2357` |
+| Max fee | 20% (hardcoded cap) |
 
 ## 📱 MiniPay Compatible
 
@@ -159,7 +169,7 @@ npx hardhat compile
 
 ```env
 NEXT_PUBLIC_TRIVQ_ADDRESS=0xf50afd22d5285f0398bf1be433252ce6a9fd9579
-NEXT_PUBLIC_GAME_ADDRESS=0xedf1505c476a5a7de9e60f79844edb7774c03f0a
+NEXT_PUBLIC_GAME_ADDRESS=0x002570e6fee3e4f0ab1708a1e8b3aaf7d6a5578f
 NEXT_PUBLIC_CHECKIN_ADDRESS=0x12a76267fd15f013daaf4f20824295afa4ebcd91
 NEXT_PUBLIC_CHAIN_ID=42220
 ```
@@ -171,6 +181,7 @@ NEXT_PUBLIC_CHAIN_ID=42220
 - ✅ $TRIVQ Token — ERC20 reward token with 1B supply
 - ✅ NFT Badges — 150 unique ERC-1155 badges on IPFS
 - ✅ Daily Check-in — On-chain streak system with rewards
+- ✅ Protocol Fee — 10% revenue on every round
 - ✅ Auto Round Management — GitHub Actions cron
 - ✅ Prove Your Humanity — Coinbase Verification
 - ✅ Submit Your Project
@@ -191,4 +202,4 @@ NEXT_PUBLIC_CHAIN_ID=42220
 
 ## 👤 Author
 
-Built with 💙 by [@wkalidev](zcodebase)(https://github.com/wkalidev) for Celo Proof of Ship — April 2026
+Built with 💙 by [@wkalidev](https://github.com/wkalidev) for Celo Proof of Ship — April 2026
