@@ -1,6 +1,26 @@
 {
-  "name": "frontend",
-  "version": "0.1.0",
+  "name": "trivia-quest",
+  "version": "1.5.0",
+  "description": "TriviaQ — Play. Learn. Earn on Celo. Blockchain quiz game with $TRIVQ rewards, NFT badges and daily check-in.",
+  "author": "wkalidev <https://github.com/wkalidev>",
+  "license": "MIT",
+  "homepage": "https://trivia-quest-eight.vercel.app",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wkalidev/trivia-quest"
+  },
+  "keywords": [
+    "celo",
+    "web3",
+    "gamefi",
+    "trivia",
+    "nft",
+    "trivq",
+    "minipay",
+    "farcaster",
+    "blockchain",
+    "quiz"
+  ],
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
