@@ -61,7 +61,6 @@ export default function Home() {
   const isReady = isConnected || !!miniPayAddress;
   const walletAddress = address ?? miniPayAddress;
 
-  // ── TRIVQ balance ────────────────────────────────────────
   const { data: trivqBalance } = useReadContract({
     address: TRIVQ_ADDRESS,
     abi: TRIVQ_ABI,
@@ -70,12 +69,11 @@ export default function Home() {
     query: { enabled: !!walletAddress && TRIVQ_ADDRESS !== "0x0" },
   });
 
-  // ── Round data réelle depuis le contrat ──────────────────
   const { data: currentRound } = useReadContract({
     address: CONTRACT_ADDRESS,
     abi: CONTRACT_ABI,
     functionName: "getCurrentRound",
-    query: { refetchInterval: 30_000 }, // refresh toutes les 30s
+    query: { refetchInterval: 30_000 },
   });
 
   const { data: totalPlayers } = useReadContract({
@@ -100,7 +98,6 @@ export default function Home() {
     <main className="min-h-screen flex flex-col items-center justify-center px-4 relative overflow-hidden"
       style={{ background: "radial-gradient(ellipse 80% 60% at 50% -10%, #1a2744 0%, #0a0b0f 60%)" }}
     >
-      {/* Grid background */}
       <div className="absolute inset-0 pointer-events-none"
         style={{
           backgroundImage: "linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)",
@@ -108,7 +105,6 @@ export default function Home() {
         }}
       />
 
-      {/* Top bar */}
       <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-6 py-4 border-b border-white/5">
         <div className="flex items-center gap-2">
           <Logo size={28} />
@@ -122,7 +118,6 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Main card */}
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
@@ -147,7 +142,6 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Stats row — données réelles */}
           <div className="grid grid-cols-3 gap-2">
             <div className="rounded-xl p-3 text-center"
               style={{ background: "rgba(255,255,255,0.04)" }}
@@ -224,22 +218,39 @@ export default function Home() {
           </div>
         )}
 
-        {/* Nav buttons */}
-           <button
-             onClick={() => router.push("/badges")}
-             className="flex items-center justify-center gap-2 py-3 rounded-2xl border border-purple-500/20 text-purple-300 hover:border-purple-500/40 font-bold text-sm transition-all"
-             style={{ background: "rgba(168,85,247,0.06)" }}
-      >
-              🎨 My Badges
+        {/* Badges */}
+        <button
+          onClick={() => router.push("/badges")}
+          className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl border border-purple-500/20 text-purple-300 hover:border-purple-500/40 font-bold text-sm transition-all mb-2"
+          style={{ background: "rgba(168,85,247,0.06)" }}
+        >
+          🎨 My Badges
         </button>
 
+        {/* Daily Check-in */}
         <button
-         onClick={() => router.push("/checkin")}
-         className="flex items-center justify-center gap-2 py-3 rounded-2xl border border-[#FBCD00]/20 text-[#FBCD00] hover:border-[#FBCD00]/40 font-bold text-sm transition-all col-span-2"
-        style={{ background: "rgba(251,205,0,0.06)" }}
-     >
-             🔥 Daily Check-in & Earn TRIVQ
+          onClick={() => router.push("/checkin")}
+          className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl border border-[#FBCD00]/20 text-[#FBCD00] hover:border-[#FBCD00]/40 font-bold text-sm transition-all mb-2"
+          style={{ background: "rgba(251,205,0,0.06)" }}
+        >
+          🔥 Daily Check-in & Earn TRIVQ
         </button>
+
+        {/* Swap button */}
+        {isReady && (
+          <button
+            onClick={() => window.open(
+              `https://app.ubeswap.org/#/swap?outputCurrency=${TRIVQ_ADDRESS}`,
+              "_blank"
+            )}
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl border border-[#35D07F]/20 text-[#35D07F] hover:border-[#35D07F]/40 font-bold text-sm transition-all mb-2"
+            style={{ background: "rgba(53,208,127,0.06)" }}
+          >
+            💱 Buy / Sell $TRIVQ on Ubeswap
+          </button>
+        )}
+
+        {/* Nav grid */}
         <div className="grid grid-cols-2 gap-2 mb-4">
           <button
             onClick={() => router.push("/leaderboard")}
