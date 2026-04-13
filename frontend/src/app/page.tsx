@@ -9,6 +9,7 @@ import { useMiniPay } from "@/hooks/useMiniPay";
 import { useTranslations, useLocale } from "next-intl";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Logo } from "@/components/Logo";
+import  TrivqPrice  from "@/components/TrivqPrice";
 import type { Locale } from "@/i18n/navigation";
 import { formatUnits } from "viem";
 import { motion } from "framer-motion";
@@ -89,6 +90,16 @@ export default function Home() {
   const countdown = endTime > BigInt(0) ? formatCountdown(endTime) : "—";
   const players = totalPlayers ? totalPlayers.toString() : "0";
 
+  // Referral link
+  const referralLink = address
+    ? `https://trivia-quest-eight.vercel.app?ref=${address}`
+    : null;
+
+  const copyReferral = () => {
+    if (!referralLink) return;
+    navigator.clipboard.writeText(referralLink);
+  };
+
   useEffect(() => {
     sdk.actions.ready();
     if (isReady) router.prefetch("/quiz");
@@ -105,6 +116,7 @@ export default function Home() {
         }}
       />
 
+      {/* Top bar */}
       <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-6 py-4 border-b border-white/5">
         <div className="flex items-center gap-2">
           <Logo size={28} />
@@ -164,6 +176,11 @@ export default function Home() {
               <p className="text-white/40 text-xs mt-0.5">Time Left</p>
             </div>
           </div>
+        </div>
+
+        {/* ── Price tracker ────────────────────────────────── */}
+        <div className="mb-3">
+          <TrivqPrice />
         </div>
 
         {/* TRIVQ balance card */}
@@ -236,7 +253,18 @@ export default function Home() {
           🔥 Daily Check-in & Earn TRIVQ
         </button>
 
-        {/* Swap button */}
+        {/* ── Referral ──────────────────────────────────────── */}
+        {isReady && referralLink && (
+          <button
+            onClick={copyReferral}
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl border border-blue-500/20 text-blue-300 hover:border-blue-500/40 font-bold text-sm transition-all mb-2"
+            style={{ background: "rgba(59,130,246,0.06)" }}
+          >
+            🔗 Invite & Earn 500 TRIVQ
+          </button>
+        )}
+
+        {/* Swap */}
         {isReady && (
           <button
             onClick={() => window.open(
@@ -270,7 +298,7 @@ export default function Home() {
           )}
         </div>
 
-        {/* Footer links */}
+        {/* Footer */}
         <div className="flex justify-center gap-5 flex-wrap">
           {[
             { href: "https://twitter.com/willycodexwar", label: "𝕏 Twitter" },

@@ -31,6 +31,9 @@ Celo's mission is financial inclusion for the unbanked. With 57% of African adul
 - ✅ MiniPay compatible (détection automatique)
 - ✅ PWA installable sur Android
 - ✅ Cron auto-finish rounds (GitHub Actions)
+  ✅ Referral system — invite & earn 500 TRIVQ
+- ✅ $TRIVQ price tracker live
+- ✅ PWA push notifications
 
 ## 📚 Question Categories
 
@@ -62,6 +65,7 @@ Celo's mission is financial inclusion for the unbanked. With 57% of African adul
 | DailyCheckIn (ERC-1155) | Celo Mainnet | `0x12a76267fd15f013daaf4f20824295afa4ebcd91` |
 | TriviaQuest | Celo Sepolia (testnet) | `0xa93422cb14278ac5d1a6f60f95b03aa723e6448e` |
 | TriviaQToken ($TRIVQ) | Celo Sepolia (testnet) | `0xa829214ea492f32818efa2c58cc7e9090572c17c` |
+| Referral | Celo Mainnet | `0x42990213bf7adf94cff2a1905cc4da3fdc9aa4a5` |
 
 ## 💎 $TRIVQ Tokenomics
 
@@ -185,6 +189,9 @@ NEXT_PUBLIC_CHAIN_ID=42220
 - ✅ Auto Round Management — GitHub Actions cron
 - ✅ Prove Your Humanity — Coinbase Verification
 - ✅ Submit Your Project
+  ✅ Referral System — 500 TRIVQ per referral
+- ✅ $TRIVQ Price Tracker — live on Ubeswap
+- ✅ PWA Push Notifications
 
 ## 📋 Tech Stack
 

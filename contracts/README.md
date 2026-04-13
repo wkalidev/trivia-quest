@@ -9,6 +9,7 @@ Solidity contracts for TriviaQ — deployed on Celo Mainnet.
 | TriviaQuest | `0x002570e6fee3e4f0ab1708a1e8b3aaf7d6a5578f` |
 | TriviaQToken ($TRIVQ) | `0xf50afd22d5285f0398bf1be433252ce6a9fd9579` |
 | DailyCheckIn (ERC-1155) | `0x12a76267fd15f013daaf4f20824295afa4ebcd91` |
+| Referral | `0x42990213bf7adf94cff2a1905cc4da3fdc9aa4a5` |
 
 ## Setup
 
@@ -34,3 +35,4 @@ npx hardhat run scripts/deploy.ts --network celo
 | `checkRound.ts` | Check + finish expired round |
 | `set-minter.ts` | Set minter on TriviaQToken |
 | `generateNFTs.ts` | Generate 150 NFTs + upload to Pinata |
+| `deployReferral.ts` | Deploy Referral contract |
