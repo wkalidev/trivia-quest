@@ -1,13 +1,20 @@
 import { getDefaultConfig } from "@rainbow-me/rainbowkit";
 import { celo } from "viem/chains";
+import { Attribution } from "ox/erc8021";
 
 export { CONTRACT_ADDRESS, CONTRACT_ABI } from "@/lib/contract";
+
+// ── Base Builder Code attribution ─────────────────────────
+const DATA_SUFFIX = Attribution.toDataSuffix({
+  codes: ["bc_kkrhcgs3"],
+});
 
 export const config = getDefaultConfig({
   appName: "Trivia Q",
   projectId: "triviaquest123",
   chains: [celo],
   ssr: true,
+  dataSuffix: DATA_SUFFIX,
 });
 
 // ── MiniPay Hook ──────────────────────────────────────────
