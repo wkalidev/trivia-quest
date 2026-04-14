@@ -267,10 +267,10 @@ export default function Home() {
         {/* Swap */}
         {isReady && (
           <button
-            onClick={() => window.open(
-              `https://app.ubeswap.org/#/swap?outputCurrency=${TRIVQ_ADDRESS}`,
-              "_blank"
-            )}
+           onClick={() => window.open(
+           "https://app.ubeswap.org/#/swap?outputCurrency=0xe65fc5cacaf9a5aebbc0e151dee08a53f24a05c5",
+           "_blank"
+        )}
             className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl border border-[#35D07F]/20 text-[#35D07F] hover:border-[#35D07F]/40 font-bold text-sm transition-all mb-2"
             style={{ background: "rgba(53,208,127,0.06)" }}
           >

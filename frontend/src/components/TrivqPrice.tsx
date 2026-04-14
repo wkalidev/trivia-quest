@@ -16,7 +16,7 @@ export default function TrivqPrice() {
     async function fetchPrice() {
       try {
         const res = await fetch(
-          "https://api.geckoterminal.com/api/v2/networks/celo/tokens/0xf50afd22d5285f0398bf1be433252ce6a9fd9579"
+          "https://api.geckoterminal.com/api/v2/networks/celo/tokens/0xe65fc5cacaf9a5aebbc0e151dee08a53f24a05c5"
         );
         const json = await res.json();
         const attrs = json?.data?.attributes;
@@ -39,7 +39,7 @@ export default function TrivqPrice() {
     return () => clearInterval(interval);
   }, []);
 
-  const SWAP_URL = "https://app.ubeswap.org/#/swap?outputCurrency=0xf50afd22d5285f0398bf1be433252ce6a9fd9579";
+  const SWAP_URL = "https://app.ubeswap.org/#/swap?outputCurrency=0xe65fc5cacaf9a5aebbc0e151dee08a53f24a05c5";
   const isPositive = (data?.change24h ?? 0) >= 0;
 
   if (loading) {
