@@ -6,10 +6,10 @@ Solidity contracts for TriviaQ — deployed on Celo Mainnet.
 
 | Contract | Address |
 |---|---|
-| TriviaQuest | `0x002570e6fee3e4f0ab1708a1e8b3aaf7d6a5578f` |
-| TriviaQToken ($TRIVQ) | `0xf50afd22d5285f0398bf1be433252ce6a9fd9579` |
-| DailyCheckIn (ERC-1155) | `0x12a76267fd15f013daaf4f20824295afa4ebcd91` |
-| Referral | `0x42990213bf7adf94cff2a1905cc4da3fdc9aa4a5` |
+| TriviaQToken ($TRIVQ) v2 | Celo Mainnet | `0xe65fc5cacaf9a5aebbc0e151dee08a53f24a05c5` |
+| TriviaQuest v3 | Celo Mainnet | `0xffe22d3d1b63866ac9da8ac92fdb9ceddeadb0bb` |
+| DailyCheckIn v2 | Celo Mainnet | `0x8650e6c477f8ae3933dc6d61d85e65c90cf71828` |
+| Referral v2 | Celo Mainnet | `0xa0fcd85a25ecb71ca1ea9d63da058c832c27c62e` |
 
 ## Setup
 

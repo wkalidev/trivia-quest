@@ -1,8 +1,8 @@
 import { network } from "hardhat";
 
 const { viem } = await network.connect();
-const QUEST = "0x002570e6fee3e4f0ab1708a1e8b3aaf7d6a5578f";
-const contract = await viem.getContractAt("TriviaQuest", QUEST);
+const TRIVIAQUEST_ADDRESS = "0xffe22d3d1b63866ac9da8ac92fdb9ceddeadb0bb" as `0x${string}`;
+const contract = await viem.getContractAt("TriviaQuest", TRIVIAQUEST_ADDRESS);
 
 const round = await contract.read.getCurrentRound();
 console.log("Round ID:", round[0].toString());

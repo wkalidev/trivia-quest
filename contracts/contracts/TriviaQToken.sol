@@ -12,14 +12,16 @@ contract TriviaQToken is ERC20, Ownable {
     uint256 public constant ECOSYSTEM_ALLOC = 100_000_000 * 1e18;
     uint256 public constant MARKETING_ALLOC =  50_000_000 * 1e18;
 
-    address public minter;
+    // ── Multi-minters ─────────────────────────────────────
+    mapping(address => bool) public minters;
     uint256 public rewardsMinted;
 
-    event MinterSet(address indexed oldMinter, address indexed newMinter);
+    event MinterAdded(address indexed minter);
+    event MinterRemoved(address indexed minter);
     event RewardMinted(address indexed player, uint256 amount);
 
     modifier onlyMinter() {
-        require(msg.sender == minter, "TRIVQ: not minter");
+        require(minters[msg.sender], "TRIVQ: not minter");
         _;
     }
 
@@ -35,10 +37,27 @@ contract TriviaQToken is ERC20, Ownable {
         _mint(marketingWallet,  MARKETING_ALLOC);
     }
 
+    // ── Owner: gérer les minters ──────────────────────────
+    function addMinter(address _minter) external onlyOwner {
+        require(_minter != address(0), "TRIVQ: zero address");
+        minters[_minter] = true;
+        emit MinterAdded(_minter);
+    }
+
+    function removeMinter(address _minter) external onlyOwner {
+        minters[_minter] = false;
+        emit MinterRemoved(_minter);
+    }
+
+    // Compatibilité avec l'ancien setMinter
     function setMinter(address _minter) external onlyOwner {
         require(_minter != address(0), "TRIVQ: zero address");
-        emit MinterSet(minter, _minter);
-        minter = _minter;
+        minters[_minter] = true;
+        emit MinterAdded(_minter);
+    }
+
+    function isMinter(address _minter) external view returns (bool) {
+        return minters[_minter];
     }
 
     function mintReward(address player, uint256 amount) external onlyMinter {

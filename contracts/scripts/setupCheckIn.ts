@@ -1,7 +1,7 @@
 import hre from "hardhat";
 import * as fs from "fs";
 
-const CHECKIN_ADDRESS = "0x12a76267fd15f013daaf4f20824295afa4ebcd91" as `0x${string}`;
+const CHECKIN_ADDRESS = "0x8650e6c477f8ae3933dc6d61d85e65c90cf71828" as `0x${string}`;
 
 async function main() {
   const { viem } = await hre.network.connect();

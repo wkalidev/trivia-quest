@@ -60,12 +60,13 @@ Celo's mission is financial inclusion for the unbanked. With 57% of African adul
 
 | Contract | Network | Address |
 |---|---|---|
-| TriviaQuest v2 (+ fee) | Celo Mainnet | `0x002570e6fee3e4f0ab1708a1e8b3aaf7d6a5578f` |
-| TriviaQToken ($TRIVQ) | Celo Mainnet | `0xf50afd22d5285f0398bf1be433252ce6a9fd9579` |
-| DailyCheckIn (ERC-1155) | Celo Mainnet | `0x12a76267fd15f013daaf4f20824295afa4ebcd91` |
+
+| TriviaQToken ($TRIVQ) v2 | Celo Mainnet | `0xe65fc5cacaf9a5aebbc0e151dee08a53f24a05c5` |
+| TriviaQuest v3 | Celo Mainnet | `0xffe22d3d1b63866ac9da8ac92fdb9ceddeadb0bb` |
+| DailyCheckIn v2 | Celo Mainnet | `0x8650e6c477f8ae3933dc6d61d85e65c90cf71828` |
+| Referral v2 | Celo Mainnet | `0xa0fcd85a25ecb71ca1ea9d63da058c832c27c62e` |
 | TriviaQuest | Celo Sepolia (testnet) | `0xa93422cb14278ac5d1a6f60f95b03aa723e6448e` |
 | TriviaQToken ($TRIVQ) | Celo Sepolia (testnet) | `0xa829214ea492f32818efa2c58cc7e9090572c17c` |
-| Referral | Celo Mainnet | `0x42990213bf7adf94cff2a1905cc4da3fdc9aa4a5` |
 
 ## 💎 $TRIVQ Tokenomics
 

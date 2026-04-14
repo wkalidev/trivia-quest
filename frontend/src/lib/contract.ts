@@ -1,5 +1,4 @@
-export const CONTRACT_ADDRESS = "0x002570e6fee3e4f0ab1708a1e8b3aaf7d6a5578f" as const;
-
+export const CONTRACT_ADDRESS = "0xffe22d3d1b63866ac9da8ac92fdb9ceddeadb0bb" as const;
 export const CONTRACT_ABI = [
   {
     name: "joinRound",
