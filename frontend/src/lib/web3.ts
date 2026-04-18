@@ -11,7 +11,7 @@ const DATA_SUFFIX = Attribution.toDataSuffix({
 
 export const config = getDefaultConfig({
   appName: "Trivia Q",
-  projectId: "triviaquest123",
+    projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID ?? "",
   chains: [celo],
   ssr: true,
   dataSuffix: DATA_SUFFIX,
