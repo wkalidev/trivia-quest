@@ -176,9 +176,13 @@ export default function Home() {
   const players = totalPlayers ? totalPlayers.toString() : "0";
   const isExpired = countdown === "Expired";
   const referralLink = address ? `https://trivia-quest-eight.vercel.app?ref=${address}` : null;
+  const [copied, setCopied] = useState(false);
 
   const copyReferral = () => {
-    if (referralLink) navigator.clipboard.writeText(referralLink);
+    if (!referralLink) return;
+    navigator.clipboard.writeText(referralLink);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   useEffect(() => {
@@ -394,7 +398,7 @@ export default function Home() {
                 }}
               />
               <span className="relative z-10 flex items-center justify-center gap-2">
-                {t("playNow")} 🎮
+                {t("playNow")} 
               </span>
             </motion.button>
           ) : (
@@ -422,7 +426,7 @@ export default function Home() {
         <motion.div variants={itemVariants} className="grid grid-cols-2 gap-2">
           {isReady && referralLink && (
             <ActionButton onClick={copyReferral} variant="blue">
-              🔗 Invite & Earn
+                {copied ? "✅ Copied!" : "🔗 Invite & Earn"}
             </ActionButton>
           )}
           <ActionButton
