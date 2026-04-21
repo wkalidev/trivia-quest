@@ -2,7 +2,7 @@ name: Auto Finish Round
 
 on:
   schedule:
-    - cron: '0 * * * *'
+    - cron: '*/5 * * * *'
   workflow_dispatch:
 
 env:
