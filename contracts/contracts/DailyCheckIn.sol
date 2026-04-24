@@ -96,10 +96,6 @@ contract DailyCheckIn is ERC1155, Ownable, ReentrancyGuard {
             return;
         }
 
-        // Reset streak si plus de 48h sans check-in
-        if (p.lastCheckIn > 0 && now_ > p.lastCheckIn + (COOLDOWN * 2)) {
-            p.streak = 0;
-        }
 
         p.lastCheckIn = now_;
         p.streak += 1;
