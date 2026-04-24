@@ -1,6 +1,7 @@
 import { getDefaultConfig } from "@rainbow-me/rainbowkit";
 import { celo, mainnet } from "viem/chains";
 import { Attribution } from "ox/erc8021";
+import { http } from "wagmi";
 
 export { CONTRACT_ADDRESS, CONTRACT_ABI } from "@/lib/contract";
 
@@ -13,6 +14,10 @@ export const config = getDefaultConfig({
   appName: "Trivia Q",
     projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID ?? "",
   chains: [celo, mainnet],
+  transports: {
+    [celo.id]: http("https://forno.celo.org"),
+    [mainnet.id]: http("https://eth.llamarpc.com"), // ← RPC public ETH pour ENS
+  },
   ssr: true,
   dataSuffix: DATA_SUFFIX,
 });
