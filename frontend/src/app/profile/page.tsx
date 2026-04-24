@@ -1,9 +1,10 @@
 "use client";
 
-import { useAccount, useReadContract } from "wagmi";
+import { useAccount, useReadContract, useEnsName } from "wagmi";
 import { useRouter } from "next/navigation";
 import { CONTRACT_ADDRESS, CONTRACT_ABI } from "@/lib/web3";
 import { motion } from "framer-motion";
+import { mainnet } from "viem/chains";
 
 function getRank(pts: number) {
   if (pts >= 5000) return { label: "Legend", emoji: "🏆", color: "text-[#FBCD00]", next: null };
@@ -18,6 +19,12 @@ export default function ProfilePage() {
   const { address, isConnected } = useAccount();
   const router = useRouter();
 
+  const { data: ensName } = useEnsName({
+    address: address,
+    chainId: mainnet.id,
+    query: { enabled: !!address },
+  });
+
   const { data: stats, isLoading } = useReadContract({
     address: CONTRACT_ADDRESS,
     abi: CONTRACT_ABI,
@@ -25,6 +32,11 @@ export default function ProfilePage() {
     args: address ? [address] : undefined,
     query: { enabled: !!address },
   });
+
+  const displayName = ensName ?? (address ? `${address.slice(0, 6)}...${address.slice(-4)}` : "—");
+  const initials = ensName
+    ? ensName.slice(0, 2).toUpperCase()
+    : address?.slice(2, 4).toUpperCase() ?? "??";
 
   if (!isConnected) {
     return (
@@ -49,10 +61,10 @@ export default function ProfilePage() {
     : 100;
 
   const statCards = [
-    { label: "Total Points", value: pts.toLocaleString(), color: "text-[#FBCD00]", sub: "pts" },
-    { label: "Games Played", value: stats?.gamesPlayed?.toString() ?? "0", color: "text-[#35D07F]", sub: "games" },
-    { label: "Best Score", value: `${stats?.bestScore?.toString() ?? "0"}/10`, color: "text-white", sub: "score" },
-    { label: "CELO Won", value: stats?.totalWinnings ? (Number(stats.totalWinnings) / 1e18).toFixed(4) : "0", color: "text-purple-400", sub: "CELO" },
+    { label: "Total Points", value: pts.toLocaleString(), color: "text-[#FBCD00]" },
+    { label: "Games Played", value: stats?.gamesPlayed?.toString() ?? "0", color: "text-[#35D07F]" },
+    { label: "Best Score", value: `${stats?.bestScore?.toString() ?? "0"}/10`, color: "text-white" },
+    { label: "CELO Won", value: stats?.totalWinnings ? (Number(stats.totalWinnings) / 1e18).toFixed(4) : "0", color: "text-purple-400" },
   ];
 
   return (
@@ -67,7 +79,6 @@ export default function ProfilePage() {
       />
 
       <div className="max-w-md mx-auto w-full z-10">
-        {/* Header */}
         <div className="flex items-center gap-4 mb-6">
           <button onClick={() => router.push("/")}
             className="w-9 h-9 rounded-xl border border-white/10 flex items-center justify-center text-white/50 hover:text-white transition-all"
@@ -90,13 +101,32 @@ export default function ProfilePage() {
               style={{ background: "rgba(255,255,255,0.04)", backdropFilter: "blur(20px)" }}
             >
               <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-2xl flex items-center justify-center font-black text-xl text-[#0a0b0f]"
-                  style={{ background: "linear-gradient(135deg, #FBCD00, #f0a500)" }}
-                >
-                  {address?.slice(2, 4).toUpperCase()}
+                <div className="relative">
+                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center font-black text-xl text-[#0a0b0f]"
+                    style={{ background: "linear-gradient(135deg, #FBCD00, #f0a500)" }}
+                  >
+                    {initials}
+                  </div>
+                  {ensName && (
+                    <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center"
+                      title="ENS verified"
+                    >
+                      <span className="text-white text-xs">✓</span>
+                    </div>
+                  )}
                 </div>
                 <div>
-                  <p className="text-white font-bold">{address?.slice(0, 6)}...{address?.slice(-4)}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-white font-bold text-lg">{displayName}</p>
+                    {ensName && (
+                      <span className="text-blue-400 text-xs px-2 py-0.5 rounded-full"
+                        style={{ background: "rgba(59,130,246,0.1)", border: "1px solid rgba(59,130,246,0.2)" }}
+                      >ENS</span>
+                    )}
+                  </div>
+                  {ensName && (
+                    <p className="text-white/30 text-xs">{address?.slice(0, 6)}...{address?.slice(-4)}</p>
+                  )}
                   <p className={`font-black text-lg ${rank.color}`}>{rank.emoji} {rank.label}</p>
                 </div>
               </div>

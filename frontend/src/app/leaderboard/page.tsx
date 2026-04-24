@@ -1,9 +1,10 @@
 "use client";
 
-import { useReadContract } from "wagmi";
+import { useReadContract, useEnsName } from "wagmi";
 import { useRouter } from "next/navigation";
 import { CONTRACT_ADDRESS, CONTRACT_ABI } from "@/lib/web3";
 import { motion } from "framer-motion";
+import { mainnet } from "viem/chains";
 
 type LeaderboardEntry = {
   player: string;
@@ -12,15 +13,31 @@ type LeaderboardEntry = {
   gamesPlayed: bigint;
 };
 
-function shortAddress(addr: string): string {
-  return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
-}
-
 const RANK_CONFIG = [
-  { bg: "rgba(251,205,0,0.08)", border: "rgba(251,205,0,0.3)", color: "text-[#FBCD00]", label: "🥇", badge: "bg-[#FBCD00]/20 text-[#FBCD00]" },
-  { bg: "rgba(255,255,255,0.05)", border: "rgba(255,255,255,0.12)", color: "text-white", label: "🥈", badge: "bg-white/10 text-white/70" },
-  { bg: "rgba(251,146,60,0.06)", border: "rgba(251,146,60,0.2)", color: "text-orange-400", label: "🥉", badge: "bg-orange-500/10 text-orange-400" },
+  { bg: "rgba(251,205,0,0.08)", border: "rgba(251,205,0,0.3)", color: "text-[#FBCD00]", label: "🥇" },
+  { bg: "rgba(255,255,255,0.05)", border: "rgba(255,255,255,0.12)", color: "text-white", label: "🥈" },
+  { bg: "rgba(251,146,60,0.06)", border: "rgba(251,146,60,0.2)", color: "text-orange-400", label: "🥉" },
 ];
+
+// Composant qui résout ENS pour chaque adresse
+function PlayerName({ address }: { address: string }) {
+  const { data: ensName } = useEnsName({
+    address: address as `0x${string}`,
+    chainId: mainnet.id,
+    query: { enabled: !!address },
+  });
+
+  return (
+    <span className="flex items-center gap-1.5">
+      {ensName ?? `${address.slice(0, 6)}...${address.slice(-4)}`}
+      {ensName && (
+        <span className="text-blue-400 text-xs px-1 rounded"
+          style={{ background: "rgba(59,130,246,0.1)" }}
+        >ENS</span>
+      )}
+    </span>
+  );
+}
 
 export default function LeaderboardPage() {
   const router = useRouter();
@@ -41,7 +58,6 @@ export default function LeaderboardPage() {
     <main className="min-h-screen flex flex-col px-4 pt-6 pb-8 relative"
       style={{ background: "radial-gradient(ellipse 80% 60% at 50% -10%, #1a2744 0%, #0a0b0f 60%)" }}
     >
-      {/* Grid bg */}
       <div className="absolute inset-0 pointer-events-none"
         style={{
           backgroundImage: "linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)",
@@ -50,15 +66,11 @@ export default function LeaderboardPage() {
       />
 
       <div className="max-w-2xl mx-auto w-full z-10">
-        {/* Header */}
         <div className="flex items-center gap-4 mb-6">
-          <button
-            onClick={() => router.push("/")}
+          <button onClick={() => router.push("/")}
             className="w-9 h-9 rounded-xl border border-white/10 flex items-center justify-center text-white/50 hover:text-white hover:border-white/20 transition-all"
             style={{ background: "rgba(255,255,255,0.04)" }}
-          >
-            ←
-          </button>
+          >←</button>
           <div>
             <h1 className="text-white font-black text-2xl tracking-tight">Leaderboard</h1>
             <p className="text-white/30 text-xs mt-0.5">
@@ -84,7 +96,9 @@ export default function LeaderboardPage() {
                   style={{ background: cfg.bg, borderColor: cfg.border }}
                 >
                   <p className="text-2xl mb-1">{cfg.label}</p>
-                  <p className="text-white text-xs font-bold">{shortAddress(entry.player)}</p>
+                  <p className="text-white text-xs font-bold">
+                    <PlayerName address={entry.player} />
+                  </p>
                   <p className={`font-black text-sm ${cfg.color}`}>{entry.totalPoints.toString()} pts</p>
                 </motion.div>
               );
@@ -92,18 +106,14 @@ export default function LeaderboardPage() {
           </div>
         )}
 
-        {/* Loading */}
         {isLoading && (
           <div className="flex justify-center py-16">
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ repeat: Infinity, duration: 1 }}
+            <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1 }}
               className="w-10 h-10 border-2 border-[#FBCD00] border-t-transparent rounded-full"
             />
           </div>
         )}
 
-        {/* Empty */}
         {!isLoading && (!leaderboard || leaderboard.length === 0) && (
           <div className="text-center py-20">
             <p className="text-5xl mb-4">🎮</p>
@@ -115,12 +125,10 @@ export default function LeaderboardPage() {
           </div>
         )}
 
-        {/* Full list */}
         {!isLoading && leaderboard && leaderboard.length > 0 && (
           <div className="rounded-2xl border border-white/8 overflow-hidden mb-4"
             style={{ background: "rgba(255,255,255,0.03)" }}
           >
-            {/* Table header */}
             <div className="grid grid-cols-12 px-4 py-2 border-b border-white/5">
               <span className="col-span-1 text-white/30 text-xs">#</span>
               <span className="col-span-5 text-white/30 text-xs">Player</span>
@@ -140,7 +148,9 @@ export default function LeaderboardPage() {
                   className="grid grid-cols-12 px-4 py-3 border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition-all items-center"
                 >
                   <span className="col-span-1 text-lg">{cfg.label}</span>
-                  <span className="col-span-5 text-white font-bold text-sm">{shortAddress(entry.player)}</span>
+                  <span className="col-span-5 text-white font-bold text-sm">
+                    <PlayerName address={entry.player} />
+                  </span>
                   <span className="col-span-2 text-white/50 text-xs text-center">{entry.gamesPlayed.toString()}</span>
                   <span className="col-span-2 text-white/50 text-xs text-center">{entry.bestScore.toString()}/10</span>
                   <span className={`col-span-2 font-black text-sm text-right ${cfg.color}`}>
@@ -152,13 +162,10 @@ export default function LeaderboardPage() {
           </div>
         )}
 
-        <button
-          onClick={() => router.push("/quiz")}
+        <button onClick={() => router.push("/quiz")}
           className="w-full font-black text-base py-4 rounded-2xl transition-all active:scale-95"
           style={{ background: "linear-gradient(135deg, #FBCD00 0%, #f0a500 100%)", color: "#0a0b0f" }}
-        >
-          Play to Climb 🚀
-        </button>
+        >Play to Climb 🚀</button>
       </div>
     </main>
   );

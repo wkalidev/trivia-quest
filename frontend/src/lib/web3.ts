@@ -1,5 +1,5 @@
 import { getDefaultConfig } from "@rainbow-me/rainbowkit";
-import { celo } from "viem/chains";
+import { celo, mainnet } from "viem/chains";
 import { Attribution } from "ox/erc8021";
 
 export { CONTRACT_ADDRESS, CONTRACT_ABI } from "@/lib/contract";
@@ -12,7 +12,7 @@ const DATA_SUFFIX = Attribution.toDataSuffix({
 export const config = getDefaultConfig({
   appName: "Trivia Q",
     projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID ?? "",
-  chains: [celo],
+  chains: [celo, mainnet],
   ssr: true,
   dataSuffix: DATA_SUFFIX,
 });
