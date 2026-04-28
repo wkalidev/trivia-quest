@@ -55,7 +55,7 @@ function addressToAlias(address: string): string {
   return `Player #${num.toString().padStart(4, "0")}`;
 }
 
-// ✅ Isolated countdown component — only this re-renders every second, not the whole page
+// ✅ Isolated countdown component
 const Countdown = memo(function Countdown({ endTime }: { endTime: bigint }) {
   const [display, setDisplay] = useState("—");
 
@@ -92,7 +92,6 @@ const Countdown = memo(function Countdown({ endTime }: { endTime: bigint }) {
   );
 });
 
-// ✅ AfricanPattern — removed blur-3xl (very expensive on mobile GPU)
 function AfricanPattern() {
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -109,8 +108,6 @@ function AfricanPattern() {
         </defs>
         <rect width="100%" height="100%" fill="url(#kente)"/>
       </svg>
-
-      {/* ✅ Replaced blur-3xl with CSS radial-gradient only — same visual, ~200ms LCP improvement */}
       <div className="absolute top-0 left-1/4 w-96 h-96 rounded-full opacity-10"
         style={{ background: "radial-gradient(circle, rgba(251,205,0,0.4) 0%, transparent 70%)" }}
       />
@@ -145,11 +142,11 @@ function ActionButton({
   className?: string;
 }) {
   const styles = {
-    gold: { bg: "rgba(251,205,0,0.08)", border: "rgba(251,205,0,0.25)", text: "#FBCD00", glow: "#FBCD00" },
-    green: { bg: "rgba(53,208,127,0.08)", border: "rgba(53,208,127,0.25)", text: "#35D07F", glow: "#35D07F" },
-    purple: { bg: "rgba(139,92,246,0.08)", border: "rgba(139,92,246,0.25)", text: "#A78BFA", glow: "#8B5CF6" },
-    blue: { bg: "rgba(59,130,246,0.08)", border: "rgba(59,130,246,0.25)", text: "#93C5FD", glow: "#3B82F6" },
-    default: { bg: "rgba(255,255,255,0.04)", border: "rgba(255,255,255,0.1)", text: "rgba(255,255,255,0.7)", glow: "transparent" },
+    gold:    { bg: "rgba(251,205,0,0.08)",   border: "rgba(251,205,0,0.25)",   text: "#FBCD00",               glow: "#FBCD00"  },
+    green:   { bg: "rgba(53,208,127,0.08)",  border: "rgba(53,208,127,0.25)",  text: "#35D07F",               glow: "#35D07F"  },
+    purple:  { bg: "rgba(139,92,246,0.08)",  border: "rgba(139,92,246,0.25)",  text: "#A78BFA",               glow: "#8B5CF6"  },
+    blue:    { bg: "rgba(59,130,246,0.08)",  border: "rgba(59,130,246,0.25)",  text: "#93C5FD",               glow: "#3B82F6"  },
+    default: { bg: "rgba(255,255,255,0.04)", border: "rgba(255,255,255,0.1)",  text: "rgba(255,255,255,0.7)", glow: "transparent" },
   };
   const s = styles[variant];
 
@@ -174,6 +171,12 @@ export default function Home() {
   const tNav = useTranslations("nav");
   const locale = useLocale() as Locale;
   const [copied, setCopied] = useState(false);
+
+  // ✅ FIX: mounted guard — ConnectButton ne se rend qu'après hydratation côté client.
+  // Evite le crash "Transaction hooks must be used within RainbowKitProvider"
+  // quand PageSpeed / bots chargent la page sans window.ethereum.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
 
   const isReady = isConnected || !!miniPayAddress;
   const walletAddress = address ?? miniPayAddress;
@@ -252,7 +255,8 @@ export default function Home() {
         </div>
         <div className="flex items-center gap-2">
           <LanguageSwitcher currentLocale={locale} />
-          {!loading && !isInMiniPay && (
+          {/* ✅ mounted guard — RainbowKit provider requis avant le rendu */}
+          {mounted && !loading && !isInMiniPay && (
             <ConnectButton label={t("connectWallet")} showBalance={false} />
           )}
         </div>
@@ -276,7 +280,6 @@ export default function Home() {
             <div className="absolute top-0 right-0 w-32 h-32 opacity-10"
               style={{ background: "radial-gradient(circle at top right, #FBCD00, transparent)" }}
             />
-
             <div className="flex items-start justify-between mb-5">
               <div className="flex items-center gap-3">
                 <div className="relative">
@@ -301,7 +304,6 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Round stats */}
             <div className="grid grid-cols-3 gap-2">
               <div className="rounded-2xl p-3 text-center relative overflow-hidden"
                 style={{ background: "rgba(251,205,0,0.06)", border: "1px solid rgba(251,205,0,0.1)" }}
@@ -309,21 +311,18 @@ export default function Home() {
                 <p className="text-[#FBCD00] font-black text-xl leading-none">{prizePool}</p>
                 <p className="text-[#FBCD00]/40 text-xs mt-1">Prize Pool</p>
               </div>
-
               <div className="rounded-2xl p-3 text-center"
                 style={{ background: "rgba(53,208,127,0.06)", border: "1px solid rgba(53,208,127,0.1)" }}
               >
                 <p className="text-[#35D07F] font-black text-xl leading-none">{players}</p>
                 <p className="text-[#35D07F]/40 text-xs mt-1">Players</p>
               </div>
-
-              {/* ✅ Countdown isolated — only this component re-renders every second */}
               <Countdown endTime={endTime} />
             </div>
           </div>
         </motion.div>
 
-        {/* ✅ TrivqPrice lazy loaded */}
+        {/* TrivqPrice lazy */}
         <motion.div variants={itemVariants}>
           <TrivqPrice />
         </motion.div>
@@ -371,7 +370,7 @@ export default function Home() {
           )}
         </AnimatePresence>
 
-        {/* ✅ MiniPay banner — alias instead of hex address */}
+        {/* MiniPay banner */}
         {isInMiniPay && miniPayAddress && (
           <motion.div variants={itemVariants}
             className="rounded-2xl p-3 flex items-center gap-3"
@@ -385,7 +384,7 @@ export default function Home() {
           </motion.div>
         )}
 
-        {/* MAIN PLAY BUTTON */}
+        {/* PLAY BUTTON */}
         <motion.div variants={itemVariants}>
           {isReady ? (
             <motion.button
@@ -413,7 +412,8 @@ export default function Home() {
               style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}
             >
               <p className="text-white/30 text-sm mb-3">Connect your wallet to start earning</p>
-              {!loading && !isInMiniPay && (
+              {/* ✅ mounted guard ici aussi */}
+              {mounted && !loading && !isInMiniPay && (
                 <ConnectButton label={t("connectWallet")} showBalance={false} />
               )}
             </div>
@@ -422,12 +422,8 @@ export default function Home() {
 
         {/* Action grid */}
         <motion.div variants={itemVariants} className="grid grid-cols-2 gap-2">
-          <ActionButton onClick={() => router.push("/badges")} variant="purple">
-            🎨 My Badges
-          </ActionButton>
-          <ActionButton onClick={() => router.push("/checkin")} variant="gold">
-            🔥 Check-in
-          </ActionButton>
+          <ActionButton onClick={() => router.push("/badges")} variant="purple">🎨 My Badges</ActionButton>
+          <ActionButton onClick={() => router.push("/checkin")} variant="gold">🔥 Check-in</ActionButton>
         </motion.div>
 
         <motion.div variants={itemVariants} className="grid grid-cols-2 gap-2">
@@ -437,10 +433,7 @@ export default function Home() {
             </ActionButton>
           )}
           <ActionButton
-            onClick={() => window.open(
-              `https://app.ubeswap.org/#/swap?outputCurrency=${TRIVQ_ADDRESS}`,
-              "_blank"
-            )}
+            onClick={() => window.open(`https://app.ubeswap.org/#/swap?outputCurrency=${TRIVQ_ADDRESS}`, "_blank")}
             variant="green"
             className={isReady && referralLink ? "" : "col-span-2"}
           >

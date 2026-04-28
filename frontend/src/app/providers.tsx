@@ -6,8 +6,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "next-themes";
 import { useEffect, useState, type ReactNode } from "react";
 
-// ✅ Config légère — jamais de WalletConnect, jamais de eval()
-// Utilisée pour MiniPay ET comme fallback initial pour tous
 const lightConfig = createConfig({
   chains: [celo],
   transports: { [celo.id]: http("https://forno.celo.org") },
@@ -26,8 +24,6 @@ function LightProviders({ children }: { children: ReactNode }) {
   );
 }
 
-// ✅ Providers complets chargés uniquement pour les non-MiniPay
-// Montés dans un sous-arbre séparé — jamais de re-mount du WagmiProvider parent
 function FullWalletProviders({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);
   const [FullProviderComponent, setFullProviderComponent] = useState<
@@ -35,12 +31,10 @@ function FullWalletProviders({ children }: { children: ReactNode }) {
   >(null);
 
   useEffect(() => {
-    // Double-check: ne charge RainbowKit que si SES n'est pas actif
     const hasSES = typeof (window as any).lockdown === "function" ||
       document.querySelector('script[src*="lockdown"]') !== null;
 
     if (hasSES) {
-      // MiniPay détecté via SES — reste sur config légère
       setReady(true);
       return;
     }
@@ -81,7 +75,14 @@ export function Providers({ children }: { children: ReactNode }) {
 
   return (
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-      {isMiniPay === null || isMiniPay
+      {/*
+        ✅ FIX: isMiniPay === null = pas encore hydraté (SSR / bots / PageSpeed).
+        On monte FullWalletProviders par défaut au lieu de LightProviders.
+        Ça évite le crash "Transaction hooks must be used within RainbowKitProvider"
+        que PageSpeed rencontrait parce que ConnectButton était rendu sans RainbowKit.
+        Les vrais utilisateurs MiniPay (isMiniPay === true) restent sur LightProviders.
+      */}
+      {isMiniPay === true
         ? <LightProviders>{children}</LightProviders>
         : <FullWalletProviders>{children}</FullWalletProviders>
       }
