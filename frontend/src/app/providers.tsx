@@ -3,9 +3,15 @@
 import { WagmiProvider, createConfig, http } from "wagmi";
 import { celo } from "viem/chains";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { ThemeProvider } from "next-themes";
 import { useEffect, useState, type ReactNode } from "react";
+import "@rainbow-me/rainbowkit/styles.css";
+import { fullConfig } from "@/lib/fullConfig";
 
+/**
+ * Config légère pour MiniPay — pas de WalletConnect, pas d'eval.
+ */
 const lightConfig = createConfig({
   chains: [celo],
   transports: { [celo.id]: http("https://forno.celo.org") },
@@ -14,7 +20,7 @@ const lightConfig = createConfig({
 
 const queryClient = new QueryClient();
 
-function LightProviders({ children }: { children: ReactNode }) {
+function MiniPayProviders({ children }: { children: ReactNode }) {
   return (
     <WagmiProvider config={lightConfig}>
       <QueryClientProvider client={queryClient}>
@@ -24,67 +30,41 @@ function LightProviders({ children }: { children: ReactNode }) {
   );
 }
 
-function FullWalletProviders({ children }: { children: ReactNode }) {
-  const [ready, setReady] = useState(false);
-  const [FullProviderComponent, setFullProviderComponent] = useState<
-    React.ComponentType<{ children: ReactNode }> | null
-  >(null);
-
-  useEffect(() => {
-    const hasSES = typeof (window as any).lockdown === "function" ||
-      document.querySelector('script[src*="lockdown"]') !== null;
-
-    if (hasSES) {
-      setReady(true);
-      return;
-    }
-
-    Promise.all([
-      import("@rainbow-me/rainbowkit"),
-      import("@/lib/fullConfig"),
-    ]).then(([{ RainbowKitProvider }, { fullConfig }]) => {
-      import("@rainbow-me/rainbowkit/styles.css");
-
-      const Component = ({ children }: { children: ReactNode }) => (
-        <WagmiProvider config={fullConfig}>
-          <QueryClientProvider client={queryClient}>
-            <RainbowKitProvider showRecentTransactions={false}>
-              {children}
-            </RainbowKitProvider>
-          </QueryClientProvider>
-        </WagmiProvider>
-      );
-      setFullProviderComponent(() => Component);
-      setReady(true);
-    });
-  }, []);
-
-  if (!ready) return <LightProviders>{children}</LightProviders>;
-  if (!FullProviderComponent) return <LightProviders>{children}</LightProviders>;
-
-  return <FullProviderComponent>{children}</FullProviderComponent>;
+function FullProviders({ children }: { children: ReactNode }) {
+  return (
+    <WagmiProvider config={fullConfig}>
+      <QueryClientProvider client={queryClient}>
+        {/*
+          RainbowKitProvider est toujours présent ici — import statique.
+          ConnectButton dans page.tsx est conditionné par `mounted`
+          (useEffect) donc il ne se rend qu'après hydratation côté client.
+          PageSpeed et les bots ne verront jamais ConnectButton → pas de crash.
+        */}
+        <RainbowKitProvider showRecentTransactions={false}>
+          {children}
+        </RainbowKitProvider>
+      </QueryClientProvider>
+    </WagmiProvider>
+  );
 }
 
 export function Providers({ children }: { children: ReactNode }) {
-  const [isMiniPay, setIsMiniPay] = useState<boolean | null>(null);
+  const [isMiniPay, setIsMiniPay] = useState(false);
 
   useEffect(() => {
-    const mini = !!(window as any).ethereum?.isMiniPay;
-    setIsMiniPay(mini);
+    setIsMiniPay(!!(window as any).ethereum?.isMiniPay);
   }, []);
 
+  /*
+   * isMiniPay démarre à false → FullProviders est toujours monté en premier.
+   * RainbowKit est disponible dès le départ.
+   * Le ConnectButton est protégé par `mounted` dans page.tsx.
+   */
   return (
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-      {/*
-        ✅ FIX: isMiniPay === null = pas encore hydraté (SSR / bots / PageSpeed).
-        On monte FullWalletProviders par défaut au lieu de LightProviders.
-        Ça évite le crash "Transaction hooks must be used within RainbowKitProvider"
-        que PageSpeed rencontrait parce que ConnectButton était rendu sans RainbowKit.
-        Les vrais utilisateurs MiniPay (isMiniPay === true) restent sur LightProviders.
-      */}
-      {isMiniPay === true
-        ? <LightProviders>{children}</LightProviders>
-        : <FullWalletProviders>{children}</FullWalletProviders>
+      {isMiniPay
+        ? <MiniPayProviders>{children}</MiniPayProviders>
+        : <FullProviders>{children}</FullProviders>
       }
     </ThemeProvider>
   );
