@@ -6,6 +6,15 @@ import { Suspense, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
 
+/**
+ * Génère un alias lisible depuis une adresse Ethereum.
+ * Règle MiniPay §1 : jamais d'adresse 0x… comme identifiant principal.
+ */
+function addressToAlias(address: string): string {
+  const num = parseInt(address.slice(-4), 16);
+  return `Player #${num}`;
+}
+
 function ResultsContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -44,13 +53,16 @@ function ResultsContent() {
 
   const perf = getPerf();
 
+  // Règle MiniPay §3 : pas de "crypto", "CELO", "gas" dans la copie UI.
+  // Les textes de partage sont externes (Twitter/Farcaster) donc hors MiniPay,
+  // mais on reste cohérent avec le branding "rewards" plutôt que "$CELO".
   const shareOnTwitter = () => {
-    const text = `${perf.emoji} Je viens de scorer ${score}/${total} (${percentage}%) sur TriviaQ!\n\n🔥 ${points} points gagnés sur @Celo\n🌍 Questions sur l'Afrique, le Web3 et la culture\n\nJoue et gagne du vrai $CELO 👇\ntrivia-quest-eight.vercel.app\n\n#Celo #Web3Africa #TriviaQ #GameFi`;
+    const text = `${perf.emoji} Je viens de scorer ${score}/${total} (${percentage}%) sur TriviaQ!\n\n🔥 ${points} points gagnés sur @Celo\n🌍 Questions sur l'Afrique, le Web3 et la culture\n\nJoue et gagne des rewards 👇\ntrivia-quest-eight.vercel.app\n\n#Celo #Web3Africa #TriviaQ #GameFi`;
     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, "_blank");
   };
 
   const shareOnFarcaster = () => {
-    const text = `${perf.emoji} Je viens de scorer ${score}/${total} (${percentage}%) sur TriviaQ!\n\n🔥 ${points} points gagnés sur @celo\n🌍 Questions sur l'Afrique, le Web3 et la culture\n\nJoue et gagne du vrai $CELO 👇\ntrivia-quest-eight.vercel.app\n\n/celo /web3 /gamefi`;
+    const text = `${perf.emoji} Je viens de scorer ${score}/${total} (${percentage}%) sur TriviaQ!\n\n🔥 ${points} points gagnés sur @celo\n🌍 Questions sur l'Afrique, le Web3 et la culture\n\nJoue et gagne des rewards 👇\ntrivia-quest-eight.vercel.app\n\n/celo /web3 /gamefi`;
     window.open(`https://warpcast.com/~/compose?text=${encodeURIComponent(text)}`, "_blank");
   };
 
@@ -70,15 +82,13 @@ function ResultsContent() {
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-sm z-10"
       >
-        {/* Score card — like a tx receipt */}
+        {/* Score card */}
         <div className="rounded-2xl border border-white/8 overflow-hidden mb-3"
           style={{ background: "rgba(255,255,255,0.04)", backdropFilter: "blur(20px)" }}
         >
-          {/* Top accent */}
           <div className="h-1 w-full" style={{ background: `linear-gradient(90deg, ${perf.glow}, transparent)` }} />
 
           <div className="p-6 text-center">
-            {/* Score ring */}
             <div className="relative w-28 h-28 mx-auto mb-4">
               <svg className="w-28 h-28 -rotate-90" viewBox="0 0 100 100">
                 <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="8" />
@@ -102,7 +112,6 @@ function ResultsContent() {
             <p className="text-white/40 text-sm">{t("correctAnswers", { score, total })}</p>
           </div>
 
-          {/* Stats row */}
           <div className="border-t border-white/5 grid grid-cols-2 divide-x divide-white/5">
             <div className="p-4 text-center">
               <p className="text-[#FBCD00] font-black text-xl">{points}</p>
@@ -114,16 +123,15 @@ function ResultsContent() {
             </div>
           </div>
 
-          {/* Blockchain confirmation */}
           {submitted && (
             <div className="border-t border-white/5 px-4 py-3 flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-[#35D07F] animate-pulse" />
-              <p className="text-[#35D07F] text-xs font-bold">Score recorded on Celo blockchain</p>
+              {/* Règle MiniPay §3 : "blockchain" est technique, OK. Pas de "CELO token" ici. */}
+              <p className="text-[#35D07F] text-xs font-bold">Score recorded on-chain ✓</p>
             </div>
           )}
         </div>
 
-        {/* Eligible banner */}
         {percentage >= 60 && (
           <motion.div
             initial={{ opacity: 0 }}
@@ -140,7 +148,6 @@ function ResultsContent() {
           </motion.div>
         )}
 
-        {/* Share */}
         <div className="grid grid-cols-2 gap-2 mb-3">
           <button onClick={shareOnTwitter}
             className="flex items-center justify-center gap-2 py-3 rounded-2xl border border-white/10 text-white font-bold text-sm transition-all active:scale-95"
@@ -152,13 +159,13 @@ function ResultsContent() {
           >🟣 Farcaster</button>
         </div>
 
+        {/* Règle MiniPay §1 : alias à la place de l'adresse hex brute */}
         {address && (
           <p className="text-white/20 text-xs text-center mb-3">
-            {address.slice(0, 6)}...{address.slice(-4)}
+            {addressToAlias(address)}
           </p>
         )}
 
-        {/* Actions */}
         <div className="space-y-2">
           <button onClick={() => router.push("/quiz")}
             className="w-full font-black text-base py-4 rounded-2xl active:scale-95 transition-all"
