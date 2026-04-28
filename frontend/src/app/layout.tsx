@@ -10,11 +10,11 @@ import "./globals.css";
 export const metadata: Metadata = {
   metadataBase: new URL("https://trivia-quest-eight.vercel.app"),
   title: "Trivia Q — Play. Learn. Earn on Celo.",
-  description: "Quiz game with real rewards on the Celo blockchain. Answer questions, earn $TRIVQ tokens and climb the leaderboard.",
+  description:
+    "Quiz game with real rewards on the Celo blockchain. Answer questions, earn $TRIVQ tokens and climb the leaderboard.",
   manifest: "/manifest.json",
   icons: {
     icon: "/favicon.svg",
-    // ✅ Retiré icon-192.png — fichier inexistant (404)
     apple: "/icon-512.png",
   },
   openGraph: {
@@ -48,7 +48,7 @@ export const viewport: Viewport = {
   themeColor: "#FBCD00",
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
+  // ✅ maximumScale supprimé — bloquait zoom accessibilité + pénalisait score MiniPay
 };
 
 export default async function RootLayout({
@@ -60,15 +60,16 @@ export default async function RootLayout({
   const messages = await getMessages();
 
   return (
-    // ✅ Pas de <head> explicite — Next.js gère ça via metadata export
     <html lang={locale}>
+      <head>
+        {/* ✅ Préconnexions — économies 300-320ms LCP selon PageSpeed */}
+        <link rel="preconnect" href="https://forno.celo.org" />
+        <link rel="preconnect" href="https://api.geckoterminal.com" />
+      </head>
       <body>
         <NextIntlClientProvider messages={messages}>
           <Providers>
-            {/* ✅ main landmark pour accessibilité Lighthouse */}
-            <main>
-              {children}
-            </main>
+            <main>{children}</main>
             <SupportButton />
             <footer
               style={{
@@ -79,13 +80,17 @@ export default async function RootLayout({
             >
               <Link
                 href="/terms"
-                style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.7rem", marginRight: "1rem" }}
+                style={{
+                  color: "rgba(255,255,255,0.5)",
+                  fontSize: "0.7rem",
+                  marginRight: "1rem",
+                }}
               >
                 Terms of Service
               </Link>
               <Link
                 href="/privacy"
-                style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.7rem" }}
+                style={{ color: "rgba(255,255,255,0.5)", fontSize: "0.7rem" }}
               >
                 Privacy Policy
               </Link>
