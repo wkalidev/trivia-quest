@@ -63,8 +63,10 @@ export default async function RootLayout({
     <html lang={locale}>
       <head>
         {/* ✅ Préconnexions — économies 300-320ms LCP selon PageSpeed */}
-        <link rel="preconnect" href="https://forno.celo.org" />
-        <link rel="preconnect" href="https://api.geckoterminal.com" />
+        <link rel="preconnect" href="https://forno.celo.org" crossOrigin="anonymous" />
+<link rel="preconnect" href="https://api.geckoterminal.com" crossOrigin="anonymous" />
+<link rel="preconnect" href="https://api.web3modal.org" crossOrigin="anonymous" />
+<link rel="preconnect" href="https://pulse.walletconnect.org" crossOrigin="anonymous" />
       </head>
       <body>
         <NextIntlClientProvider messages={messages}>
