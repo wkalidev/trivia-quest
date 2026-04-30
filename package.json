@@ -1,7 +1,7 @@
 {
   "name": "@wkalidev/trivia-quest-sdk",
-  "version": "1.1.0",
-  "description": "SDK for TriviaQuest - Blockchain quiz game on Celo",
+  "version": "1.4.0",
+  "description": "TriviaQ SDK — Interact with TriviaQ smart contracts — Blockchain quiz game on Celo",
   "main": "sdk/index.js",
   "types": "sdk/index.d.ts",
   "files": [
@@ -17,13 +17,26 @@
     "web3",
     "trivia",
     "minipay",
-    "gamefi"
+    "gamefi",
+    "sdk",
+    "smart-contract",
+    "erc20",
+    "viem",
+    "wagmi",
+    "abi",
+    "dailydrop",
+    "trivq",
+    "leaderboard",
+    "on-chain"
   ],
   "author": "wkalidev",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/wkalidev/trivia-quest.git"
+    "url": "git+https://github.com/wkalidev/trivia-quest.git"
+  },
+  "bugs": {
+    "url": "https://github.com/wkalidev/trivia-quest/issues"
   },
   "homepage": "https://trivia-quest-eight.vercel.app",
   "peerDependencies": {

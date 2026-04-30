@@ -2,3 +2,5 @@ node_modules/
 sdk/
 *.log
 .env
+.vercel
+.env*.local
