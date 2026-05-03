@@ -21,21 +21,29 @@ function ResultsContent() {
   const { address } = useAccount();
   const t = useTranslations("results");
   const [submitted, setSubmitted] = useState(false);
+  const [rank, setRank] = useState<number | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const score = parseInt(searchParams.get("score") ?? "0");
   const total = parseInt(searchParams.get("total") ?? "10");
   const points = parseInt(searchParams.get("points") ?? "0");
   const percentage = Math.round((score / total) * 100);
 
+  // Dynamic share image URL
+  const shareImageUrl = `https://trivia-quest-eight.vercel.app/api/share-image?score=${score}&total=${total}&points=${points}${rank ? `&rank=${rank}` : ""}`;
+  const shareUrl = "https://trivia-quest-eight.vercel.app";
+
   useEffect(() => {
     if (!address || submitted) return;
     const submitScore = async () => {
       try {
-        await fetch("/api/submit-score", {
+        const res = await fetch("/api/submit-score", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ player: address, score, points }),
         });
+        const data = await res.json();
+        if (data?.rank) setRank(data.rank);
         setSubmitted(true);
       } catch (error) {
         console.error("Failed to submit score:", error);
@@ -53,17 +61,38 @@ function ResultsContent() {
 
   const perf = getPerf();
 
-  // Règle MiniPay §3 : pas de "crypto", "CELO", "gas" dans la copie UI.
-  // Les textes de partage sont externes (Twitter/Farcaster) donc hors MiniPay,
-  // mais on reste cohérent avec le branding "rewards" plutôt que "$CELO".
+  const shareText = `${perf.emoji} I just scored ${score}/${total} (${percentage}%) on TriviaQ!\n\n🔥 ${points} points earned on @Celo\n🌍 Questions about Africa, Web3 & Culture\n\nCan you beat me? 👇\n${shareUrl}\n\n#Celo #Web3Africa #TriviaQ #GameFi`;
+
   const shareOnTwitter = () => {
-    const text = `${perf.emoji} Je viens de scorer ${score}/${total} (${percentage}%) sur TriviaQ!\n\n🔥 ${points} points gagnés sur @Celo\n🌍 Questions sur l'Afrique, le Web3 et la culture\n\nJoue et gagne des rewards 👇\ntrivia-quest-eight.vercel.app\n\n#Celo #Web3Africa #TriviaQ #GameFi`;
-    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, "_blank");
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`, "_blank");
   };
 
   const shareOnFarcaster = () => {
-    const text = `${perf.emoji} Je viens de scorer ${score}/${total} (${percentage}%) sur TriviaQ!\n\n🔥 ${points} points gagnés sur @celo\n🌍 Questions sur l'Afrique, le Web3 et la culture\n\nJoue et gagne des rewards 👇\ntrivia-quest-eight.vercel.app\n\n/celo /web3 /gamefi`;
-    window.open(`https://warpcast.com/~/compose?text=${encodeURIComponent(text)}`, "_blank");
+    const farcasterText = `${perf.emoji} I just scored ${score}/${total} (${percentage}%) on TriviaQ!\n\n🔥 ${points} points earned on @celo\n🌍 Questions about Africa, Web3 & Culture\n\nCan you beat me? 👇\n${shareUrl}\n\n/celo /web3 /gamefi`;
+    window.open(`https://warpcast.com/~/compose?text=${encodeURIComponent(farcasterText)}`, "_blank");
+  };
+
+  const copyShareLink = async () => {
+    try {
+      await navigator.clipboard.writeText(shareImageUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {}
+  };
+
+  // Native share (mobile)
+  const nativeShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "TriviaQ",
+          text: shareText,
+          url: shareUrl,
+        });
+      } catch {}
+    } else {
+      copyShareLink();
+    }
   };
 
   return (
@@ -118,15 +147,23 @@ function ResultsContent() {
               <p className="text-white/40 text-xs">Points earned</p>
             </div>
             <div className="p-4 text-center">
-              <p className="text-[#35D07F] font-black text-xl">{percentage}%</p>
-              <p className="text-white/40 text-xs">Accuracy</p>
+              {rank ? (
+                <>
+                  <p className="text-[#35D07F] font-black text-xl">#{rank}</p>
+                  <p className="text-white/40 text-xs">Leaderboard rank</p>
+                </>
+              ) : (
+                <>
+                  <p className="text-[#35D07F] font-black text-xl">{percentage}%</p>
+                  <p className="text-white/40 text-xs">Accuracy</p>
+                </>
+              )}
             </div>
           </div>
 
           {submitted && (
             <div className="border-t border-white/5 px-4 py-3 flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-[#35D07F] animate-pulse" />
-              {/* Règle MiniPay §3 : "blockchain" est technique, OK. Pas de "CELO token" ici. */}
               <p className="text-[#35D07F] text-xs font-bold">Score recorded on-chain ✓</p>
             </div>
           )}
@@ -148,15 +185,55 @@ function ResultsContent() {
           </motion.div>
         )}
 
-        <div className="grid grid-cols-2 gap-2 mb-3">
-          <button onClick={shareOnTwitter}
-            className="flex items-center justify-center gap-2 py-3 rounded-2xl border border-white/10 text-white font-bold text-sm transition-all active:scale-95"
-            style={{ background: "rgba(0,0,0,0.4)" }}
-          >𝕏 Twitter</button>
-          <button onClick={shareOnFarcaster}
-            className="flex items-center justify-center gap-2 py-3 rounded-2xl border border-purple-500/20 text-purple-300 font-bold text-sm transition-all active:scale-95"
-            style={{ background: "rgba(168,85,247,0.08)" }}
-          >🟣 Farcaster</button>
+        {/* Share section */}
+        <div className="rounded-2xl border border-white/8 p-4 mb-3"
+          style={{ background: "rgba(255,255,255,0.03)" }}
+        >
+          <p className="text-white/40 text-xs font-bold uppercase tracking-widest mb-3">
+            📣 Share your score
+          </p>
+
+          {/* Share image preview */}
+          <div className="rounded-xl overflow-hidden mb-3 border border-white/8 cursor-pointer"
+            onClick={copyShareLink}
+            style={{ background: "rgba(0,0,0,0.3)" }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={shareImageUrl}
+              alt="Share preview"
+              className="w-full"
+              style={{ aspectRatio: "1200/630" }}
+            />
+            <div className="px-3 py-2 flex items-center justify-between">
+              <span className="text-white/30 text-xs">Click to copy image link</span>
+              <span className="text-white/50 text-xs font-bold">
+                {copied ? "✅ Copied!" : "📋 Copy"}
+              </span>
+            </div>
+          </div>
+
+          {/* Share buttons */}
+          <div className="grid grid-cols-3 gap-2">
+            <button onClick={shareOnTwitter}
+              className="flex items-center justify-center gap-1.5 py-3 rounded-xl border border-white/10 text-white font-bold text-sm transition-all active:scale-95"
+              style={{ background: "rgba(0,0,0,0.4)" }}
+            >
+              𝕏
+            </button>
+            <button onClick={shareOnFarcaster}
+              className="flex items-center justify-center gap-1.5 py-3 rounded-xl border border-purple-500/20 text-purple-300 font-bold text-sm transition-all active:scale-95"
+              style={{ background: "rgba(168,85,247,0.08)" }}
+            >
+              🟣
+            </button>
+            <button onClick={nativeShare}
+              className="flex items-center justify-center gap-1.5 py-3 rounded-xl border border-blue-500/20 text-blue-300 font-bold text-sm transition-all active:scale-95"
+              style={{ background: "rgba(59,130,246,0.08)" }}
+            >
+              📤
+            </button>
+          </div>
         </div>
 
         {/* Règle MiniPay §1 : alias à la place de l'adresse hex brute */}
