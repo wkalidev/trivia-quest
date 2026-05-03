@@ -9,10 +9,21 @@
     "name": "TriviaQ",
     "iconUrl": "https://trivia-quest-eight.vercel.app/icon-512.png",
     "homeUrl": "https://trivia-quest-eight.vercel.app",
-    "imageUrl": "https://trivia-quest-eight.vercel.app/og-image.png",
-    "buttonTitle": "Jouer maintenant 🎮",
+    "imageUrl": "https://trivia-quest-eight.vercel.app/opengraph-image",
+    "buttonTitle": "Play & Earn 🎮",
     "splashImageUrl": "https://trivia-quest-eight.vercel.app/icon-512.png",
-    "splashBackgroundColor": "#1A1A2E",
-    "webhookUrl": "https://trivia-quest-eight.vercel.app/api/farcaster/webhook"
+    "splashBackgroundColor": "#0a0f1e",
+    "webhookUrl": "https://trivia-quest-eight.vercel.app/api/farcaster/webhook",
+    "subtitle": "Play. Learn. Earn on Celo.",
+    "description": "Blockchain quiz game on Celo. Answer questions about Africa, Web3 & Science. Earn $TRIVQ tokens, climb the on-chain leaderboard, and win the prize pool. MiniPay compatible.",
+    "primaryCategory": "games",
+    "tags": ["quiz", "web3", "celo", "gamefi", "africa", "minipay", "earn"],
+    "tagline": "Answer questions. Earn crypto. On Celo.",
+    "heroImageUrl": "https://trivia-quest-eight.vercel.app/opengraph-image",
+    "ogTitle": "TriviaQ — Play. Learn. Earn on Celo.",
+    "ogDescription": "Blockchain quiz game with real $TRIVQ rewards. 446 questions, on-chain leaderboard, MiniPay compatible.",
+    "ogImageUrl": "https://trivia-quest-eight.vercel.app/opengraph-image",
+    "castShareUrl": "https://trivia-quest-eight.vercel.app",
+    "screenshotUrls": []
   }
 }
