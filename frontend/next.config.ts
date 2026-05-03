@@ -18,10 +18,14 @@ const nextConfig: NextConfig = {
       {
         source: "/(.*)",
         headers: [
-          // Sécurité (Lighthouse Best Practices)
+          // ✅ Autorise l'embedding dans Farcaster / MiniPay iframes
           {
             key: "X-Frame-Options",
-            value: "SAMEORIGIN",
+            value: "ALLOWALL",
+          },
+          {
+            key: "Content-Security-Policy",
+            value: "frame-ancestors *;",
           },
           {
             key: "X-Content-Type-Options",
