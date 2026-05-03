@@ -49,13 +49,11 @@ function formatCelo(wei: bigint): string {
   return n.toFixed(3);
 }
 
-// ✅ addressToAlias — MiniPay compliance: no raw hex addresses in UI
 function addressToAlias(address: string): string {
   const num = parseInt(address.slice(-4), 16) % 9999 + 1;
   return `Player #${num.toString().padStart(4, "0")}`;
 }
 
-// ✅ Isolated countdown component
 const Countdown = memo(function Countdown({ endTime }: { endTime: bigint }) {
   const [display, setDisplay] = useState("—");
 
@@ -172,14 +170,23 @@ export default function Home() {
   const locale = useLocale() as Locale;
   const [copied, setCopied] = useState(false);
 
-  // ✅ FIX: mounted guard — ConnectButton ne se rend qu'après hydratation côté client.
-  // Evite le crash "Transaction hooks must be used within RainbowKitProvider"
-  // quand PageSpeed / bots chargent la page sans window.ethereum.
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
 
+  // ✅ isReady déclaré avant les useEffect qui l'utilisent
   const isReady = isConnected || !!miniPayAddress;
   const walletAddress = address ?? miniPayAddress;
+
+  // ✅ sdk.actions.ready() isolé — appelé immédiatement au montage
+  // sans dépendances pour ne pas bloquer le splash screen Farcaster
+  useEffect(() => {
+    sdk.actions.ready();
+  }, []);
+
+  // ✅ prefetch séparé — ne dépend que de l'état wallet
+  useEffect(() => {
+    if (isReady) router.prefetch("/quiz");
+  }, [isReady, router]);
 
   const { data: trivqBalance } = useReadContract({
     address: TRIVQ_ADDRESS,
@@ -216,11 +223,6 @@ export default function Home() {
     setTimeout(() => setCopied(false), 2000);
   }, [referralLink]);
 
-  useEffect(() => {
-    sdk.actions.ready();
-    if (isReady) router.prefetch("/quiz");
-  }, [isReady, router]);
-
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
     show: { opacity: 1, transition: { staggerChildren: 0.08 } }
@@ -255,7 +257,6 @@ export default function Home() {
         </div>
         <div className="flex items-center gap-2">
           <LanguageSwitcher currentLocale={locale} />
-          {/* ✅ mounted guard — RainbowKit provider requis avant le rendu */}
           {mounted && !loading && !isInMiniPay && (
             <ConnectButton label={t("connectWallet")} showBalance={false} />
           )}
@@ -292,7 +293,7 @@ export default function Home() {
                   <h1 className="text-white font-black text-2xl tracking-tight leading-none">
                     Trivia<span className="text-[#FBCD00]">Q</span>
                   </h1>
-                  <p className="text-white/40 text-xs mt-0.5">$TRIVQ · Celo Mainnet</p>
+                  <p className="text-white/40 text-xs mt-0.5">TRIVQ · Celo Mainnet</p>
                 </div>
               </div>
               <div className="text-right">
@@ -344,7 +345,7 @@ export default function Home() {
                 }}
               >
                 <div>
-                  <p className="text-purple-400/60 text-xs mb-1">Your $TRIVQ Balance</p>
+                  <p className="text-purple-400/60 text-xs mb-1">Your TRIVQ Balance</p>
                   <motion.p
                     key={trivqFormatted}
                     initial={{ scale: 1.1 }}
@@ -412,7 +413,6 @@ export default function Home() {
               style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}
             >
               <p className="text-white/30 text-sm mb-3">Connect your wallet to start earning</p>
-              {/* ✅ mounted guard ici aussi */}
               {mounted && !loading && !isInMiniPay && (
                 <ConnectButton label={t("connectWallet")} showBalance={false} />
               )}
@@ -437,7 +437,7 @@ export default function Home() {
             variant="green"
             className={isReady && referralLink ? "" : "col-span-2"}
           >
-            💱 Swap $TRIVQ
+            💱 Swap TRIVQ
           </ActionButton>
         </motion.div>
 
