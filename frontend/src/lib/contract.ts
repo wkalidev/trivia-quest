@@ -1,4 +1,31 @@
-export const CONTRACT_ADDRESS = "0xffe22d3d1b63866ac9da8ac92fdb9ceddeadb0bb" as const;
+import { celo, base } from "viem/chains";
+
+// ✅ Adresses par chain
+export const CONTRACTS = {
+  [celo.id]: {
+    game:    "0xffe22d3d1b63866ac9da8ac92fdb9ceddeadb0bb" as `0x${string}`,
+    token:   "0xe65fc5cacaf9a5aebbc0e151dee08a53f24a05c5" as `0x${string}`,
+    checkin: "0x8650e6c477f8ae3933dc6d61d85e65c90cf71828" as `0x${string}`,
+    referral:"0xa0fcd85a25ecb71ca1ea9d63da058c832c27c62e" as `0x${string}`,
+  },
+  [base.id]: {
+    game:    "0xf44dfec3230bcf917ca7ccc59b4e67df2507e21f" as `0x${string}`,
+    token:   "0x3217e21a74a068779902213ab06ad3301a8e6a02" as `0x${string}`,
+    checkin: "0x8a6f59c5f1f11a7ae75c54b1eb95c477405f1bda" as `0x${string}`,
+    referral:"0x4dafb4d844ce8bd52ce3ad4cee2a4e73780d0c91" as `0x${string}`,
+  },
+} as const;
+
+// ✅ Helpers
+export function getContractAddress(chainId: number, contract: keyof typeof CONTRACTS[typeof celo.id]): `0x${string}` {
+  const chain = CONTRACTS[chainId as keyof typeof CONTRACTS];
+  if (!chain) return CONTRACTS[celo.id][contract]; // fallback Celo
+  return chain[contract];
+}
+
+// ✅ Rétrocompatibilité — pointe sur Celo par défaut
+export const CONTRACT_ADDRESS = CONTRACTS[celo.id].game;
+
 export const CONTRACT_ABI = [
   {
     name: "joinRound",

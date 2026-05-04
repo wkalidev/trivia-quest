@@ -40,6 +40,20 @@ const config: HardhatUserConfig = {
       accounts: [process.env.PRIVATE_KEY!],
       chainId: 42220,
     },
+    // ✅ Base Mainnet
+    base: {
+      type: "http",
+      url: process.env.BASE_RPC ?? "https://mainnet.base.org",
+      accounts: [process.env.PRIVATE_KEY!],
+      chainId: 8453,
+    },
+    // ✅ Base Sepolia testnet
+    baseSepolia: {
+      type: "http",
+      url: process.env.BASE_SEPOLIA_RPC ?? "https://sepolia.base.org",
+      accounts: [process.env.PRIVATE_KEY!],
+      chainId: 84532,
+    },
   },
 };
 
