@@ -1,62 +1,25 @@
 import { Client, GatewayIntentBits, REST, Routes, EmbedBuilder } from "discord.js";
 import dotenv from "dotenv";
-import { createPublicClient, http, formatUnits } from "viem";
-import { celo } from "viem/chains";
+import { ethers } from "ethers";
 
 dotenv.config();
 
-// ✅ Celo client
-const celoClient = createPublicClient({
-  chain: celo,
-  transport: http("https://forno.celo.org"),
-});
+// ✅ Celo client via ethers
+const provider = new ethers.JsonRpcProvider("https://forno.celo.org");
 
-const CONTRACT_ADDRESS = "0xffe22d3d1b63866ac9da8ac92fdb9ceddeadb0bb" as `0x${string}`;
+const CONTRACT_ADDRESS = "0xffe22d3d1b63866ac9da8ac92fdb9ceddeadb0bb";
 
 const CONTRACT_ABI = [
-  {
-    name: "getCurrentRound",
-    type: "function",
-    stateMutability: "view",
-    inputs: [],
-    outputs: [
-      { name: "id", type: "uint256" },
-      { name: "prizePool", type: "uint256" },
-      { name: "startTime", type: "uint256" },
-      { name: "endTime", type: "uint256" },
-      { name: "topWinners", type: "address[]" },
-      { name: "finished", type: "bool" },
-    ],
-  },
-  {
-    name: "getTotalPlayers",
-    type: "function",
-    stateMutability: "view",
-    inputs: [],
-    outputs: [{ type: "uint256" }],
-  },
-  {
-    name: "getLeaderboard",
-    type: "function",
-    stateMutability: "view",
-    inputs: [],
-    outputs: [
-      {
-        type: "tuple[]",
-        components: [
-          { name: "player", type: "address" },
-          { name: "totalPoints", type: "uint256" },
-          { name: "bestScore", type: "uint256" },
-          { name: "gamesPlayed", type: "uint256" },
-        ],
-      },
-    ],
-  },
-] as const;
+  "function getCurrentRound() view returns (uint256 id, uint256 prizePool, uint256 startTime, uint256 endTime, address[] topWinners, bool finished)",
+  "function getTotalPlayers() view returns (uint256)",
+  "function getLeaderboard() view returns (tuple(address player, uint256 totalPoints, uint256 bestScore, uint256 gamesPlayed)[])",
+];
+
+const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider);
 
 // ✅ Helpers
 function formatCelo(wei: bigint): string {
-  const n = Number(formatUnits(wei, 18));
+  const n = Number(ethers.formatUnits(wei, 18));
   if (n === 0) return "0";
   if (n < 0.001) return "<0.001";
   return n.toFixed(3);
@@ -120,21 +83,13 @@ client.on("interactionCreate", async (interaction) => {
     await interaction.deferReply();
     try {
       const [round, totalPlayers] = await Promise.all([
-        celoClient.readContract({
-          address: CONTRACT_ADDRESS,
-          abi: CONTRACT_ABI,
-          functionName: "getCurrentRound",
-        }),
-        celoClient.readContract({
-          address: CONTRACT_ADDRESS,
-          abi: CONTRACT_ABI,
-          functionName: "getTotalPlayers",
-        }),
+        contract.getCurrentRound(),
+        contract.getTotalPlayers(),
       ]);
 
-      const prizePool = formatCelo(round[1]);
-      const endTime = formatCountdown(round[3]);
-      const finished = round[5];
+      const prizePool = formatCelo(round.prizePool);
+      const endTime = formatCountdown(round.endTime);
+      const finished = round.finished;
 
       const embed = new EmbedBuilder()
         .setTitle("📊 Trivia Quest — Live On-Chain Stats")
@@ -177,17 +132,11 @@ client.on("interactionCreate", async (interaction) => {
   if (interaction.commandName === "leaderboard") {
     await interaction.deferReply();
     try {
-      const leaderboard = await celoClient.readContract({
-        address: CONTRACT_ADDRESS,
-        abi: CONTRACT_ABI,
-        functionName: "getLeaderboard",
-      });
-
+      const leaderboard = await contract.getLeaderboard();
       const top5 = leaderboard.slice(0, 5);
-
       const medals = ["🥇", "🥈", "🥉", "4️⃣", "5️⃣"];
 
-      const fields = top5.map((entry, i) => ({
+      const fields = top5.map((entry: any, i: number) => ({
         name: `${medals[i]} ${addressToAlias(entry.player)}`,
         value: `Points: **${entry.totalPoints.toString()}** · Best: **${entry.bestScore.toString()}** · Games: **${entry.gamesPlayed.toString()}**`,
         inline: false,
