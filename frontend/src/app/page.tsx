@@ -2,7 +2,7 @@
 
 import { sdk } from '@farcaster/miniapp-sdk';
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { useAccount, useReadContract } from "wagmi";
+import { useAccount, useReadContract, useChainId } from "wagmi";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useCallback, memo } from "react";
 import { useMiniPay } from "@/hooks/useMiniPay";
@@ -12,10 +12,9 @@ import { Logo } from "@/components/Logo";
 import type { Locale } from "@/i18n/navigation";
 import { formatUnits } from "viem";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
-import { CONTRACT_ADDRESS, CONTRACT_ABI } from "@/lib/contract";
+import { CONTRACT_ABI, getContractAddress } from "@/lib/contract";
 import dynamic_ from "next/dynamic";
 
-// ✅ Lazy load heavy components
 const TrivqPrice = dynamic_(() => import("@/components/TrivqPrice"), {
   ssr: false,
   loading: () => (
@@ -23,7 +22,6 @@ const TrivqPrice = dynamic_(() => import("@/components/TrivqPrice"), {
   ),
 });
 
-const TRIVQ_ADDRESS = (process.env.NEXT_PUBLIC_TRIVQ_ADDRESS ?? "0x0") as `0x${string}`;
 const TRIVQ_ABI = [
   {
     name: "balanceOf",
@@ -173,27 +171,32 @@ export default function Home() {
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
 
-  // ✅ isReady déclaré avant les useEffect qui l'utilisent
+  // ✅ Adresses dynamiques selon la chain active dans le wallet
+  const chainId = useChainId();
+  const CONTRACT_ADDRESS = getContractAddress(chainId, "game");
+  const TRIVQ_ADDR = getContractAddress(chainId, "token");
+
+  // Labels UI dynamiques
+  const chainLabel = chainId === 8453 ? "Base Mainnet" : "Celo Mainnet";
+  const tokenLabel = chainId === 8453 ? "TRIVQ · Base" : "TRIVQ · Celo";
+
   const isReady = isConnected || !!miniPayAddress;
   const walletAddress = address ?? miniPayAddress;
 
-  // ✅ sdk.actions.ready() isolé — appelé immédiatement au montage
-  // sans dépendances pour ne pas bloquer le splash screen Farcaster
   useEffect(() => {
     sdk.actions.ready();
   }, []);
 
-  // ✅ prefetch séparé — ne dépend que de l'état wallet
   useEffect(() => {
     if (isReady) router.prefetch("/quiz");
   }, [isReady, router]);
 
   const { data: trivqBalance } = useReadContract({
-    address: TRIVQ_ADDRESS,
+    address: TRIVQ_ADDR,
     abi: TRIVQ_ABI,
     functionName: "balanceOf",
     args: walletAddress ? [walletAddress as `0x${string}`] : undefined,
-    query: { enabled: !!walletAddress && TRIVQ_ADDRESS !== "0x0" },
+    query: { enabled: !!walletAddress },
   });
 
   const { data: currentRound } = useReadContract({
@@ -240,7 +243,6 @@ export default function Home() {
     >
       <AfricanPattern />
 
-      {/* Top navigation bar */}
       <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-5 py-3"
         style={{
           background: "rgba(5,7,9,0.8)",
@@ -269,7 +271,6 @@ export default function Home() {
         animate="show"
         className="w-full max-w-md z-10 space-y-3"
       >
-        {/* Hero card */}
         <motion.div variants={itemVariants}>
           <div
             className="rounded-3xl p-5 relative overflow-hidden"
@@ -293,14 +294,14 @@ export default function Home() {
                   <h1 className="text-white font-black text-2xl tracking-tight leading-none">
                     Trivia<span className="text-[#FBCD00]">Q</span>
                   </h1>
-                  <p className="text-white/40 text-xs mt-0.5">TRIVQ · Celo Mainnet</p>
+                  <p className="text-white/40 text-xs mt-0.5">{tokenLabel}</p>
                 </div>
               </div>
               <div className="text-right">
                 <div className="text-white/20 text-xs mb-1">Network</div>
                 <div className="flex items-center gap-1.5 justify-end">
                   <div className="w-1.5 h-1.5 rounded-full bg-[#35D07F] animate-pulse"/>
-                  <span className="text-[#35D07F] text-xs font-bold">Mainnet</span>
+                  <span className="text-[#35D07F] text-xs font-bold">{chainLabel}</span>
                 </div>
               </div>
             </div>
@@ -323,12 +324,10 @@ export default function Home() {
           </div>
         </motion.div>
 
-        {/* TrivqPrice lazy */}
         <motion.div variants={itemVariants}>
           <TrivqPrice />
         </motion.div>
 
-        {/* TRIVQ balance */}
         <AnimatePresence>
           {isReady && (
             <motion.div
@@ -371,7 +370,6 @@ export default function Home() {
           )}
         </AnimatePresence>
 
-        {/* MiniPay banner */}
         {isInMiniPay && miniPayAddress && (
           <motion.div variants={itemVariants}
             className="rounded-2xl p-3 flex items-center gap-3"
@@ -385,7 +383,6 @@ export default function Home() {
           </motion.div>
         )}
 
-        {/* PLAY BUTTON */}
         <motion.div variants={itemVariants}>
           {isReady ? (
             <motion.button
@@ -420,7 +417,6 @@ export default function Home() {
           )}
         </motion.div>
 
-        {/* Action grid */}
         <motion.div variants={itemVariants} className="grid grid-cols-2 gap-2">
           <ActionButton onClick={() => router.push("/badges")} variant="purple">🎨 My Badges</ActionButton>
           <ActionButton onClick={() => router.push("/checkin")} variant="gold">🔥 Check-in</ActionButton>
@@ -433,7 +429,7 @@ export default function Home() {
             </ActionButton>
           )}
           <ActionButton
-            onClick={() => window.open(`https://app.ubeswap.org/#/swap?outputCurrency=${TRIVQ_ADDRESS}`, "_blank")}
+            onClick={() => window.open(`https://app.ubeswap.org/#/swap?outputCurrency=${TRIVQ_ADDR}`, "_blank")}
             variant="green"
             className={isReady && referralLink ? "" : "col-span-2"}
           >
@@ -452,7 +448,6 @@ export default function Home() {
           )}
         </motion.div>
 
-        {/* Footer */}
         <motion.div variants={itemVariants} className="pt-2 flex items-center justify-center gap-6">
           {[
             { href: "https://twitter.com/willycodexwar", label: "𝕏" },
