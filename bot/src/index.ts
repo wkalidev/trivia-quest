@@ -1,10 +1,10 @@
-import { Client, GatewayIntentBits, REST, Routes, EmbedBuilder } from "discord.js";
+import { Client, GatewayIntentBits, REST, Routes, EmbedBuilder, TextChannel } from "discord.js";
 import dotenv from "dotenv";
 import { ethers } from "ethers";
 
 dotenv.config();
 
-// ✅ Celo client via ethers
+// ✅ Celo client
 const provider = new ethers.JsonRpcProvider("https://forno.celo.org");
 
 const CONTRACT_ADDRESS = "0xffe22d3d1b63866ac9da8ac92fdb9ceddeadb0bb";
@@ -39,6 +39,10 @@ function formatCountdown(endTime: bigint): string {
   return h > 0 ? `${h}h ${m}m` : `${m}m`;
 }
 
+// ✅ State pour détecter les changements de round
+let lastRoundId: bigint | null = null;
+let lastRoundFinished: boolean | null = null;
+
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -70,9 +74,167 @@ async function registerCommands() {
   }
 }
 
+// ✅ Récupère un channel par nom
+function getChannel(name: string): TextChannel | null {
+  const guild = client.guilds.cache.get(process.env.GUILD_ID!);
+  if (!guild) return null;
+  return guild.channels.cache.find(
+    (c) => c.name.includes(name) && c.isTextBased()
+  ) as TextChannel | null;
+}
+
+// ✅ Post leaderboard quotidien
+async function postDailyLeaderboard() {
+  try {
+    const channel = getChannel("leaderboard");
+    if (!channel) return;
+
+    const leaderboard = await contract.getLeaderboard();
+    const top5 = leaderboard.slice(0, 5);
+    const medals = ["🥇", "🥈", "🥉", "4️⃣", "5️⃣"];
+
+    const fields = top5.map((entry: any, i: number) => ({
+      name: `${medals[i]} ${addressToAlias(entry.player)}`,
+      value: `Points: **${entry.totalPoints.toString()}** · Best: **${entry.bestScore.toString()}** · Games: **${entry.gamesPlayed.toString()}**`,
+      inline: false,
+    }));
+
+    const embed = new EmbedBuilder()
+      .setTitle("🏆 Daily Leaderboard — Trivia Quest")
+      .setColor(0x8b5cf6)
+      .setDescription("Top 5 players on Celo Mainnet")
+      .addFields(
+        ...fields,
+        { name: "🔗 Full Leaderboard", value: "https://trivia-quest-eight.vercel.app/leaderboard" }
+      )
+      .setFooter({ text: "Trivia Quest · Celo Mainnet · Daily Update" })
+      .setTimestamp();
+
+    await channel.send({ embeds: [embed] });
+    console.log("📊 Daily leaderboard posted!");
+  } catch (e) {
+    console.error("Daily leaderboard error:", e);
+  }
+}
+
+// ✅ Annonce gagnant quand round terminé
+async function announceWinner(round: any) {
+  try {
+    const channel = getChannel("announcements");
+    if (!channel) return;
+
+    const winners = round.topWinners as string[];
+    const prizePool = formatCelo(round.prizePool);
+
+    const prizes = ["50%", "30%", "20%"];
+    const medals = ["🥇", "🥈", "🥉"];
+
+    const fields = winners.slice(0, 3).map((w: string, i: number) => ({
+      name: `${medals[i]} ${addressToAlias(w)}`,
+      value: `Prize: **${prizes[i]}** of ${prizePool} CELO`,
+      inline: false,
+    }));
+
+    const embed = new EmbedBuilder()
+      .setTitle("🎉 Round Finished — Winners Announced!")
+      .setColor(0xfbcd00)
+      .setDescription(`Round #${round.id.toString()} is over! Here are the winners:`)
+      .addFields(
+        ...fields,
+        { name: "🏆 Total Prize Pool", value: `${prizePool} CELO`, inline: true },
+        { name: "▶️ Play Next Round", value: "https://trivia-quest-eight.vercel.app", inline: true },
+      )
+      .setFooter({ text: "Trivia Quest · Celo Mainnet" })
+      .setTimestamp();
+
+    await channel.send({ content: "@everyone 🎉 Round finished!", embeds: [embed] });
+    console.log("🎉 Winner announced!");
+  } catch (e) {
+    console.error("Announce winner error:", e);
+  }
+}
+
+// ✅ Annonce nouveau round
+async function announceNewRound(round: any) {
+  try {
+    const channel = getChannel("announcements");
+    if (!channel) return;
+
+    const prizePool = formatCelo(round.prizePool);
+    const endTime = formatCountdown(round.endTime);
+
+    const embed = new EmbedBuilder()
+      .setTitle("🚀 New Round Started!")
+      .setColor(0x35d07f)
+      .setDescription(`Round #${round.id.toString()} is now live on Celo Mainnet!`)
+      .addFields(
+        { name: "🏆 Prize Pool", value: `${prizePool} CELO`, inline: true },
+        { name: "⏰ Ends In", value: endTime, inline: true },
+        { name: "▶️ Play Now", value: "https://trivia-quest-eight.vercel.app", inline: false },
+      )
+      .setFooter({ text: "Trivia Quest · Celo Mainnet" })
+      .setTimestamp();
+
+    await channel.send({ content: "@everyone 🚀 New round started!", embeds: [embed] });
+    console.log("🚀 New round announced!");
+  } catch (e) {
+    console.error("Announce new round error:", e);
+  }
+}
+
+// ✅ Polling on-chain toutes les 60 secondes
+async function startPolling() {
+  console.log("🔄 Starting on-chain polling...");
+
+  setInterval(async () => {
+    try {
+      const round = await contract.getCurrentRound();
+      const currentId: bigint = round.id;
+      const currentFinished: boolean = round.finished;
+
+      // 🔔 Nouveau round détecté
+      if (lastRoundId !== null && currentId > lastRoundId) {
+        await announceNewRound(round);
+      }
+
+      // 🎉 Round terminé détecté
+      if (lastRoundFinished === false && currentFinished === true) {
+        await announceWinner(round);
+      }
+
+      lastRoundId = currentId;
+      lastRoundFinished = currentFinished;
+
+    } catch (e) {
+      console.error("Polling error:", e);
+    }
+  }, 60_000); // toutes les 60 secondes
+}
+
+// ✅ Post leaderboard toutes les 24h
+function startDailyLeaderboard() {
+  console.log("📅 Starting daily leaderboard scheduler...");
+  setInterval(async () => {
+    await postDailyLeaderboard();
+  }, 24 * 60 * 60 * 1000); // toutes les 24h
+}
+
 client.once("clientReady", async () => {
   console.log(`🤖 ${client.user?.tag} is online!`);
   await registerCommands();
+
+  // ✅ Init state
+  try {
+    const round = await contract.getCurrentRound();
+    lastRoundId = round.id;
+    lastRoundFinished = round.finished;
+    console.log(`📌 Current round: #${round.id.toString()} — finished: ${round.finished}`);
+  } catch (e) {
+    console.error("Init state error:", e);
+  }
+
+  startPolling();
+  startDailyLeaderboard();
 });
 
 client.on("interactionCreate", async (interaction) => {
