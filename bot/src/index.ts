@@ -4,8 +4,11 @@ import { ethers } from "ethers";
 
 dotenv.config();
 
-// ✅ Celo client
-const provider = new ethers.JsonRpcProvider("https://forno.celo.org");
+// ✅ Celo client avec fallback RPC
+const provider = new ethers.FallbackProvider([
+  new ethers.JsonRpcProvider("https://forno.celo.org"),
+  new ethers.JsonRpcProvider("https://rpc.ankr.com/celo"),
+]);
 const CONTRACT_ADDRESS = "0xffe22d3d1b63866ac9da8ac92fdb9ceddeadb0bb";
 const CONTRACT_ABI = [
   "function getCurrentRound() view returns (uint256 id, uint256 prizePool, uint256 startTime, uint256 endTime, address[] topWinners, bool finished)",
@@ -196,7 +199,8 @@ async function startPolling() {
       const currentId: bigint = round.id;
       const currentFinished: boolean = round.finished;
 
-      if (lastRoundId !== null && currentId > lastRoundId) {
+      // ✅ Fix faux positif au démarrage
+      if (lastRoundId !== null && lastRoundId !== BigInt(0) && currentId > lastRoundId) {
         await announceNewRound(round);
       }
       if (lastRoundFinished === false && currentFinished === true) {
