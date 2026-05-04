@@ -1,13 +1,37 @@
-import { NextResponse } from 'next/server'
+import { NextResponse, NextRequest } from 'next/server'
 
-export const revalidate = 60 // cache 60s
+export const revalidate = 60
 
-export async function GET() {
+// ✅ Rate limiting — max 30 requêtes par IP par minute
+const rateLimit = new Map<string, { count: number; resetTime: number }>();
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const limit = rateLimit.get(ip);
+
+  if (!limit || now > limit.resetTime) {
+    rateLimit.set(ip, { count: 1, resetTime: now + 60_000 });
+    return false;
+  }
+
+  if (limit.count >= 30) return true;
+  limit.count++;
+  return false;
+}
+
+export async function GET(req: NextRequest) {
+  const ip = req.headers.get("x-forwarded-for") ?? "unknown";
+
+  if (isRateLimited(ip)) {
+    return NextResponse.json(
+      { error: "Too many requests" },
+      { status: 429 }
+    );
+  }
+
   let players = null
-  let totalTransactions = null
 
   try {
-    // getTotalPlayers()
     const res = await fetch('https://forno.celo.org', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -24,7 +48,7 @@ export async function GET() {
 
   return NextResponse.json({
     project: 'TriviaQ',
-    description: 'Blockchain quiz game on Celo — earn $TRIVQ tokens by answering questions',
+    description: 'Blockchain quiz game on Celo — earn TRIVQ tokens by answering questions',
     network: 'celo-mainnet',
     chainId: 42220,
     contracts: {
@@ -34,7 +58,7 @@ export async function GET() {
       referral: '0xa0fcd85a25ecb71ca1ea9d63da058c832c27c62e',
     },
     live_stats: {
-      players: players,
+      players,
       last_updated: new Date().toISOString(),
     },
     game: {

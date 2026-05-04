@@ -6,16 +6,23 @@ dotenv.config();
 
 // ✅ Celo client
 const provider = new ethers.JsonRpcProvider("https://forno.celo.org");
-
 const CONTRACT_ADDRESS = "0xffe22d3d1b63866ac9da8ac92fdb9ceddeadb0bb";
-
 const CONTRACT_ABI = [
   "function getCurrentRound() view returns (uint256 id, uint256 prizePool, uint256 startTime, uint256 endTime, address[] topWinners, bool finished)",
   "function getTotalPlayers() view returns (uint256)",
   "function getLeaderboard() view returns (tuple(address player, uint256 totalPoints, uint256 bestScore, uint256 gamesPlayed)[])",
 ];
-
 const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider);
+
+// ✅ Rate limiting — 20s entre chaque commande par user
+const cooldowns = new Map<string, number>();
+function isRateLimited(userId: string): boolean {
+  const now = Date.now();
+  const lastUsed = cooldowns.get(userId) ?? 0;
+  if (now - lastUsed < 20_000) return true;
+  cooldowns.set(userId, now);
+  return false;
+}
 
 // ✅ Helpers
 function formatCelo(wei: bigint): string {
@@ -74,7 +81,6 @@ async function registerCommands() {
   }
 }
 
-// ✅ Récupère un channel par nom
 function getChannel(name: string): TextChannel | null {
   const guild = client.guilds.cache.get(process.env.GUILD_ID!);
   if (!guild) return null;
@@ -117,7 +123,7 @@ async function postDailyLeaderboard() {
   }
 }
 
-// ✅ Annonce gagnant quand round terminé
+// ✅ Annonce gagnant
 async function announceWinner(round: any) {
   try {
     const channel = getChannel("announcements");
@@ -125,7 +131,6 @@ async function announceWinner(round: any) {
 
     const winners = round.topWinners as string[];
     const prizePool = formatCelo(round.prizePool);
-
     const prizes = ["50%", "30%", "20%"];
     const medals = ["🥇", "🥈", "🥉"];
 
@@ -138,7 +143,7 @@ async function announceWinner(round: any) {
     const embed = new EmbedBuilder()
       .setTitle("🎉 Round Finished — Winners Announced!")
       .setColor(0xfbcd00)
-      .setDescription(`Round #${round.id.toString()} is over! Here are the winners:`)
+      .setDescription(`Round #${round.id.toString()} is over!`)
       .addFields(
         ...fields,
         { name: "🏆 Total Prize Pool", value: `${prizePool} CELO`, inline: true },
@@ -166,7 +171,7 @@ async function announceNewRound(round: any) {
     const embed = new EmbedBuilder()
       .setTitle("🚀 New Round Started!")
       .setColor(0x35d07f)
-      .setDescription(`Round #${round.id.toString()} is now live on Celo Mainnet!`)
+      .setDescription(`Round #${round.id.toString()} is now live!`)
       .addFields(
         { name: "🏆 Prize Pool", value: `${prizePool} CELO`, inline: true },
         { name: "⏰ Ends In", value: endTime, inline: true },
@@ -185,45 +190,39 @@ async function announceNewRound(round: any) {
 // ✅ Polling on-chain toutes les 60 secondes
 async function startPolling() {
   console.log("🔄 Starting on-chain polling...");
-
   setInterval(async () => {
     try {
       const round = await contract.getCurrentRound();
       const currentId: bigint = round.id;
       const currentFinished: boolean = round.finished;
 
-      // 🔔 Nouveau round détecté
       if (lastRoundId !== null && currentId > lastRoundId) {
         await announceNewRound(round);
       }
-
-      // 🎉 Round terminé détecté
       if (lastRoundFinished === false && currentFinished === true) {
         await announceWinner(round);
       }
 
       lastRoundId = currentId;
       lastRoundFinished = currentFinished;
-
     } catch (e) {
       console.error("Polling error:", e);
     }
-  }, 60_000); // toutes les 60 secondes
+  }, 60_000);
 }
 
-// ✅ Post leaderboard toutes les 24h
+// ✅ Leaderboard quotidien toutes les 24h
 function startDailyLeaderboard() {
   console.log("📅 Starting daily leaderboard scheduler...");
   setInterval(async () => {
     await postDailyLeaderboard();
-  }, 24 * 60 * 60 * 1000); // toutes les 24h
+  }, 24 * 60 * 60 * 1000);
 }
 
 client.once("clientReady", async () => {
   console.log(`🤖 ${client.user?.tag} is online!`);
   await registerCommands();
 
-  // ✅ Init state
   try {
     const round = await contract.getCurrentRound();
     lastRoundId = round.id;
@@ -240,6 +239,15 @@ client.once("clientReady", async () => {
 client.on("interactionCreate", async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
 
+  // ✅ Rate limit check
+  if (isRateLimited(interaction.user.id)) {
+    await interaction.reply({
+      content: "⏳ Please wait a few seconds before using this command again.",
+      ephemeral: true,
+    });
+    return;
+  }
+
   // ✅ /stats
   if (interaction.commandName === "stats") {
     await interaction.deferReply();
@@ -249,18 +257,14 @@ client.on("interactionCreate", async (interaction) => {
         contract.getTotalPlayers(),
       ]);
 
-      const prizePool = formatCelo(round.prizePool);
-      const endTime = formatCountdown(round.endTime);
-      const finished = round.finished;
-
       const embed = new EmbedBuilder()
         .setTitle("📊 Trivia Quest — Live On-Chain Stats")
         .setColor(0xfbcd00)
         .addFields(
           { name: "🎮 Total Players", value: `${totalPlayers.toString()}`, inline: true },
-          { name: "🏆 Prize Pool", value: `${prizePool} CELO`, inline: true },
-          { name: "⏰ Round Ends", value: endTime, inline: true },
-          { name: "🔄 Round Status", value: finished ? "✅ Finished" : "🟢 Active", inline: true },
+          { name: "🏆 Prize Pool", value: `${formatCelo(round.prizePool)} CELO`, inline: true },
+          { name: "⏰ Round Ends", value: formatCountdown(round.endTime), inline: true },
+          { name: "🔄 Round Status", value: round.finished ? "✅ Finished" : "🟢 Active", inline: true },
           { name: "❓ Questions", value: "446", inline: true },
           { name: "💰 Reward/point", value: "100 TRIVQ", inline: true },
         )

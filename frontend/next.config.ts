@@ -5,20 +5,15 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  typescript: {
-    ignoreBuildErrors: true,
-  },
 
-  // ✅ Compression gzip/brotli — réduit la taille des chunks JS
+  // ✅ Compression gzip/brotli
   compress: true,
 
-  // ✅ Headers sécurité + performance
   async headers() {
     return [
       {
         source: "/(.*)",
         headers: [
-          // ✅ Autorise l'embedding dans Farcaster / MiniPay iframes
           {
             key: "X-Frame-Options",
             value: "ALLOWALL",
@@ -31,7 +26,6 @@ const nextConfig: NextConfig = {
             key: "X-Content-Type-Options",
             value: "nosniff",
           },
-          // ✅ Préconnexion aux origines critiques via Early Hints
           {
             key: "Link",
             value: [
@@ -42,7 +36,6 @@ const nextConfig: NextConfig = {
           },
         ],
       },
-      // ✅ Cache long pour les assets statiques (chunks JS/CSS hashés)
       {
         source: "/_next/static/(.*)",
         headers: [
