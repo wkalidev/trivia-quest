@@ -169,7 +169,7 @@ export default function QuizPage() {
           <div className="text-5xl mb-4">🎮</div>
           <h2 className="text-white font-black text-2xl mb-2">{t("joinTitle")}</h2>
           <p className="text-white/60 mb-4">
-            {t("entryFee")} : <span className="text-[#FBCD00] font-bold">0.01 {nativeToken}</span>
+            {t("entryFee")} : <span className="text-[#FBCD00] font-bold">{chainId === 8453 ? "0.00001" : "0.01"} {nativeToken}</span>
           </p>
 
           {/* Category selector */}
