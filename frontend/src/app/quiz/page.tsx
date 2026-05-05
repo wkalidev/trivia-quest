@@ -11,15 +11,6 @@ import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGameSounds } from "@/hooks/useGameSounds";
 
-type WriteContractParams = {
-  address: `0x${string}`;
-  abi: typeof CONTRACT_ABI;
-  functionName: "joinRound";
-  value: bigint;
-  chain: undefined;
-  account: `0x${string}` | undefined;
-};
-
 function getMultiplier(streak: number): number {
   if (streak >= 5) return 3;
   if (streak >= 3) return 2;
@@ -48,6 +39,7 @@ export default function QuizPage() {
   const CONTRACT_ADDRESS = getContractAddress(chainId, "game");
   const router = useRouter();
   const t = useTranslations("quiz");
+
   const [questions, setQuestions] = useState<Question[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [current, setCurrent] = useState(0);
@@ -62,15 +54,27 @@ export default function QuizPage() {
   const [bonusText, setBonusText] = useState("");
   const [isCorrectAnswer, setIsCorrectAnswer] = useState<boolean | null>(null);
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [joinError, setJoinError] = useState<string | null>(null);
 
   const { playCorrect, playWrong, playStreak, playTick } = useGameSounds();
   const { writeContract, isPending } = useWriteContract();
 
+  // ✅ Fix: chainId passé explicitement pour lire sur la bonne chain (Celo ou Base)
   const { data: entryFee } = useReadContract({
     address: CONTRACT_ADDRESS,
     abi: CONTRACT_ABI,
     functionName: "entryFee",
+    chainId: chainId,
+    query: { enabled: !!CONTRACT_ADDRESS },
   });
+
+  // ✅ Fallback par chain si entryFee pas encore chargé
+  const nativeToken = chainId === 8453 ? "ETH" : "CELO";
+  const fallbackFee = chainId === 8453
+    ? parseEther("0.00001")  // Base Mainnet
+    : parseEther("0.01");    // Celo Mainnet
+  const fee = (entryFee as bigint | undefined) ?? fallbackFee;
+  const feeDisplay = chainId === 8453 ? "0.00001" : "0.01";
 
   useEffect(() => {
     if (!isConnected) router.push("/");
@@ -114,16 +118,32 @@ export default function QuizPage() {
   }, [timer, joined, finished, questions, handleNext, playTick, soundEnabled]);
 
   const handleJoin = () => {
-    writeContract({
-      address: CONTRACT_ADDRESS,
-      abi: CONTRACT_ABI,
-      functionName: "joinRound",
-      value: entryFee ?? (chainId === 8453 ? parseEther("0.00001") : parseEther("0.01")), 
-     chain: null,
-     account: address,
-    } as any, {
-      onSuccess: () => setJoined(true),
-    });
+    if (!CONTRACT_ADDRESS) return;
+    setJoinError(null);
+
+    writeContract(
+      {
+        address: CONTRACT_ADDRESS,
+        abi: CONTRACT_ABI,
+        functionName: "joinRound",
+        value: fee,
+        chain: undefined,
+        account: address,
+      } as any,
+      {
+        onSuccess: () => {
+          setJoined(true);
+        },
+        onError: (err) => {
+          console.error("joinRound failed:", err);
+          setJoinError(
+            err.message?.includes("insufficient")
+              ? `Solde insuffisant. Il te faut ${feeDisplay} ${nativeToken} + gas.`
+              : "Transaction échouée. Vérifie que tu es sur la bonne chain."
+          );
+        },
+      }
+    );
   };
 
   const handleAnswer = (idx: number) => {
@@ -155,9 +175,7 @@ export default function QuizPage() {
     setTimeout(() => handleNext(), 1200);
   };
 
-  // ✅ Label dynamique selon la chain
-  const nativeToken = chainId === 8453 ? "ETH" : "CELO";
-
+  // — Join screen —
   if (!joined) {
     return (
       <motion.main
@@ -169,7 +187,10 @@ export default function QuizPage() {
           <div className="text-5xl mb-4">🎮</div>
           <h2 className="text-white font-black text-2xl mb-2">{t("joinTitle")}</h2>
           <p className="text-white/60 mb-4">
-            {t("entryFee")} : <span className="text-[#FBCD00] font-bold">{chainId === 8453 ? "0.00001" : "0.01"} {nativeToken}</span>
+            {t("entryFee")} :{" "}
+            <span className="text-[#FBCD00] font-bold">
+              {feeDisplay} {nativeToken}
+            </span>
           </p>
 
           {/* Category selector */}
@@ -211,6 +232,13 @@ export default function QuizPage() {
             <li>🔥 Streak x2 / x3 bonus multiplier !</li>
           </ul>
 
+          {/* ✅ Affiche l'erreur si la transaction échoue */}
+          {joinError && (
+            <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+              {joinError}
+            </div>
+          )}
+
           <button
             onClick={handleJoin}
             disabled={isPending}
@@ -223,6 +251,7 @@ export default function QuizPage() {
     );
   }
 
+  // — Loading questions —
   if (questions.length === 0) {
     return (
       <main className="min-h-screen flex items-center justify-center bg-[#1A1A2E]">
@@ -238,6 +267,7 @@ export default function QuizPage() {
   const q = questions[current];
   const multiplier = getMultiplier(streak);
 
+  // — Quiz screen —
   return (
     <main className="min-h-screen flex flex-col bg-[#1A1A2E] px-6 pt-10 relative overflow-hidden">
 
@@ -318,11 +348,15 @@ export default function QuizPage() {
             exit={{ opacity: 0, x: -20 }}
             className="flex items-center gap-2 mb-3"
           >
-            <div className={`flex items-center gap-1 px-3 py-1 rounded-full text-sm font-bold ${
-              multiplier >= 3 ? "bg-red-500 text-white" :
-              multiplier >= 2 ? "bg-orange-500 text-white" :
-              "bg-white/10 text-white"
-            }`}>
+            <div
+              className={`flex items-center gap-1 px-3 py-1 rounded-full text-sm font-bold ${
+                multiplier >= 3
+                  ? "bg-red-500 text-white"
+                  : multiplier >= 2
+                  ? "bg-orange-500 text-white"
+                  : "bg-white/10 text-white"
+              }`}
+            >
               {getStreakLabel(streak)} — {streak} combo
             </div>
             {multiplier > 1 && (
