@@ -1,6 +1,7 @@
 import { Client, GatewayIntentBits, REST, Routes, EmbedBuilder, TextChannel } from "discord.js";
 import dotenv from "dotenv";
 import { ethers } from "ethers";
+import { generateQuestion, buildQuestionEmbed } from "./ai-agent.js";
 
 dotenv.config();
 
@@ -64,6 +65,27 @@ const commands = [
   { name: "stats", description: "Live on-chain stats for Trivia Quest" },
   { name: "play", description: "Get the link to play Trivia Quest" },
   { name: "leaderboard", description: "View the on-chain leaderboard" },
+  { name: "ask", description: "Generate an AI trivia question (random category)" },
+  {
+    name: "askcat",
+    description: "Generate an AI question for a specific category",
+    options: [
+      {
+        name: "category",
+        description: "Choose a category",
+        type: 3,
+        required: true,
+        choices: [
+          { name: "🌍 African Geography", value: "African Geography" },
+          { name: "💰 Web3 & Crypto", value: "Web3 & Crypto" },
+          { name: "📖 African History & Culture", value: "African History & Culture" },
+          { name: "🔬 Science & Tech", value: "Science & Tech" },
+          { name: "⚽ Sports", value: "Sports" },
+          { name: "🌐 General Knowledge", value: "General Knowledge" },
+        ],
+      },
+    ],
+  },
 ];
 
 const rest = new REST({ version: "10" }).setToken(process.env.DISCORD_TOKEN!);
@@ -199,7 +221,6 @@ async function startPolling() {
       const currentId: bigint = round.id;
       const currentFinished: boolean = round.finished;
 
-      // ✅ Fix faux positif au démarrage
       if (lastRoundId !== null && lastRoundId !== BigInt(0) && currentId > lastRoundId) {
         await announceNewRound(round);
       }
@@ -327,6 +348,41 @@ client.on("interactionCreate", async (interaction) => {
     } catch (e) {
       console.error(e);
       await interaction.editReply("❌ Could not fetch leaderboard.");
+    }
+  }
+
+  // ✅ /ask — question IA catégorie aléatoire
+  if (interaction.commandName === "ask") {
+    await interaction.deferReply();
+    try {
+      const question = await generateQuestion();
+      if (!question) {
+        await interaction.editReply("❌ Could not generate a question. Try again!");
+        return;
+      }
+      const embed = buildQuestionEmbed(question);
+      await interaction.editReply({ embeds: [embed] });
+    } catch (e) {
+      console.error("ask error:", e);
+      await interaction.editReply("❌ AI generation failed. Try again!");
+    }
+  }
+
+  // ✅ /askcat — question IA catégorie choisie
+  if (interaction.commandName === "askcat") {
+    await interaction.deferReply();
+    try {
+      const category = interaction.options.getString("category") ?? undefined;
+      const question = await generateQuestion(category);
+      if (!question) {
+        await interaction.editReply("❌ Could not generate a question. Try again!");
+        return;
+      }
+      const embed = buildQuestionEmbed(question);
+      await interaction.editReply({ embeds: [embed] });
+    } catch (e) {
+      console.error("askcat error:", e);
+      await interaction.editReply("❌ AI generation failed. Try again!");
     }
   }
 });
