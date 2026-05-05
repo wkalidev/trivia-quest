@@ -3,21 +3,17 @@ import { HardhatUserConfig } from "hardhat/config";
 import * as dotenv from "dotenv";
 dotenv.config();
 
-const config: HardhatUserConfig = {
+const config: HardhatUserConfig & { sourcify?: any } = {
   plugins: [hardhatToolboxViem],
   solidity: {
     compilers: [
       {
         version: "0.8.24",
-        settings: {
-          evmVersion: "cancun",
-        },
+        settings: { evmVersion: "cancun" },
       },
       {
         version: "0.8.20",
-        settings: {
-          evmVersion: "paris",
-        },
+        settings: { evmVersion: "paris" },
       },
     ],
   },
@@ -40,20 +36,21 @@ const config: HardhatUserConfig = {
       accounts: [process.env.PRIVATE_KEY!],
       chainId: 42220,
     },
-    // ✅ Base Mainnet
     base: {
       type: "http",
       url: process.env.BASE_RPC ?? "https://mainnet.base.org",
       accounts: [process.env.PRIVATE_KEY!],
       chainId: 8453,
     },
-    // ✅ Base Sepolia testnet
     baseSepolia: {
       type: "http",
       url: process.env.BASE_SEPOLIA_RPC ?? "https://sepolia.base.org",
       accounts: [process.env.PRIVATE_KEY!],
       chainId: 84532,
     },
+  },
+  sourcify: {
+    enabled: true,
   },
 };
 
