@@ -118,10 +118,10 @@ export default function QuizPage() {
       address: CONTRACT_ADDRESS,
       abi: CONTRACT_ABI,
       functionName: "joinRound",
-      value: entryFee ?? (chainId === 8453 ? parseEther("0.00001") : parseEther("0.01")),
-      chain: undefined,
-      account: address,
-    } as WriteContractParams, {
+      value: entryFee ?? (chainId === 8453 ? parseEther("0.00001") : parseEther("0.01")), 
+     chain: null,
+     account: address,
+    } as any, {
       onSuccess: () => setJoined(true),
     });
   };
