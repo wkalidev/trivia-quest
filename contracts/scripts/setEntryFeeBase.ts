@@ -3,7 +3,7 @@ import { parseEther } from "viem";
 
 async function main() {
   const { viem } = await hre.network.connect();
-  const CONTRACT = "0xf44dfec3230bcf917ca7ccc59b4e67df2507e21f" as `0x${string}`;
+  const CONTRACT = "0x1e2c209412ec30915ccf922654f0593faf61fcfb" as `0x${string}`;
   const contract = await viem.getContractAt("TriviaQuest", CONTRACT);
 
   // ✅ 0.00001 ETH ≈ $0.023 — prix raisonnable sur Base

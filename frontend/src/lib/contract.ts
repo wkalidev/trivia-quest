@@ -8,12 +8,12 @@ export const CONTRACTS = {
     checkin: "0x8650e6c477f8ae3933dc6d61d85e65c90cf71828" as `0x${string}`,
     referral:"0xa0fcd85a25ecb71ca1ea9d63da058c832c27c62e" as `0x${string}`,
   },
-  [base.id]: {
-    game:    "0xf44dfec3230bcf917ca7ccc59b4e67df2507e21f" as `0x${string}`,
-    token:   "0x3217e21a74a068779902213ab06ad3301a8e6a02" as `0x${string}`,
-    checkin: "0x8a6f59c5f1f11a7ae75c54b1eb95c477405f1bda" as `0x${string}`,
-    referral:"0x4dafb4d844ce8bd52ce3ad4cee2a4e73780d0c91" as `0x${string}`,
-  },
+ [base.id]: {
+  game:    "0x1e2c209412ec30915ccf922654f0593faf61fcfb" as `0x${string}`,
+  token:   "0x8ecc1dc70f3bc5be941b61b42707eb7dbddb54c3" as `0x${string}`,
+  checkin: "0x0f19851d5cd905d110c000a7d26d74a2f21f8ff9" as `0x${string}`,
+  referral:"0x4fb5285263354e1e75f044c65166ab22c3840074" as `0x${string}`,
+},
 } as const;
 
 // ✅ Helpers
