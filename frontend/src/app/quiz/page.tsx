@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useAccount, useWriteContract, useReadContract } from "wagmi";
+import { useAccount, useWriteContract, useReadContract, useChainId } from "wagmi";
 import { useRouter } from "next/navigation";
 import { parseEther } from "viem";
-import { CONTRACT_ADDRESS, CONTRACT_ABI } from "@/lib/web3";
+import { CONTRACT_ABI, getContractAddress } from "@/lib/contract";
 import { getRandomQuestions, getQuestionsByCategory, CATEGORIES } from "@/lib/questions";
 import type { Question } from "@/lib/questions";
 import { useTranslations } from "next-intl";
@@ -44,6 +44,8 @@ function getCategoryEmoji(cat: string): string {
 
 export default function QuizPage() {
   const { address, isConnected } = useAccount();
+  const chainId = useChainId();
+  const CONTRACT_ADDRESS = getContractAddress(chainId, "game");
   const router = useRouter();
   const t = useTranslations("quiz");
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -153,6 +155,9 @@ export default function QuizPage() {
     setTimeout(() => handleNext(), 1200);
   };
 
+  // ✅ Label dynamique selon la chain
+  const nativeToken = chainId === 8453 ? "ETH" : "CELO";
+
   if (!joined) {
     return (
       <motion.main
@@ -164,7 +169,7 @@ export default function QuizPage() {
           <div className="text-5xl mb-4">🎮</div>
           <h2 className="text-white font-black text-2xl mb-2">{t("joinTitle")}</h2>
           <p className="text-white/60 mb-4">
-            {t("entryFee")} : <span className="text-[#FBCD00] font-bold">0.01 CELO</span>
+            {t("entryFee")} : <span className="text-[#FBCD00] font-bold">0.01 {nativeToken}</span>
           </p>
 
           {/* Category selector */}
