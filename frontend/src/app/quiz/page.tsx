@@ -10,6 +10,7 @@ import type { Question } from "@/lib/questions";
 import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGameSounds } from "@/hooks/useGameSounds";
+import { useAIQuestion } from "@/hooks/useAIQuestion";
 
 function getMultiplier(streak: number): number {
   if (streak >= 5) return 3;
@@ -55,6 +56,9 @@ export default function QuizPage() {
   const [isCorrectAnswer, setIsCorrectAnswer] = useState<boolean | null>(null);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [joinError, setJoinError] = useState<string | null>(null);
+  const { fetchAIQuestion, loading: aiLoading } = useAIQuestion();
+  const [aiMode, setAIMode] = useState(false);
+  const [aiQuestion, setAIQuestion] = useState<Question | null>(null);
 
   const { playCorrect, playWrong, playStreak, playTick } = useGameSounds();
   const { writeContract, isPending } = useWriteContract();
@@ -81,12 +85,16 @@ export default function QuizPage() {
   }, [isConnected, router]);
 
   useEffect(() => {
-    if (selectedCategory === "all") {
-      setQuestions(getRandomQuestions(10));
-    } else {
-      setQuestions(getQuestionsByCategory(selectedCategory, 10));
-    }
-  }, [selectedCategory]);
+  if (aiMode && aiQuestion) {
+    setQuestions([aiQuestion]);
+    return;
+  }
+  if (selectedCategory === "all") {
+    setQuestions(getRandomQuestions(10));
+  } else {
+    setQuestions(getQuestionsByCategory(selectedCategory, 10));
+  }
+}, [selectedCategory, aiMode, aiQuestion]);
 
   const handleNext = useCallback(() => {
     if (questions.length === 0) return;
@@ -208,6 +216,22 @@ export default function QuizPage() {
                 }`}
               >
                 🌐 Toutes
+              </button>
+              <button
+              onClick={async () => {
+               setAIMode(true);
+              const q = await fetchAIQuestion(
+              selectedCategory !== "all" ? selectedCategory : undefined
+              );
+                if (q) setAIQuestion(q);
+         }}
+                  className={`px-3 py-2 rounded-xl text-sm font-bold transition-all col-span-2 ${
+                   aiMode
+                   ? "bg-purple-500 text-white"
+                  : "bg-white/10 text-white/70 hover:bg-white/20"
+              }`}
+              >
+                  {aiLoading ? "⏳ Génération..." : "🤖 Mode IA"}
               </button>
               {CATEGORIES.map((cat) => (
                 <button
