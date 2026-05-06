@@ -90,6 +90,8 @@ export default function DuelPage() {
         abi: DUEL_ABI,
         functionName: "createDuel",
         value: parseEther(wager),
+        chain: undefined,
+        account: address,
       },
       {
         onSuccess: () => {
@@ -118,6 +120,8 @@ export default function DuelPage() {
         functionName: "joinDuel",
         args: [duel.id],
         value: duel.wager,
+        chain: undefined,
+        account: address,
       },
       {
         onSuccess: () => {
@@ -148,6 +152,8 @@ export default function DuelPage() {
         functionName: "joinDuel",
         args: [BigInt(joinDuelId)],
         value: parseEther(wager),
+        chain: undefined,
+        account: address,
       },
       {
         onSuccess: () => {
