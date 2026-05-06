@@ -7,7 +7,8 @@ export const CONTRACTS = {
     token:   "0xe65fc5cacaf9a5aebbc0e151dee08a53f24a05c5" as `0x${string}`,
     checkin: "0x8650e6c477f8ae3933dc6d61d85e65c90cf71828" as `0x${string}`,
     referral:"0xa0fcd85a25ecb71ca1ea9d63da058c832c27c62e" as `0x${string}`,
-    duel:    "" as `0x${string}`, // 🔜 Mainnet après test
+    duel: "0xee7be00cd5454b9bea56d864d82076b8b5de5ca1" as `0x${string}`,
+
   },
   [base.id]: {
     game:    "0x1e2c209412ec30915ccf922654f0593faf61fcfb" as `0x${string}`,
@@ -21,7 +22,7 @@ export const CONTRACTS = {
     token:   "" as `0x${string}`,
     checkin: "" as `0x${string}`,
     referral:"" as `0x${string}`,
-    duel: "0xee7be00cd5454b9bea56d864d82076b8b5de5ca1" as `0x${string}`,
+    duel: "0xd9456518d7acbe6bcab494aa5894ce4cdf7c5ad7" as `0x${string}`,
 
   },
 } as const;
