@@ -56,14 +56,15 @@ export default function QuizPage() {
   const [isCorrectAnswer, setIsCorrectAnswer] = useState<boolean | null>(null);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [joinError, setJoinError] = useState<string | null>(null);
-  const { fetchAIQuestion, loading: aiLoading } = useAIQuestion();
+
+  // ✅ AI Mode
   const [aiMode, setAIMode] = useState(false);
-  const [aiQuestion, setAIQuestion] = useState<Question | null>(null);
+  const [aiReady, setAIReady] = useState(false);
+  const { fetchAIQuestion, loading: aiLoading } = useAIQuestion();
 
   const { playCorrect, playWrong, playStreak, playTick } = useGameSounds();
   const { writeContract, isPending } = useWriteContract();
 
-  // ✅ Fix: chainId passé explicitement pour lire sur la bonne chain (Celo ou Base)
   const { data: entryFee } = useReadContract({
     address: CONTRACT_ADDRESS,
     abi: CONTRACT_ABI,
@@ -72,11 +73,10 @@ export default function QuizPage() {
     query: { enabled: !!CONTRACT_ADDRESS },
   });
 
-  // ✅ Fallback par chain si entryFee pas encore chargé
   const nativeToken = chainId === 8453 ? "ETH" : "CELO";
   const fallbackFee = chainId === 8453
-    ? parseEther("0.00001")  // Base Mainnet
-    : parseEther("0.01");    // Celo Mainnet
+    ? parseEther("0.00001")
+    : parseEther("0.01");
   const fee = (entryFee as bigint | undefined) ?? fallbackFee;
   const feeDisplay = chainId === 8453 ? "0.00001" : "0.01";
 
@@ -84,17 +84,40 @@ export default function QuizPage() {
     if (!isConnected) router.push("/");
   }, [isConnected, router]);
 
+  // ✅ Charge les questions selon le mode
   useEffect(() => {
-  if (aiMode && aiQuestion) {
-    setQuestions([aiQuestion]);
-    return;
-  }
-  if (selectedCategory === "all") {
-    setQuestions(getRandomQuestions(10));
-  } else {
-    setQuestions(getQuestionsByCategory(selectedCategory, 10));
-  }
-}, [selectedCategory, aiMode, aiQuestion]);
+    if (aiMode) return; // géré séparément
+    if (selectedCategory === "all") {
+      setQuestions(getRandomQuestions(10));
+    } else {
+      setQuestions(getQuestionsByCategory(selectedCategory, 10));
+    }
+  }, [selectedCategory, aiMode]);
+
+  // ✅ Active le Mode IA : charge la 1ère question + pré-charge la 2ème
+  const handleActivateAI = useCallback(async () => {
+    setAIMode(true);
+    setAIReady(false);
+    const cat = selectedCategory !== "all" ? selectedCategory : undefined;
+    const first = await fetchAIQuestion(cat);
+    if (!first) {
+      setAIMode(false);
+      return;
+    }
+    setQuestions([first]);
+    setAIReady(true);
+    // Pré-charge la 2ème en arrière-plan
+    const second = await fetchAIQuestion(cat);
+    if (second) setQuestions((prev) => [...prev, second]);
+  }, [selectedCategory, fetchAIQuestion]);
+
+  // ✅ Pré-charge la question suivante en mode IA
+  const prefetchNextAIQuestion = useCallback(async () => {
+    if (!aiMode) return;
+    const cat = selectedCategory !== "all" ? selectedCategory : undefined;
+    const next = await fetchAIQuestion(cat);
+    if (next) setQuestions((prev) => [...prev, next]);
+  }, [aiMode, selectedCategory, fetchAIQuestion]);
 
   const handleNext = useCallback(() => {
     if (questions.length === 0) return;
@@ -109,10 +132,12 @@ export default function QuizPage() {
         );
       } else {
         setCurrent((c) => c + 1);
+        // Pré-charge la prochaine question IA
+        if (aiMode) prefetchNextAIQuestion();
       }
       return null;
     });
-  }, [questions, current, score, totalPoints, router]);
+  }, [questions, current, score, totalPoints, router, aiMode, prefetchNextAIQuestion]);
 
   useEffect(() => {
     if (!joined || finished || questions.length === 0) return;
@@ -128,7 +153,6 @@ export default function QuizPage() {
   const handleJoin = () => {
     if (!CONTRACT_ADDRESS) return;
     setJoinError(null);
-
     writeContract(
       {
         address: CONTRACT_ADDRESS,
@@ -139,9 +163,7 @@ export default function QuizPage() {
         account: address,
       } as any,
       {
-        onSuccess: () => {
-          setJoined(true);
-        },
+        onSuccess: () => setJoined(true),
         onError: (err) => {
           console.error("joinRound failed:", err);
           setJoinError(
@@ -207,38 +229,38 @@ export default function QuizPage() {
               🎯 Choisir une catégorie :
             </p>
             <div className="grid grid-cols-2 gap-2">
+              {/* Bouton Toutes */}
               <button
-                onClick={() => setSelectedCategory("all")}
+                onClick={() => { setSelectedCategory("all"); setAIMode(false); setAIReady(false); }}
                 className={`px-3 py-2 rounded-xl text-sm font-bold transition-all ${
-                  selectedCategory === "all"
+                  selectedCategory === "all" && !aiMode
                     ? "bg-[#FBCD00] text-[#1A1A2E]"
                     : "bg-white/10 text-white/70 hover:bg-white/20"
                 }`}
               >
                 🌐 Toutes
               </button>
+
+              {/* Bouton Mode IA */}
               <button
-              onClick={async () => {
-               setAIMode(true);
-              const q = await fetchAIQuestion(
-              selectedCategory !== "all" ? selectedCategory : undefined
-              );
-                if (q) setAIQuestion(q);
-         }}
-                  className={`px-3 py-2 rounded-xl text-sm font-bold transition-all col-span-2 ${
-                   aiMode
-                   ? "bg-purple-500 text-white"
-                  : "bg-white/10 text-white/70 hover:bg-white/20"
-              }`}
+                onClick={handleActivateAI}
+                disabled={aiLoading}
+                className={`px-3 py-2 rounded-xl text-sm font-bold transition-all disabled:opacity-60 ${
+                  aiMode
+                    ? "bg-purple-500 text-white"
+                    : "bg-white/10 text-white/70 hover:bg-white/20"
+                }`}
               >
-                  {aiLoading ? "⏳ Génération..." : "🤖 Mode IA"}
+                {aiLoading ? "⏳ Chargement..." : aiReady ? "✅ Mode IA" : "🤖 Mode IA"}
               </button>
+
+              {/* Catégories */}
               {CATEGORIES.map((cat) => (
                 <button
                   key={cat}
-                  onClick={() => setSelectedCategory(cat)}
+                  onClick={() => { setSelectedCategory(cat); setAIMode(false); setAIReady(false); }}
                   className={`px-3 py-2 rounded-xl text-xs font-bold transition-all text-left ${
-                    selectedCategory === cat
+                    selectedCategory === cat && !aiMode
                       ? "bg-[#FBCD00] text-[#1A1A2E]"
                       : "bg-white/10 text-white/70 hover:bg-white/20"
                   }`}
@@ -254,18 +276,27 @@ export default function QuizPage() {
             <li>✅ {t("feature2")}</li>
             <li>✅ {t("feature3")}</li>
             <li>🔥 Streak x2 / x3 bonus multiplier !</li>
+            {aiMode && aiReady && (
+              <li>🤖 Questions générées par IA en temps réel !</li>
+            )}
           </ul>
 
-          {/* ✅ Affiche l'erreur si la transaction échoue */}
           {joinError && (
             <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
               {joinError}
             </div>
           )}
 
+          {/* Message si Mode IA pas encore prêt */}
+          {aiMode && !aiReady && (
+            <div className="mb-4 p-3 rounded-xl bg-purple-500/10 border border-purple-500/30 text-purple-300 text-sm">
+              ⏳ Génération des questions IA en cours...
+            </div>
+          )}
+
           <button
             onClick={handleJoin}
-            disabled={isPending}
+            disabled={isPending || (aiMode && !aiReady)}
             className="w-full bg-[#FBCD00] text-[#1A1A2E] font-black text-lg py-4 rounded-2xl active:scale-95 transition-all disabled:opacity-50"
           >
             {isPending ? t("loading") : t("playButton")}
@@ -303,6 +334,13 @@ export default function QuizPage() {
         {soundEnabled ? "🔊" : "🔇"}
       </button>
 
+      {/* AI badge */}
+      {aiMode && (
+        <div className="absolute top-4 left-4 bg-purple-500/20 border border-purple-500/40 text-purple-300 text-xs px-2 py-1 rounded-full z-20">
+          🤖 Mode IA
+        </div>
+      )}
+
       {/* Flash background */}
       <AnimatePresence>
         {isCorrectAnswer !== null && (
@@ -338,7 +376,7 @@ export default function QuizPage() {
       {/* Header */}
       <div className="flex justify-between items-center mb-3">
         <span className="text-white/60 text-sm">
-          {t("question")} {current + 1}/{questions.length}
+          {t("question")} {current + 1}/{aiMode ? "∞" : questions.length}
         </span>
         <motion.div
           key={timer}
@@ -400,6 +438,7 @@ export default function QuizPage() {
       <div className="mb-3">
         <span className="text-xs text-white/40 bg-white/10 px-3 py-1 rounded-full">
           {getCategoryEmoji(q.category)} {q.category}
+          {aiMode && " · 🤖 IA"}
         </span>
       </div>
 
@@ -407,7 +446,7 @@ export default function QuizPage() {
       <div className="w-full bg-white/10 rounded-full h-2 mb-6">
         <motion.div
           className="bg-[#FBCD00] h-2 rounded-full"
-          animate={{ width: `${(current / questions.length) * 100}%` }}
+          animate={{ width: aiMode ? "100%" : `${(current / questions.length) * 100}%` }}
           transition={{ duration: 0.5 }}
         />
       </div>
