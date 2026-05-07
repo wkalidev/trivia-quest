@@ -171,12 +171,10 @@ export default function Home() {
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
 
-  // ✅ Adresses dynamiques selon la chain active dans le wallet
   const chainId = useChainId();
   const CONTRACT_ADDRESS = getContractAddress(chainId, "game");
   const TRIVQ_ADDR = getContractAddress(chainId, "token");
 
-  // Labels UI dynamiques
   const chainLabel = chainId === 8453 ? "Base Mainnet" : "Celo Mainnet";
   const tokenLabel = chainId === 8453 ? "TRIVQ · Base" : "TRIVQ · Celo";
 
@@ -420,6 +418,28 @@ export default function Home() {
         <motion.div variants={itemVariants} className="grid grid-cols-2 gap-2">
           <ActionButton onClick={() => router.push("/badges")} variant="purple">🎨 My Badges</ActionButton>
           <ActionButton onClick={() => router.push("/checkin")} variant="gold">🔥 Check-in</ActionButton>
+        </motion.div>
+
+        {/* ✅ Bouton Duel 1v1 */}
+        <motion.div variants={itemVariants}>
+          <motion.button
+            onClick={() => router.push("/duel")}
+            whileHover={{ scale: 1.02, boxShadow: "0 0 30px rgba(139,92,246,0.3)" }}
+            whileTap={{ scale: 0.97 }}
+            className="w-full py-4 rounded-2xl font-black text-base relative overflow-hidden flex items-center justify-center gap-2"
+            style={{
+              background: "linear-gradient(135deg, rgba(139,92,246,0.15) 0%, rgba(109,40,217,0.1) 100%)",
+              border: "1px solid rgba(139,92,246,0.4)",
+              color: "#A78BFA",
+            }}
+          >
+            <span>⚔️</span>
+            <span>Trivia Duel</span>
+            <span className="text-purple-400/50 text-sm font-normal">— Défie un joueur</span>
+            <span className="absolute right-4 text-xs bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded-full border border-purple-500/30">
+              NEW
+            </span>
+          </motion.button>
         </motion.div>
 
         <motion.div variants={itemVariants} className="grid grid-cols-2 gap-2">
