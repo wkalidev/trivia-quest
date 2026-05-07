@@ -1,9 +1,83 @@
-// TriviaQuest SDK
-// Blockchain quiz game on Celo
+// TriviaQuest SDK v2.0.0
+// Blockchain quiz game on Celo & Base
+// https://trivia-quest-eight.vercel.app
 
-export const CONTRACT_ADDRESS_MAINNET = "0xe7faded5157341911a99cae5c49ad4c1eeb1116a" as const;
+export const SDK_VERSION = "2.0.0";
+
+// ── Contract Addresses ─────────────────────────────────────
+
+// Celo Mainnet
+export const TRIVIA_QUEST_ADDRESS_CELO = "0xffe22d3d1b63866ac9da8ac92fdb9ceddeadb0bb" as const;
+export const TRIVQ_TOKEN_ADDRESS_CELO   = "0xe65fc5cacaf9a5aebbc0e151dee08a53f24a05c5" as const;
+export const CHECKIN_ADDRESS_CELO       = "0x8650e6c477f8ae3933dc6d61d85e65c90cf71828" as const;
+export const REFERRAL_ADDRESS_CELO      = "0xa0fcd85a25ecb71ca1ea9d63da058c832c27c62e" as const;
+export const DUEL_ADDRESS_CELO          = "0xee7be00cd5454b9bea56d864d82076b8b5de5ca1" as const;
+
+// Base Mainnet
+export const TRIVIA_QUEST_ADDRESS_BASE  = "0x1e2c209412ec30915ccf922654f0593faf61fcfb" as const;
+export const TRIVQ_TOKEN_ADDRESS_BASE   = "0x8ecc1dc70f3bc5be941b61b42707eb7dbddb54c3" as const;
+export const CHECKIN_ADDRESS_BASE       = "0x0f19851d5cd905d110c000a7d26d74a2f21f8ff9" as const;
+export const REFERRAL_ADDRESS_BASE      = "0x4fb5285263354e1e75f044c65166ab22c3840074" as const;
+
+// Legacy exports (backwards compatibility)
+export const CONTRACT_ADDRESS_MAINNET = TRIVIA_QUEST_ADDRESS_CELO;
 export const CONTRACT_ADDRESS_TESTNET = "0x50b20728ba0ad803679b5428f267c89aede9a378" as const;
 
+// ── Network Config ─────────────────────────────────────────
+
+export const CELO_MAINNET = {
+  id: 42220,
+  name: "Celo Mainnet",
+  rpcUrl: "https://forno.celo.org",
+  explorerUrl: "https://celoscan.io",
+  contracts: {
+    game:    TRIVIA_QUEST_ADDRESS_CELO,
+    token:   TRIVQ_TOKEN_ADDRESS_CELO,
+    checkin: CHECKIN_ADDRESS_CELO,
+    referral:REFERRAL_ADDRESS_CELO,
+    duel:    DUEL_ADDRESS_CELO,
+  },
+};
+
+export const BASE_MAINNET = {
+  id: 8453,
+  name: "Base Mainnet",
+  rpcUrl: "https://mainnet.base.org",
+  explorerUrl: "https://basescan.org",
+  contracts: {
+    game:    TRIVIA_QUEST_ADDRESS_BASE,
+    token:   TRIVQ_TOKEN_ADDRESS_BASE,
+    checkin: CHECKIN_ADDRESS_BASE,
+    referral:REFERRAL_ADDRESS_BASE,
+    duel:    "" as const,
+  },
+};
+
+export const CELO_TESTNET = {
+  id: 11142220,
+  name: "Celo Sepolia",
+  rpcUrl: "https://forno.celo-sepolia.celo-testnet.org",
+  explorerUrl: "https://sepolia.celoscan.io",
+  contracts: {
+    game:    CONTRACT_ADDRESS_TESTNET,
+    token:   "" as const,
+    checkin: "" as const,
+    referral:"" as const,
+    duel:    "0xd9456518d7acbe6bcab494aa5894ce4cdf7c5ad7" as const,
+  },
+};
+
+// ── Helper: get contract address by chainId ────────────────
+export function getAddress(
+  chainId: number,
+  contract: "game" | "token" | "checkin" | "referral" | "duel"
+): `0x${string}` {
+  if (chainId === 42220) return CELO_MAINNET.contracts[contract] as `0x${string}`;
+  if (chainId === 8453)  return BASE_MAINNET.contracts[contract] as `0x${string}`;
+  return CELO_TESTNET.contracts[contract] as `0x${string}`;
+}
+
+// ── TriviaQuest ABI ────────────────────────────────────────
 export const CONTRACT_ABI = [
   {
     name: "joinRound",
@@ -25,7 +99,7 @@ export const CONTRACT_ABI = [
           { name: "prizePool", type: "uint256" },
           { name: "startTime", type: "uint256" },
           { name: "endTime", type: "uint256" },
-          { name: "winner", type: "address" },
+          { name: "topWinners", type: "address[]" },
           { name: "finished", type: "bool" },
         ],
       },
@@ -94,7 +168,132 @@ export const CONTRACT_ABI = [
   },
 ] as const;
 
+// ── TriviaDuel ABI ─────────────────────────────────────────
+export const DUEL_ABI = [
+  {
+    name: "createDuel",
+    type: "function",
+    stateMutability: "payable",
+    inputs: [],
+    outputs: [{ type: "uint256" }],
+  },
+  {
+    name: "joinDuel",
+    type: "function",
+    stateMutability: "payable",
+    inputs: [{ name: "duelId", type: "uint256" }],
+    outputs: [],
+  },
+  {
+    name: "cancelExpiredDuel",
+    type: "function",
+    stateMutability: "nonpayable",
+    inputs: [{ name: "duelId", type: "uint256" }],
+    outputs: [],
+  },
+  {
+    name: "getDuel",
+    type: "function",
+    stateMutability: "view",
+    inputs: [{ name: "duelId", type: "uint256" }],
+    outputs: [
+      {
+        type: "tuple",
+        components: [
+          { name: "id", type: "uint256" },
+          { name: "playerA", type: "address" },
+          { name: "playerB", type: "address" },
+          { name: "wager", type: "uint256" },
+          { name: "scoreA", type: "uint256" },
+          { name: "scoreB", type: "uint256" },
+          { name: "scoreASubmitted", type: "bool" },
+          { name: "scoreBSubmitted", type: "bool" },
+          { name: "winner", type: "address" },
+          { name: "status", type: "uint8" },
+          { name: "createdAt", type: "uint256" },
+          { name: "expiresAt", type: "uint256" },
+        ],
+      },
+    ],
+  },
+  {
+    name: "getOpenDuels",
+    type: "function",
+    stateMutability: "view",
+    inputs: [{ name: "limit", type: "uint256" }],
+    outputs: [
+      {
+        type: "tuple[]",
+        components: [
+          { name: "id", type: "uint256" },
+          { name: "playerA", type: "address" },
+          { name: "playerB", type: "address" },
+          { name: "wager", type: "uint256" },
+          { name: "scoreA", type: "uint256" },
+          { name: "scoreB", type: "uint256" },
+          { name: "scoreASubmitted", type: "bool" },
+          { name: "scoreBSubmitted", type: "bool" },
+          { name: "winner", type: "address" },
+          { name: "status", type: "uint8" },
+          { name: "createdAt", type: "uint256" },
+          { name: "expiresAt", type: "uint256" },
+        ],
+      },
+    ],
+  },
+  {
+    name: "getPlayerDuels",
+    type: "function",
+    stateMutability: "view",
+    inputs: [{ name: "player", type: "address" }],
+    outputs: [{ type: "uint256[]" }],
+  },
+  {
+    name: "duelCounter",
+    type: "function",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [{ type: "uint256" }],
+  },
+] as const;
+
+// ── TRIVQ Token ABI ────────────────────────────────────────
+export const TRIVQ_ABI = [
+  {
+    name: "balanceOf",
+    type: "function",
+    stateMutability: "view",
+    inputs: [{ name: "account", type: "address" }],
+    outputs: [{ type: "uint256" }],
+  },
+  {
+    name: "transfer",
+    type: "function",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "to", type: "address" },
+      { name: "amount", type: "uint256" },
+    ],
+    outputs: [{ type: "bool" }],
+  },
+  {
+    name: "totalSupply",
+    type: "function",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [{ type: "uint256" }],
+  },
+  {
+    name: "decimals",
+    type: "function",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [{ type: "uint8" }],
+  },
+] as const;
+
 // ── Types ──────────────────────────────────────────────────
+
 export type LeaderboardEntry = {
   player: string;
   totalPoints: bigint;
@@ -116,11 +315,81 @@ export type Round = {
   prizePool: bigint;
   startTime: bigint;
   endTime: bigint;
-  winner: string;
+  topWinners: string[];
   finished: boolean;
 };
 
+export enum DuelStatus {
+  Open = 0,
+  Active = 1,
+  Finished = 2,
+  Cancelled = 3,
+}
+
+export type Duel = {
+  id: bigint;
+  playerA: string;
+  playerB: string;
+  wager: bigint;
+  scoreA: bigint;
+  scoreB: bigint;
+  scoreASubmitted: boolean;
+  scoreBSubmitted: boolean;
+  winner: string;
+  status: DuelStatus;
+  createdAt: bigint;
+  expiresAt: bigint;
+};
+
+// ── Score & Streak Utils ───────────────────────────────────
+
+export function getMultiplier(streak: number): number {
+  if (streak >= 5) return 3;
+  if (streak >= 3) return 2;
+  return 1;
+}
+
+export function calculatePoints(correct: boolean, streak: number): number {
+  if (!correct) return 0;
+  return 100 * getMultiplier(streak + 1);
+}
+
+export function getStreakLabel(streak: number): string {
+  if (streak >= 5) return "🔥🔥🔥 x3 MEGA";
+  if (streak >= 3) return "🔥🔥 x2 HOT";
+  if (streak >= 1) return "🔥 Streak";
+  return "";
+}
+
+// ── Duel Utils ─────────────────────────────────────────────
+
+export function getDuelStatusLabel(status: DuelStatus): string {
+  switch (status) {
+    case DuelStatus.Open:      return "Open";
+    case DuelStatus.Active:    return "Active";
+    case DuelStatus.Finished:  return "Finished";
+    case DuelStatus.Cancelled: return "Cancelled";
+  }
+}
+
+export function formatWager(wager: bigint): string {
+  const n = Number(wager) / 1e18;
+  if (n < 0.001) return "<0.001 CELO";
+  return `${n.toFixed(3)} CELO`;
+}
+
+export function getDuelNetPrize(wager: bigint, feeBps = 1000): bigint {
+  const total = wager * BigInt(2);
+  const fee = (total * BigInt(feeBps)) / BigInt(10000);
+  return total - fee;
+}
+
+export function isDuelExpired(expiresAt: bigint): boolean {
+  return Date.now() / 1000 > Number(expiresAt);
+}
+
 // ── MiniPay Utils ──────────────────────────────────────────
+
 export function isMiniPay(): boolean {
   if (typeof window === "undefined") return false;
   return window.navigator.userAgent.includes("MiniPay");
@@ -146,40 +415,23 @@ export async function getMiniPayAccount(): Promise<string | null> {
   }
 }
 
-// ── Score Utils ────────────────────────────────────────────
-export function getMultiplier(streak: number): number {
-  if (streak >= 5) return 3;
-  if (streak >= 3) return 2;
-  return 1;
+// ── Format Utils ───────────────────────────────────────────
+
+export function formatAddress(address: string): string {
+  return `${address.slice(0, 6)}...${address.slice(-4)}`;
 }
 
-export function calculatePoints(correct: boolean, streak: number): number {
-  if (!correct) return 0;
-  return 100 * getMultiplier(streak + 1);
+export function formatTrivq(raw: bigint): string {
+  const n = Number(raw) / 1e18;
+  if (n >= 1_000_000_000) return `${(n / 1_000_000_000).toFixed(1)}B`;
+  if (n >= 1_000_000)     return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000)         return `${(n / 1_000).toFixed(1)}K`;
+  return n.toFixed(0);
 }
 
-export function getStreakLabel(streak: number): string {
-  if (streak >= 5) return "🔥🔥🔥 x3 MEGA";
-  if (streak >= 3) return "🔥🔥 x2 HOT";
-  if (streak >= 1) return "🔥 Streak";
-  return "";
+export function formatCelo(wei: bigint): string {
+  const n = Number(wei) / 1e18;
+  if (n === 0)     return "0";
+  if (n < 0.001)   return "<0.001";
+  return n.toFixed(3);
 }
-
-// ── Network Config ─────────────────────────────────────────
-export const CELO_MAINNET = {
-  id: 42220,
-  name: "Celo Mainnet",
-  rpcUrl: "https://forno.celo.org",
-  explorerUrl: "https://celoscan.io",
-  contractAddress: CONTRACT_ADDRESS_MAINNET,
-};
-
-export const CELO_TESTNET = {
-  id: 11142220,
-  name: "Celo Sepolia",
-  rpcUrl: "https://forno.celo-sepolia.celo-testnet.org",
-  explorerUrl: "https://sepolia.celoscan.io",
-  contractAddress: CONTRACT_ADDRESS_TESTNET,
-};
-
-export const SDK_VERSION = "1.0.0";
