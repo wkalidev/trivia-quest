@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useAccount, useWriteContract, useReadContract, useChainId } from "wagmi";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { parseEther } from "viem";
 import { CONTRACT_ABI, getContractAddress } from "@/lib/contract";
 import { getRandomQuestions, getQuestionsByCategory, CATEGORIES } from "@/lib/questions";
@@ -39,6 +39,9 @@ export default function QuizPage() {
   const chainId = useChainId();
   const CONTRACT_ADDRESS = getContractAddress(chainId, "game");
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const duelId = searchParams?.get("duelId");
+  const isDuelMode = !!duelId;
   const t = useTranslations("quiz");
 
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -123,21 +126,36 @@ export default function QuizPage() {
     if (questions.length === 0) return;
     setSelected((prev) => {
       const isCorrect = prev === questions[current]?.answer;
+      const finalScore = score + (isCorrect ? 1 : 0);
       setTimer(15);
       setIsCorrectAnswer(null);
       if (current + 1 >= questions.length) {
         setFinished(true);
-        router.push(
-          `/results?score=${score + (isCorrect ? 1 : 0)}&total=${questions.length}&points=${totalPoints}`
-        );
+        // ✅ Mode Duel — soumet le score on-chain puis redirige vers le détail
+        if (isDuelMode && duelId && address) {
+          fetch("/api/submit-duel-score", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              player: address,
+              duelId: parseInt(duelId),
+              score: finalScore,
+            }),
+          }).finally(() => {
+            router.push(`/duel/${duelId}?scored=1`);
+          });
+        } else {
+          router.push(
+            `/results?score=${finalScore}&total=${questions.length}&points=${totalPoints}`
+          );
+        }
       } else {
         setCurrent((c) => c + 1);
-        // Pré-charge la prochaine question IA
         if (aiMode) prefetchNextAIQuestion();
       }
       return null;
     });
-  }, [questions, current, score, totalPoints, router, aiMode, prefetchNextAIQuestion]);
+  }, [questions, current, score, totalPoints, router, aiMode, prefetchNextAIQuestion, isDuelMode, duelId, address]);
 
   useEffect(() => {
     if (!joined || finished || questions.length === 0) return;
@@ -338,6 +356,13 @@ export default function QuizPage() {
       {aiMode && (
         <div className="absolute top-4 left-4 bg-purple-500/20 border border-purple-500/40 text-purple-300 text-xs px-2 py-1 rounded-full z-20">
           🤖 Mode IA
+        </div>
+      )}
+
+      {/* Duel badge */}
+      {isDuelMode && (
+        <div className="absolute top-4 left-4 bg-yellow-500/20 border border-yellow-500/40 text-yellow-300 text-xs px-2 py-1 rounded-full z-20">
+          ⚔️ Duel #{duelId}
         </div>
       )}
 
