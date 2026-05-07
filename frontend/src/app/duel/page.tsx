@@ -375,10 +375,14 @@ export default function DuelPage() {
             ) : (
               <div className="space-y-2">
                 {(myDuelIds as bigint[]).map((id) => (
-                  <div key={id.toString()} className="bg-white/5 rounded-xl px-4 py-3 flex justify-between items-center">
+                  <button
+                    key={id.toString()}
+                    onClick={() => router.push(`/duel/${id.toString()}`)}
+                    className="w-full bg-white/5 hover:bg-white/10 rounded-xl px-4 py-3 flex justify-between items-center transition-all"
+                  >
                     <span className="text-white font-bold">Duel #{id.toString()}</span>
-                    <span className="text-white/40 text-xs">Voir détails →</span>
-                  </div>
+                    <span className="text-[#FBCD00] text-xs font-bold">Voir détails →</span>
+                  </button>
                 ))}
               </div>
             )}
