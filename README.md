@@ -4,6 +4,7 @@
 
 [![Live Demo](https://img.shields.io/badge/Live-trivia--quest--eight.vercel.app-FBCD00?style=for-the-badge)](https://trivia-quest-eight.vercel.app)
 [![npm](https://img.shields.io/badge/SDK-npm-CB3837?style=for-the-badge&logo=npm)](https://www.npmjs.com/package/@wkalidev/trivia-quest-sdk)
+[![Self Agent](https://img.shields.io/badge/Self_Agent-ID_%23103-6366f1?style=for-the-badge)](https://app.ai.self.xyz/agents)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 
 ## 🌍 Why Africa?
@@ -16,8 +17,8 @@ Celo's mission is financial inclusion for the unbanked. With **57% of African ad
 |---|---|
 | App | https://trivia-quest-eight.vercel.app |
 | Duel 1v1 | https://trivia-quest-eight.vercel.app/duel |
-| SDK | npm install @wkalidev/trivia-quest-sdk |
-| Stats API | GET /api/stats |
+| SDK | `npm install @wkalidev/trivia-quest-sdk` |
+| Stats API | `GET /api/stats` |
 | GitHub | https://github.com/wkalidev/trivia-quest |
 
 ## 🎮 Features
@@ -41,6 +42,7 @@ Celo's mission is financial inclusion for the unbanked. With **57% of African ad
 - 🆕 AI Mode — questions by Groq AI (LLaMA 3.1)
 - 🆕 Trivia Duel 1v1 — wager CELO on-chain
 - 🆕 Discord AI Agent — /ask /askcat
+- 🆕 Self Agent ID — verified onchain AI agent (#103)
 
 ## 🤖 AI Mode (NEW — May 2026)
 
@@ -49,7 +51,20 @@ Questions generated in real-time by Groq AI (LLaMA 3.1-8b-instant):
 - Infinite unique questions — never the same quiz twice
 - Questions preloaded in background while you play
 - Accessible via /quiz → Mode IA button
-- API: GET /api/ai-question?category=Web3%20%26%20Crypto
+- API: `GET /api/ai-question?category=Web3%20%26%20Crypto`
+
+## 🔐 Self Agent ID (NEW — May 2026)
+
+The Trivia Q Discord bot is registered as a verified onchain AI agent via [Self Protocol](https://app.ai.self.xyz):
+
+| Property | Value |
+|---|---|
+| Agent ID | #103 |
+| Agent Address | `0xFa475D3E676c4A87e410F536b1231FcD220B0261` |
+| Network | Celo Mainnet |
+| Status | ✅ Verified onchain |
+
+Every AI request made by the bot is cryptographically signed with ECDSA — verifiable on-chain. The `/api/ai-question` endpoint recognizes verified Self Agents and grants them priority access, bypassing standard rate limits.
 
 ## ⚔️ Trivia Duel 1v1 (NEW — May 2026)
 
@@ -59,26 +74,26 @@ Questions generated in real-time by Groq AI (LLaMA 3.1-8b-instant):
 - Tie = both players refunded minus fees
 - Expires in 24h if no one joins → full refund
 - 10% protocol fee on winnings
-- Contract: 0xee7be00cd5454b9bea56d864d82076b8b5de5ca1
+- Contract: `0xee7be00cd5454b9bea56d864d82076b8b5de5ca1`
 
 ## 🔗 Smart Contracts
 
 ### Celo Mainnet
 | Contract | Address |
 |---|---|
-| TriviaQToken ($TRIVQ) v2 | 0xe65fc5cacaf9a5aebbc0e151dee08a53f24a05c5 |
-| TriviaQuest v3 | 0xffe22d3d1b63866ac9da8ac92fdb9ceddeadb0bb |
-| TriviaDuel v1 NEW | 0xee7be00cd5454b9bea56d864d82076b8b5de5ca1 |
-| DailyCheckIn v2 | 0x8650e6c477f8ae3933dc6d61d85e65c90cf71828 |
-| Referral v2 | 0xa0fcd85a25ecb71ca1ea9d63da058c832c27c62e |
+| TriviaQToken ($TRIVQ) v2 | `0xe65fc5cacaf9a5aebbc0e151dee08a53f24a05c5` |
+| TriviaQuest v3 | `0xffe22d3d1b63866ac9da8ac92fdb9ceddeadb0bb` |
+| TriviaDuel v1 🆕 | `0xee7be00cd5454b9bea56d864d82076b8b5de5ca1` |
+| DailyCheckIn v2 | `0x8650e6c477f8ae3933dc6d61d85e65c90cf71828` |
+| Referral v2 | `0xa0fcd85a25ecb71ca1ea9d63da058c832c27c62e` |
 
 ### Base Mainnet
 | Contract | Address |
 |---|---|
-| TriviaQToken ($TRIVQ) | 0x3217e21a74a068779902213ab06ad3301a8e6a02 |
-| TriviaQuest | 0xf44dfec3230bcf917ca7ccc59b4e67df2507e21f |
-| DailyCheckIn | 0x8a6f59c5f1f11a7ae75c54b1eb95c477405f1bda |
-| Referral | 0x4dafb4d844ce8bd52ce3ad4cee2a4e73780d0c91 |
+| TriviaQToken ($TRIVQ) | `0x3217e21a74a068779902213ab06ad3301a8e6a02` |
+| TriviaQuest | `0xf44dfec3230bcf917ca7ccc59b4e67df2507e21f` |
+| DailyCheckIn | `0x8a6f59c5f1f11a7ae75c54b1eb95c477405f1bda` |
+| Referral | `0x4dafb4d844ce8bd52ce3ad4cee2a4e73780d0c91` |
 
 ## 💎 $TRIVQ Tokenomics
 
@@ -112,7 +127,8 @@ Questions generated in real-time by Groq AI (LLaMA 3.1-8b-instant):
 | NFT Storage | Pinata IPFS |
 | Frontend | Next.js 16 + TypeScript + TailwindCSS |
 | Web3 | Wagmi + Viem + RainbowKit |
-| AI | Groq API (LLaMA 3.1-8b-instant) NEW |
+| AI | Groq API (LLaMA 3.1-8b-instant) |
+| AI Agent | Self Protocol — Agent #103 🆕 |
 | i18n | next-intl (FR, EN, ES, IT) |
 | Bot | discord.js v14 + ethers.js v6 |
 | Bot Hosting | Railway (24/7) |
@@ -131,7 +147,7 @@ yarn dev
 
 # Bot
 cd ../bot && npm install
-# Add DISCORD_TOKEN, CLIENT_ID, GUILD_ID, GROQ_API_KEY to .env
+# Add DISCORD_TOKEN, CLIENT_ID, GUILD_ID, GROQ_API_KEY, SELF_AGENT_PRIVATE_KEY to .env
 npm run build && npm start
 
 # Contracts
@@ -141,30 +157,31 @@ npx hardhat compile
 
 ## 🎯 Proof of Ship Checklist
 
-- Build For MiniPay
-- Deploy On Celo (5 contracts)
-- Deploy On Base (4 contracts)
-- $TRIVQ Token ERC-20 verified
-- 150 NFT Badges ERC-1155 on IPFS
-- Daily Check-in on-chain
-- Protocol Fee 10%
-- Auto Round Management via cron
-- Referral System
-- $TRIVQ Price Tracker
-- Liquidity Pool on Ubeswap v3
-- PWA Push Notifications
-- Public SDK on npm
-- Farcaster Frame
-- Dynamic OG image
-- Score share card
-- Public Stats API
-- Discord Bot 24/7 on Railway
-- Multi-chain Celo + Base
-- Coinbase Verification
-- Terms of Service + Privacy Policy
-- 🆕 AI Question Mode (Groq LLaMA 3.1)
-- 🆕 Trivia Duel 1v1 on-chain
-- 🆕 Discord AI Agent /ask /askcat
+- [x] Build For MiniPay
+- [x] Deploy On Celo (5 contracts)
+- [x] Deploy On Base (4 contracts)
+- [x] $TRIVQ Token ERC-20 verified
+- [x] 150 NFT Badges ERC-1155 on IPFS
+- [x] Daily Check-in on-chain
+- [x] Protocol Fee 10%
+- [x] Auto Round Management via cron
+- [x] Referral System
+- [x] $TRIVQ Price Tracker
+- [x] Liquidity Pool on Ubeswap v3
+- [x] PWA Push Notifications
+- [x] Public SDK on npm
+- [x] Farcaster Frame
+- [x] Dynamic OG image
+- [x] Score share card
+- [x] Public Stats API
+- [x] Discord Bot 24/7 on Railway
+- [x] Multi-chain Celo + Base
+- [x] Coinbase Verification
+- [x] Terms of Service + Privacy Policy
+- [x] AI Question Mode (Groq LLaMA 3.1) 🆕
+- [x] Trivia Duel 1v1 on-chain 🆕
+- [x] Discord AI Agent /ask /askcat 🆕
+- [x] Self Agent ID — verified onchain AI agent #103 🆕
 
 ## 👤 Author
 
