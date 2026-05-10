@@ -1,6 +1,8 @@
 import { EmbedBuilder } from "discord.js";
+import { SelfAgent } from "@selfxyz/agent-sdk";
 
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
+const FRONTEND_URL = "https://trivia-quest-eight.vercel.app";
 
 const CATEGORIES = [
   "African Geography",
@@ -10,6 +12,17 @@ const CATEGORIES = [
   "Sports",
   "General Knowledge",
 ];
+
+// ✅ Self Agent — singleton signé onchain
+const selfAgent = process.env.SELF_AGENT_PRIVATE_KEY
+  ? new SelfAgent({ privateKey: process.env.SELF_AGENT_PRIVATE_KEY })
+  : null;
+
+if (selfAgent) {
+  console.log("🔐 Self Agent initialized — requests will be signed onchain");
+} else {
+  console.warn("⚠️  SELF_AGENT_PRIVATE_KEY not set — running without Self Agent verification");
+}
 
 export interface GeneratedQuestion {
   question: string;
@@ -41,11 +54,16 @@ Rules:
 - question must be factual and educational`;
 
   try {
-    const res = await fetch(GROQ_API_URL, {
+    // ✅ Utilise SelfAgent.fetch si disponible (requête signée), sinon fetch normal
+    const fetcher = selfAgent
+      ? (url: string, init: RequestInit) => selfAgent.fetch(url, init)
+      : fetch;
+
+    const res = await fetcher(GROQ_API_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
+        Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
       },
       body: JSON.stringify({
         model: "llama-3.1-8b-instant",
@@ -107,9 +125,9 @@ export function buildQuestionEmbed(q: GeneratedQuestion): EmbedBuilder {
       })),
       {
         name: "✅ Answer",
-        value: `||${q.answer}. ${q.options
-          .find((o) => o.startsWith(q.answer))
-          ?.substring(3) ?? ""}||`,
+        value: `||${q.answer}. ${
+          q.options.find((o) => o.startsWith(q.answer))?.substring(3) ?? ""
+        }||`,
         inline: false,
       },
       {
@@ -119,10 +137,17 @@ export function buildQuestionEmbed(q: GeneratedQuestion): EmbedBuilder {
       },
       {
         name: "🎮 Play & Earn",
-        value: "https://trivia-quest-eight.vercel.app",
+        value: FRONTEND_URL,
+        inline: true,
+      },
+      {
+        name: "🔐 Verified Agent",
+        value: selfAgent ? "✅ Self Protocol" : "⚠️ Unverified",
         inline: true,
       }
     )
-    .setFooter({ text: "Trivia Quest AI · Powered by Groq · Celo Mainnet" })
+    .setFooter({
+      text: `Trivia Quest AI · Powered by Groq · Celo Mainnet${selfAgent ? " · Self Agent #103" : ""}`,
+    })
     .setTimestamp();
 }

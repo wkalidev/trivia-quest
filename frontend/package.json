@@ -45,6 +45,7 @@
     "@rainbow-me/rainbowkit": "^2.2.10",
     "@safe-global/safe-apps-provider": "^0.18.6",
     "@safe-global/safe-apps-sdk": "^9.1.0",
+    "@selfxyz/agent-sdk": "^0.2.1",
     "@tanstack/react-query": "^5.96.0",
     "@walletconnect/ethereum-provider": "^2.23.9",
     "framer-motion": "^12.38.0",

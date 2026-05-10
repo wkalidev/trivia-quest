@@ -1,4 +1,5 @@
 import { NextResponse, NextRequest } from "next/server";
+import { SelfAgentVerifier } from "@selfxyz/agent-sdk";
 
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 
@@ -25,10 +26,42 @@ function isRateLimited(ip: string): boolean {
   return false;
 }
 
+// ✅ Self Agent verifier — singleton
+const verifier = SelfAgentVerifier.create().build();
+
+// ✅ Vérifie si la requête vient d'un agent Self vérifié
+async function isSelfAgent(req: NextRequest): Promise<boolean> {
+  try {
+    const signature = req.headers.get("x-self-signature");
+    const timestamp = req.headers.get("x-self-timestamp");
+    const keytype   = req.headers.get("x-self-keytype") ?? undefined;
+    if (!signature || !timestamp) return false;
+
+    const result = await verifier.verify({
+      signature,
+      timestamp,
+      method: req.method,
+      url: req.url,
+      keytype,
+    });
+
+    return result?.valid === true;
+  } catch {
+    return false;
+  }
+}
+
 export async function GET(req: NextRequest) {
   const ip = req.headers.get("x-forwarded-for") ?? "unknown";
-  if (isRateLimited(ip)) {
-    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+
+  // ✅ Self Agent vérifié → bypass rate limit
+  const agentVerified = await isSelfAgent(req);
+
+  if (!agentVerified && isRateLimited(ip)) {
+    return NextResponse.json(
+      { error: "Too many requests. Verified Self agents bypass this limit." },
+      { status: 429 }
+    );
   }
 
   const { searchParams } = new URL(req.url);
@@ -75,7 +108,6 @@ Règles :
     const clean = raw.replace(/```json|```/g, "").trim();
     const parsed = JSON.parse(clean);
 
-    // Validation
     if (
       !parsed.question ||
       !Array.isArray(parsed.options) ||
@@ -93,6 +125,7 @@ Règles :
       answer: parsed.answer,
       category: parsed.category ?? category,
       isAI: true,
+      verifiedAgent: agentVerified,
     });
   } catch (e) {
     console.error("ai-question error:", e);
