@@ -1,5 +1,4 @@
 import { EmbedBuilder } from "discord.js";
-import { SelfAgent } from "@selfxyz/agent-sdk";
 
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 const FRONTEND_URL = "https://trivia-quest-eight.vercel.app";
@@ -13,17 +12,6 @@ const CATEGORIES = [
   "General Knowledge",
 ];
 
-// ✅ Self Agent — singleton signé onchain
-const selfAgent = process.env.SELF_AGENT_PRIVATE_KEY
-  ? new SelfAgent({ privateKey: process.env.SELF_AGENT_PRIVATE_KEY })
-  : null;
-
-if (selfAgent) {
-  console.log("🔐 Self Agent initialized — requests will be signed onchain");
-} else {
-  console.warn("⚠️  SELF_AGENT_PRIVATE_KEY not set — running without Self Agent verification");
-}
-
 export interface GeneratedQuestion {
   question: string;
   options: string[];
@@ -31,6 +19,27 @@ export interface GeneratedQuestion {
   category: string;
   difficulty: "easy" | "medium" | "hard";
 }
+
+// ✅ Self Agent — chargé dynamiquement pour éviter le bug ESM de @noble/ed25519
+let selfAgent: { fetch: typeof fetch } | null = null;
+
+async function initSelfAgent(): Promise<void> {
+  if (!process.env.SELF_AGENT_PRIVATE_KEY) {
+    console.warn("⚠️  SELF_AGENT_PRIVATE_KEY not set — running without Self Agent");
+    return;
+  }
+  try {
+    const { SelfAgent } = await import("@selfxyz/agent-sdk");
+    selfAgent = new SelfAgent({ privateKey: process.env.SELF_AGENT_PRIVATE_KEY });
+    console.log("🔐 Self Agent #103 initialized — requests signed onchain");
+  } catch (e) {
+    console.warn("⚠️  Self Agent failed to initialize:", e);
+    selfAgent = null;
+  }
+}
+
+// Initialise au démarrage
+initSelfAgent();
 
 export async function generateQuestion(
   category?: string
@@ -54,9 +63,9 @@ Rules:
 - question must be factual and educational`;
 
   try {
-    // ✅ Utilise SelfAgent.fetch si disponible (requête signée), sinon fetch normal
+    // ✅ Utilise selfAgent.fetch si disponible, sinon fetch normal
     const fetcher = selfAgent
-      ? (url: string, init: RequestInit) => selfAgent.fetch(url, init)
+      ? (url: string, init: RequestInit) => selfAgent!.fetch(url, init)
       : fetch;
 
     const res = await fetcher(GROQ_API_URL, {
@@ -142,7 +151,7 @@ export function buildQuestionEmbed(q: GeneratedQuestion): EmbedBuilder {
       },
       {
         name: "🔐 Verified Agent",
-        value: selfAgent ? "✅ Self Protocol" : "⚠️ Unverified",
+        value: selfAgent ? "✅ Self Protocol #103" : "⚠️ Unverified",
         inline: true,
       }
     )
