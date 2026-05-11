@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
+    "postinstall": "node patch-sdk.cjs",
     "build": "tsc",
-    "start": "node --experimental-vm-modules dist/index.js"
+    "start": "node dist/index.js"
   },
   "dependencies": {
     "@selfxyz/agent-sdk": "^0.2.1",
