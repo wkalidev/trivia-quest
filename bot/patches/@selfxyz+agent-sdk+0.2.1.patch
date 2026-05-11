@@ -1,0 +1,42 @@
+diff --git a/node_modules/@selfxyz/agent-sdk/dist/Ed25519Agent.js b/node_modules/@selfxyz/agent-sdk/dist/Ed25519Agent.js
+index 4921f56..d399bed 100644
+--- a/node_modules/@selfxyz/agent-sdk/dist/Ed25519Agent.js
++++ b/node_modules/@selfxyz/agent-sdk/dist/Ed25519Agent.js
+@@ -37,7 +37,7 @@ var __importStar = (this && this.__importStar) || (function () {
+ })();
+ Object.defineProperty(exports, "__esModule", { value: true });
+ exports.Ed25519Agent = void 0;
+-const ed = __importStar(require("@noble/ed25519"));
++const { ed25519 } = require("@noble/curves/ed25519");
+ const node_crypto_1 = require("node:crypto");
+ const ethers_1 = require("ethers");
+ const constants_1 = require("./constants");
+@@ -45,9 +45,7 @@ const signing_1 = require("./signing");
+ const contract_types_1 = require("./contract-types");
+ // @noble/ed25519 v3 requires a SHA-512 implementation for sync methods (getPublicKey, sign, verify).
+ // Use Node's built-in crypto module.
+-if (!ed.hashes.sha512) {
+-    ed.hashes.sha512 = (message) => new Uint8Array((0, node_crypto_1.createHash)("sha512").update(message).digest());
+-}
++
+ /**
+  * Agent-side SDK for Self Agent ID using Ed25519 key pairs.
+  *
+@@ -75,7 +73,7 @@ class Ed25519Agent {
+             throw new Error("Ed25519 private key must be 32 bytes (64 hex characters)");
+         }
+         this.privateKeyBytes = hexToBytes(privHex);
+-        this.publicKeyBytes = ed.getPublicKey(this.privateKeyBytes);
++        this.publicKeyBytes = ed25519.getPublicKey(this.privateKeyBytes);
+         const net = constants_1.NETWORKS[config.network ?? constants_1.DEFAULT_NETWORK];
+         const provider = new ethers_1.ethers.JsonRpcProvider(config.rpcUrl ?? net.rpcUrl);
+         this.registry = (0, contract_types_1.typedRegistry)(config.registryAddress ?? net.registryAddress, provider);
+@@ -138,7 +136,7 @@ class Ed25519Agent {
+         const message = (0, signing_1.computeSigningMessage)(timestamp, method, url, body);
+         // Sign the raw 32-byte keccak256 hash with Ed25519
+         const msgBytes = ethers_1.ethers.getBytes(message);
+-        const sigBytes = await ed.signAsync(msgBytes, this.privateKeyBytes);
++        const sigBytes = await ed25519.sign(msgBytes, this.privateKeyBytes);
+         return {
+             [constants_1.HEADERS.KEY]: this._agentKey,
+             [constants_1.HEADERS.KEYTYPE]: "ed25519",

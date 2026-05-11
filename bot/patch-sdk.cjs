@@ -1,54 +1,63 @@
 const fs = require('fs');
 const path = require('path');
 
-const filePath = path.join(__dirname, 'node_modules/@selfxyz/agent-sdk/dist/Ed25519Agent.js');
-let content = fs.readFileSync(filePath, 'utf8');
+// 1. Patch package.json de @noble/ed25519 pour retirer le mode ESM
+const pkgFile = path.join(__dirname, 'node_modules/@noble/ed25519/package.json');
+const pkg = JSON.parse(fs.readFileSync(pkgFile, 'utf8'));
+delete pkg.exports;
+delete pkg.type;
+pkg.main = 'cjs-wrapper.js';
+fs.writeFileSync(pkgFile, JSON.stringify(pkg, null, 2));
+console.log('✅ package.json patched');
 
-// Patch 1: remplace le require par une variable vide (sera remplie au runtime)
-const oldRequire = `const ed = __importStar(require("@noble/ed25519"));`;
-const newRequire = `// patched: ed is loaded lazily via dynamic import`;
+// 2. Créer un wrapper CJS qui réimplémente les fonctions nécessaires
+const { createHash } = require('crypto');
+const cjsWrapper = `
+'use strict';
+const { createHash } = require('crypto');
 
-// Patch 2: remplace le check sha512 et tout le reste par une version async-safe
-const oldCheck = `if (!ed.hashes.sha512) {
-    ed.hashes.sha512 = (message) => new Uint8Array((0, node_crypto_1.createHash)("sha512").update(message).digest());
-}`;
+// sha512 helper
+function sha512(msg) {
+    return new Uint8Array(createHash('sha512').update(msg).digest());
+}
 
-const newCheck = `// sha512 patch handled below`;
+// Noble ed25519 needs to be loaded — we bundle the essentials inline via sync crypto
+// Load the original ESM source synchronously by reading and eval-ing with a shim
+const fs = require('fs');
+const path = require('path');
 
-const oldClass = `class Ed25519Agent {`;
-const newClass = `let ed;
-async function getEd() {
-    if (!ed) {
-        ed = await import('@noble/ed25519');
-        const { createHash } = await import('node:crypto');
-        if (!ed.hashes) ed.hashes = {};
-        if (!ed.hashes.sha512) {
-            ed.hashes.sha512 = (message) => new Uint8Array(createHash("sha512").update(message).digest());
-        }
+// Expose hashes so the SDK can set sha512
+const hashes = { sha512 };
+
+// Re-export a lazy async loader
+let _ed = null;
+async function _load() {
+    if (!_ed) {
+        _ed = await import('@noble/ed25519/index.js');
     }
-    return ed;
+    return _ed;
 }
-class Ed25519Agent {`;
 
-let patched = content;
-
-if (patched.includes(oldRequire)) {
-    patched = patched.replace(oldRequire, newRequire);
-    patched = patched.replace(oldCheck, newCheck);
-    patched = patched.replace(oldClass, newClass);
-
-    // Patch les appels ed.getPublicKey, ed.signAsync pour attendre getEd()
-    patched = patched.replace(
-        `this.publicKeyBytes = ed.getPublicKey(this.privateKeyBytes);`,
-        `this.publicKeyBytes = (await getEd()).getPublicKey(this.privateKeyBytes);`
-    );
-    patched = patched.replace(
-        `const sigBytes = await ed.signAsync(msgBytes, this.privateKeyBytes);`,
-        `const sigBytes = await (await getEd()).signAsync(msgBytes, this.privateKeyBytes);`
-    );
-
-    fs.writeFileSync(filePath, patched);
-    console.log('✅ Patch applied successfully');
-} else {
-    console.log('⚠️ Already patched or pattern not found');
+function getPublicKey(privKey) {
+    // sync - use noble's internal via dynamic require workaround
+    throw new Error('Use getPublicKeyAsync instead');
 }
+
+async function getPublicKeyAsync(privKey) {
+    const ed = await _load();
+    return ed.getPublicKeyAsync(privKey);
+}
+
+async function signAsync(msg, privKey) {
+    const ed = await _load();
+    return ed.signAsync(msg, privKey);
+}
+
+module.exports = { hashes, getPublicKey, getPublicKeyAsync, signAsync };
+`;
+
+fs.writeFileSync(
+    path.join(__dirname, 'node_modules/@noble/ed25519/cjs-wrapper.js'),
+    cjsWrapper
+);
+console.log('✅ CJS wrapper created');
