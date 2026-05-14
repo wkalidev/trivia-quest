@@ -29,18 +29,19 @@ export const metadata: Metadata = {
       "37ab229ec7b57c297e0d4450f934b4bad9b287ea73370cc1cb258e84e4f9da6c38c5982849aa04cca1033f139ad77f56eb1d9e9fe442ccf043098fcdf80f4342",
     "base:app_id": "69d393ef87bcdc902b52fd27",
     "fc:frame": JSON.stringify({
-      version: "next",
-      imageUrl: "https://trivia-quest-eight.vercel.app/opengraph-image",
-      button: {
-        title: "Jouer maintenant 🎮",
-        action: {
-          type: "launch_frame",
-          url: "https://trivia-quest-eight.vercel.app",
-          splashImageUrl: "https://trivia-quest-eight.vercel.app/icon-512.png",
-          splashBackgroundColor: "#1A1A2E",
-        },
-      },
-    }),
+  version: "next",
+  imageUrl: "https://trivia-quest-eight.vercel.app/opengraph-image",
+  button: {
+    title: "Jouer maintenant 🎮",
+    action: {
+      type: "launch_frame",
+      name: "Trivia Q",          // ← ajoute cette ligne
+      url: "https://trivia-quest-eight.vercel.app",
+      splashImageUrl: "https://trivia-quest-eight.vercel.app/icon-512.png",
+      splashBackgroundColor: "#1A1A2E",
+    },
+  },
+}),
   },
 };
 
