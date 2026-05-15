@@ -3,7 +3,6 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 /**
  * @title TriviaDuel
@@ -17,8 +16,6 @@ contract TriviaDuel is Ownable, ReentrancyGuard {
     address public treasury;
     uint256 public totalFeesCollected;
     uint256 public duelCounter;
-    address public gameSigner;  // Backend signer wallet
-    bool public useVerifiedOnly = false;
 
     // ── Duel states ───────────────────────────────────────
     enum DuelStatus { Open, Active, Finished, Cancelled }
@@ -38,28 +35,16 @@ contract TriviaDuel is Ownable, ReentrancyGuard {
         uint256 expiresAt;    // Si pas rejoint dans 24h → annulé
     }
 
-    mapping(bytes32 => bool) public usedNonces;  // Prevent replay attacks
     mapping(uint256 => Duel) public duels;
     mapping(address => uint256[]) public playerDuels; // historique par joueur
 
     // ── Events ────────────────────────────────────────────
     event DuelCreated(uint256 indexed duelId, address indexed playerA, uint256 wager);
     event DuelJoined(uint256 indexed duelId, address indexed playerB);
-    event ScoreSubmitted(uint256 indexed duelId, address indexed player, uint256 score, bytes32 nonce);
+    event ScoreSubmitted(uint256 indexed duelId, address indexed player, uint256 score);
     event DuelFinished(uint256 indexed duelId, address indexed winner, uint256 prize);
     event DuelCancelled(uint256 indexed duelId, address indexed playerA);
     event DuelTie(uint256 indexed duelId, uint256 refundEach);
-
-    // ── Errors ────────────────────────────────────────────
-    error InvalidSignature();
-
-    struct ScoreProof {
-        uint256 duelId;
-        address player;
-        uint256 score;
-        bytes32 nonce;
-        bytes signature;
-    }
 
     // ── Create duel ───────────────────────────────────────
     /**
@@ -127,7 +112,7 @@ contract TriviaDuel is Ownable, ReentrancyGuard {
         uint256 score
     ) external onlyOwner nonReentrant {
         Duel storage duel = duels[duelId];
-        require(!useVerifiedOnly || gameSigner == address(0), "Use submitScoreVerified instead");
+
         require(duel.status == DuelStatus.Active, "Duel not active");
         require(score <= 10, "Score max is 10");
         require(
@@ -147,58 +132,9 @@ contract TriviaDuel is Ownable, ReentrancyGuard {
 
         emit ScoreSubmitted(duelId, player, score);
 
-        //  Résout le duel si les deux scores sont soumis
+        // ✅ Résout le duel si les deux scores sont soumis
         if (duel.scoreASubmitted && duel.scoreBSubmitted) {
             _resolveDuel(duelId);
-        }
-    }
-
-    function submitScoreVerified(ScoreProof calldata proof) external nonReentrant {
-        require(gameSigner != address(0), "Game signer not set");
-        
-        // 1. Verify signature
-        bytes32 messageHash = keccak256(abi.encodePacked(
-            proof.duelId,
-            proof.player,
-            proof.score,
-            proof.nonce,
-            block.chainid,  // Prevent cross-chain replay
-            address(this)    // Prevent cross-contract replay
-        ));
-        
-        bytes32 ethSignedMessage = messageHash.toEthSignedMessageHash();
-        address recoveredSigner = ethSignedMessage.recover(proof.signature);
-        
-        require(recoveredSigner == gameSigner, InvalidSignature());
-        require(!usedNonces[proof.nonce], "Nonce already used");
-        
-        // 2. Mark nonce as used
-        usedNonces[proof.nonce] = true;
-        
-        // 3. Submit the score
-        Duel storage duel = duels[proof.duelId];
-        require(duel.status == DuelStatus.Active, "Duel not active");
-        require(proof.score <= 10, "Score max is 10");
-        require(
-            proof.player == duel.playerA || proof.player == duel.playerB,
-            "Player not in duel"
-        );
-        
-        if (proof.player == duel.playerA) {
-            require(!duel.scoreASubmitted, "Score already submitted");
-            duel.scoreA = proof.score;
-            duel.scoreASubmitted = true;
-        } else {
-            require(!duel.scoreBSubmitted, "Score already submitted");
-            duel.scoreB = proof.score;
-            duel.scoreBSubmitted = true;
-        }
-        
-        emit ScoreSubmitted(proof.duelId, proof.player, proof.score, proof.nonce);
-        
-        // Resolve if both scores are submitted
-        if (duel.scoreASubmitted && duel.scoreBSubmitted) {
-            _resolveDuel(proof.duelId);
         }
     }
 
@@ -286,15 +222,6 @@ contract TriviaDuel is Ownable, ReentrancyGuard {
     function setProtocolFee(uint256 _feeBps) external onlyOwner {
         require(_feeBps <= 2000, "Max 20%");
         protocolFeeBps = _feeBps;
-    }
-
-    function setGameSigner(address _signer) external onlyOwner {
-        require(_signer != address(0), "Zero address");
-        gameSigner = _signer;
-    }
-
-    function setVerifiedOnly(bool _enabled) external onlyOwner {
-        useVerifiedOnly = _enabled;
     }
 
     constructor() Ownable(msg.sender) {
