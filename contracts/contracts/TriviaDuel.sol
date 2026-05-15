@@ -171,7 +171,7 @@ contract TriviaDuel is Ownable, ReentrancyGuard {
         proof.signature
         );
         
-        require(recoveredSigner == gameSigner, InvalidSignature());
+        if (recoveredSigner != gameSigner) revert InvalidSignature();
         require(!usedNonces[proof.nonce], "Nonce already used");
         
         // 2. Mark nonce as used
