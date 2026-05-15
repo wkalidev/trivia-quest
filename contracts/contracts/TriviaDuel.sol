@@ -11,7 +11,6 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
  * @dev Contrat indépendant de TriviaQuest.sol
  */
 contract TriviaDuel is Ownable, ReentrancyGuard {
-    using ECDSA for bytes32;
 
     // ── Constants ─────────────────────────────────────────
     uint256 public protocolFeeBps = 1000; // 10%
@@ -167,8 +166,10 @@ contract TriviaDuel is Ownable, ReentrancyGuard {
             address(this)    // Prevent cross-contract replay
         ));
         
-        bytes32 ethSignedMessage = messageHash.toEthSignedMessageHash();
-        address recoveredSigner = ethSignedMessage.recover(proof.signature);
+        address recoveredSigner = ECDSA.recover(
+        keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", messageHash)),
+        proof.signature
+        );
         
         require(recoveredSigner == gameSigner, InvalidSignature());
         require(!usedNonces[proof.nonce], "Nonce already used");
