@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/farcaster/notify",
+      "schedule": "0 9 * * *"
+    }
+  ]
+}

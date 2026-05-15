@@ -1,5 +1,6 @@
 "use client";
 
+import { sdk } from '@farcaster/miniapp-sdk';
 import { useAccount, useReadContract, useWriteContract } from "wagmi";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -52,6 +53,8 @@ export default function CheckInPage() {
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [countdown, setCountdown] = useState(0);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [notifEnabled, setNotifEnabled] = useState(false);
+  const [notifLoading, setNotifLoading] = useState(false);
 
   const { data: playerData, refetch } = useReadContract({
     address: CHECKIN_ADDRESS,
@@ -68,7 +71,6 @@ export default function CheckInPage() {
   const canCheckIn = playerData?.[3] ?? true;
   const secondsUntilNext = Number(playerData?.[4] ?? 0);
 
-  // Countdown timer
   useEffect(() => {
     if (!canCheckIn && secondsUntilNext > 0) {
       setCountdown(secondsUntilNext);
@@ -98,6 +100,20 @@ export default function CheckInPage() {
         setTimeout(() => setShowSuccess(false), 3000);
       }
     });
+  };
+
+  const enableNotifications = async () => {
+    setNotifLoading(true);
+    try {
+      const result = await sdk.actions.addFrame();
+      if (result?.notificationDetails) {
+        setNotifEnabled(true);
+      }
+    } catch (err) {
+      console.error("Notif error:", err);
+    } finally {
+      setNotifLoading(false);
+    }
   };
 
   if (!isConnected) {
@@ -179,7 +195,6 @@ export default function CheckInPage() {
             </div>
           </div>
 
-          {/* Streak progress — 7 jours */}
           <div className="mb-2">
             <div className="flex justify-between text-xs text-white/30 mb-2">
               <span>Week progress</span>
@@ -198,7 +213,6 @@ export default function CheckInPage() {
             </div>
           </div>
 
-          {/* Rewards info */}
           <div className="grid grid-cols-2 gap-2 mt-3">
             <div className="rounded-xl p-2 text-center"
               style={{ background: "rgba(255,255,255,0.04)" }}
@@ -231,12 +245,8 @@ export default function CheckInPage() {
                 onClick={() => setSelectedCategory(cat.id)}
                 className="rounded-xl p-3 text-center transition-all border"
                 style={{
-                  background: selectedCategory === cat.id
-                    ? `${cat.color}22`
-                    : "rgba(255,255,255,0.03)",
-                  borderColor: selectedCategory === cat.id
-                    ? `${cat.color}66`
-                    : "rgba(255,255,255,0.06)",
+                  background: selectedCategory === cat.id ? `${cat.color}22` : "rgba(255,255,255,0.03)",
+                  borderColor: selectedCategory === cat.id ? `${cat.color}66` : "rgba(255,255,255,0.06)",
                 }}
               >
                 <p className="text-xl mb-1">{cat.emoji}</p>
@@ -244,6 +254,35 @@ export default function CheckInPage() {
               </button>
             ))}
           </div>
+        </motion.div>
+
+        {/* Notification button */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          className="mb-3"
+        >
+          {notifEnabled ? (
+            <div className="rounded-2xl p-3 text-center"
+              style={{ background: "rgba(53,208,127,0.08)", border: "1px solid rgba(53,208,127,0.2)" }}
+            >
+              <p className="text-[#35D07F] font-bold text-sm">🔔 Rappels activés !</p>
+            </div>
+          ) : (
+            <button
+              onClick={enableNotifications}
+              disabled={notifLoading}
+              className="w-full font-bold text-sm py-3 rounded-2xl transition-all disabled:opacity-50"
+              style={{
+                background: "rgba(139,92,246,0.08)",
+                border: "1px solid rgba(139,92,246,0.25)",
+                color: "#A78BFA"
+              }}
+            >
+              {notifLoading ? "Activation..." : "🔔 Activer les rappels quotidiens"}
+            </button>
+          )}
         </motion.div>
 
         {/* Check-in button or countdown */}
