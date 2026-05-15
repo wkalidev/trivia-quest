@@ -11,6 +11,7 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
  * @dev Contrat indépendant de TriviaQuest.sol
  */
 contract TriviaDuel is Ownable, ReentrancyGuard {
+    using ECDSA for bytes32;
 
     // ── Constants ─────────────────────────────────────────
     uint256 public protocolFeeBps = 1000; // 10%
@@ -145,7 +146,7 @@ contract TriviaDuel is Ownable, ReentrancyGuard {
             duel.scoreBSubmitted = true;
         }
 
-        emit ScoreSubmitted(duelId, player, score);
+        emit ScoreSubmitted(duelId, player, score, bytes32(0));
 
         //  Résout le duel si les deux scores sont soumis
         if (duel.scoreASubmitted && duel.scoreBSubmitted) {
