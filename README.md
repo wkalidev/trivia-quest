@@ -43,6 +43,7 @@ Celo's mission is financial inclusion for the unbanked. With **57% of African ad
 - 🆕 Trivia Duel 1v1 — wager CELO on-chain
 - 🆕 Discord AI Agent — /ask /askcat
 - 🆕 Self Agent ID — verified onchain AI agent (#103)
+- 🆕 Farcaster Push Notifications — daily check-in reminders
 
 ## 🤖 AI Mode (NEW — May 2026)
 
@@ -133,6 +134,7 @@ Every AI request made by the bot is cryptographically signed with ECDSA — veri
 | Bot | discord.js v14 + ethers.js v6 |
 | Bot Hosting | Railway (24/7) |
 | Deploy | Vercel + GitHub Actions |
+| Notifications | Farcaster Mini App SDK + Supabase |
 
 ## 🛠️ Local Setup
 
@@ -182,6 +184,7 @@ npx hardhat compile
 - [x] Trivia Duel 1v1 on-chain 🆕
 - [x] Discord AI Agent /ask /askcat 🆕
 - [x] Self Agent ID — verified onchain AI agent #103 🆕
+- [x] Farcaster Push Notifications (daily reminders) 🆕
 
 ## 👤 Author
 
