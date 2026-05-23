@@ -468,6 +468,18 @@ export default function Home() {
           )}
         </motion.div>
 
+        <motion.div variants={itemVariants} className="grid grid-cols-3 gap-2">
+          <ActionButton onClick={() => router.push("/stats")} variant="default">
+            📊 Stats
+          </ActionButton>
+          <ActionButton onClick={() => router.push("/about")} variant="default">
+            ℹ️ About
+          </ActionButton>
+          <ActionButton onClick={() => router.push("/referral")} variant="default">
+            🔗 Referral
+          </ActionButton>
+        </motion.div>
+
         <motion.div variants={itemVariants} className="pt-2 flex items-center justify-center gap-6">
           {[
             { href: "https://twitter.com/willycodexwar", label: "𝕏" },
