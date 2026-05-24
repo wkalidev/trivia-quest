@@ -1,4 +1,5 @@
 import { NextResponse, NextRequest } from 'next/server'
+import { encodeFunctionData, decodeFunctionResult } from 'viem'
 
 export const revalidate = 30
 
@@ -15,41 +16,51 @@ function isRateLimited(ip: string): boolean {
   return false;
 }
 
-async function celoCall(to: string, data: string) {
+const ABI = [
+  { name: 'getTotalPlayers', type: 'function', inputs: [], outputs: [{ type: 'uint256' }], stateMutability: 'view' },
+  { name: 'getCurrentRound', type: 'function', inputs: [], outputs: [{ type: 'uint256' }, { type: 'uint256' }], stateMutability: 'view' },
+  { name: 'totalCheckIns',   type: 'function', inputs: [], outputs: [{ type: 'uint256' }], stateMutability: 'view' },
+] as const
+
+async function celoCall(to: string, functionName: 'getTotalPlayers' | 'getCurrentRound' | 'totalCheckIns') {
+  const data = encodeFunctionData({ abi: ABI, functionName })  // ← viem calcule le bon sélecteur
   const res = await fetch('https://forno.celo.org', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'eth_call', params: [{ to, data }, 'latest'] }),
   })
   const json = await res.json()
-  return json.result
+  if (!json.result || json.result === '0x') return null
+  return decodeFunctionResult({ abi: ABI, functionName, data: json.result })  // ← décode proprement
 }
+
+const GAME    = '0xffe22d3d1b63866ac9da8ac92fdb9ceddeadb0bb'
+const CHECKIN = '0x8650e6c477f8ae3933dc6d61d85e65c90cf71828'
 
 export async function GET(req: NextRequest) {
   const ip = req.headers.get("x-forwarded-for") ?? "unknown";
   if (isRateLimited(ip)) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
 
-  const GAME = '0xffe22d3d1b63866ac9da8ac92fdb9ceddeadb0bb'
-  const CHECKIN = '0x8650e6c477f8ae3933dc6d61d85e65c90cf71828'
-
   let players = null, prizePool = null, roundId = null, totalCheckins = null
 
   try {
-    // getTotalPlayers
-    const r1 = await celoCall(GAME, '0x63f28e0d')
-    if (r1 && r1 !== '0x') players = parseInt(r1, 16)
+    const [p, round, c] = await Promise.all([
+      celoCall(GAME,    'getTotalPlayers'),
+      celoCall(GAME,    'getCurrentRound'),
+      celoCall(CHECKIN, 'totalCheckIns'),
+    ])
 
-    // getCurrentRound — id + prizePool
-    const r2 = await celoCall(GAME, '0xf178f4e7')
-    if (r2 && r2 !== '0x') {
-      roundId = parseInt(r2.slice(0, 66), 16)
-      prizePool = parseInt(r2.slice(66, 130), 16)
+    if (p != null)     players       = Number(p as bigint)
+    if (round != null) {
+      const [id, pool] = round as [bigint, bigint]
+      roundId   = Number(id)
+      prizePool = pool.toString()
     }
+    if (c != null)     totalCheckins = Number(c as bigint)
 
-    // totalCheckIns
-    const r3 = await celoCall(CHECKIN, '0x4cc82215')
-    if (r3 && r3 !== '0x') totalCheckins = parseInt(r3, 16)
-  } catch {}
+  } catch (e) {
+    console.error('[api/stats] onchain error:', e)
+  }
 
   return NextResponse.json({
     project: 'TriviaQ',
