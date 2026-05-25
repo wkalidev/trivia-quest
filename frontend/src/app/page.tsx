@@ -32,6 +32,16 @@ const TRIVQ_ABI = [
   },
 ] as const;
 
+const TRIVQ_REWARDS_ABI = [
+  {
+    name: "rewardsRemaining",
+    type: "function",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [{ type: "uint256" }],
+  },
+] as const;
+
 function formatTrivq(raw: bigint): string {
   const n = Number(formatUnits(raw, 18));
   if (n >= 1_000_000_000) return `${(n / 1_000_000_000).toFixed(1)}B`;
@@ -211,6 +221,13 @@ export default function Home() {
     query: { refetchInterval: 30_000 },
   });
 
+  const { data: rewardsRemaining } = useReadContract({
+    address: TRIVQ_ADDR,
+    abi: TRIVQ_REWARDS_ABI,
+    functionName: "rewardsRemaining",
+    query: { refetchInterval: 60_000 },
+  });
+
   const trivqFormatted = trivqBalance ? formatTrivq(trivqBalance as bigint) : "—";
   const prizePool = currentRound ? formatCelo(currentRound[1]) : "0";
   const endTime = currentRound ? currentRound[3] : BigInt(0);
@@ -368,6 +385,16 @@ export default function Home() {
           )}
         </AnimatePresence>
 
+        {/* ⚡ Bandeau cap rewards */}
+        {rewardsRemaining !== undefined && rewardsRemaining < BigInt("10000000000000000000000000") && (
+          <motion.div variants={itemVariants}
+            className="rounded-xl p-3 text-center text-xs font-bold"
+            style={{ background: "rgba(251,205,0,0.08)", border: "1px solid rgba(251,205,0,0.25)", color: "#FBCD00" }}
+          >
+            ⚡ Token v3 en cours de déploiement — récompenses bientôt augmentées
+          </motion.div>
+        )}
+
         {isInMiniPay && miniPayAddress && (
           <motion.div variants={itemVariants}
             className="rounded-2xl p-3 flex items-center gap-3"
@@ -420,7 +447,6 @@ export default function Home() {
           <ActionButton onClick={() => router.push("/checkin")} variant="gold">🔥 Check-in</ActionButton>
         </motion.div>
 
-        {/* ✅ Bouton Duel 1v1 */}
         <motion.div variants={itemVariants}>
           <motion.button
             onClick={() => router.push("/duel")}
