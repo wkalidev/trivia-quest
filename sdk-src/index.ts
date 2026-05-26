@@ -435,3 +435,147 @@ export function formatCelo(wei: bigint): string {
   if (n < 0.001)   return "<0.001";
   return n.toFixed(3);
 }
+
+// ── CheckIn ABI ────────────────────────────────────────────
+export const CHECKIN_ABI = [
+  {
+    name: "checkIn",
+    type: "function",
+    stateMutability: "nonpayable",
+    inputs: [{ name: "categoryId", type: "uint256" }],
+    outputs: [],
+  },
+  {
+    name: "getPlayerData",
+    type: "function",
+    stateMutability: "view",
+    inputs: [{ name: "player", type: "address" }],
+    outputs: [
+      { name: "lastCheckIn", type: "uint256" },
+      { name: "streak", type: "uint256" },
+      { name: "totalCheckIns", type: "uint256" },
+      { name: "checkInAvailable", type: "bool" },
+      { name: "secondsUntilNext", type: "uint256" },
+    ],
+  },
+  {
+    name: "totalCheckIns",
+    type: "function",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [{ type: "uint256" }],
+  },
+] as const;
+
+// ── Referral ABI ───────────────────────────────────────────
+export const REFERRAL_ABI = [
+  {
+    name: "registerReferral",
+    type: "function",
+    stateMutability: "nonpayable",
+    inputs: [{ name: "referrer", type: "address" }],
+    outputs: [],
+  },
+  {
+    name: "getReferrer",
+    type: "function",
+    stateMutability: "view",
+    inputs: [{ name: "user", type: "address" }],
+    outputs: [{ type: "address" }],
+  },
+  {
+    name: "getReferralCount",
+    type: "function",
+    stateMutability: "view",
+    inputs: [{ name: "referrer", type: "address" }],
+    outputs: [{ type: "uint256" }],
+  },
+] as const;
+
+// ── Types ──────────────────────────────────────────────────
+
+export type CheckInData = {
+  lastCheckIn: bigint;
+  streak: bigint;
+  totalCheckIns: bigint;
+  checkInAvailable: boolean;
+  secondsUntilNext: bigint;
+};
+
+export type NetworkStats = {
+  players: number;
+  roundId: number;
+  prizePool: string;
+  totalCheckins: number;
+};
+
+// ── Network Stats Fetcher ──────────────────────────────────
+
+export async function fetchNetworkStats(): Promise<NetworkStats> {
+  const res = await fetch("https://trivia-quest-eight.vercel.app/api/stats");
+  const data = await res.json();
+  return {
+    players: data.live_stats?.players ?? 0,
+    roundId: data.live_stats?.round_id ?? 0,
+    prizePool: data.live_stats?.prize_pool ?? "0",
+    totalCheckins: data.live_stats?.total_checkins ?? 0,
+  };
+}
+
+// ── Streak Utils ───────────────────────────────────────────
+
+export function getStreakBonus(streak: number): number {
+  return streak > 0 && streak % 7 === 0 ? 2000 : 0;
+}
+
+export function getNextStreakMilestone(streak: number): number {
+  return 7 - (streak % 7);
+}
+
+export function formatCountdown(seconds: number): string {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = seconds % 60;
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+}
+
+// ── Category Utils ─────────────────────────────────────────
+
+export const CATEGORIES = [
+  { id: 1, name: "Africa Explorer",  emoji: "🌍", description: "African Geography" },
+  { id: 2, name: "Crypto Master",    emoji: "⛓",  description: "Web3 & Crypto" },
+  { id: 3, name: "Culture Keeper",   emoji: "📜", description: "History & Culture" },
+  { id: 4, name: "Tech Wizard",      emoji: "⚡", description: "Science & Tech" },
+  { id: 5, name: "Sport Champion",   emoji: "🏆", description: "Sports" },
+  { id: 6, name: "Trivia Legend",    emoji: "✨", description: "General Knowledge" },
+] as const;
+
+export function getCategoryById(id: number) {
+  return CATEGORIES.find(c => c.id === id) ?? null;
+}
+
+// ── Reward Calculator ──────────────────────────────────────
+
+export function calculateRewards(params: {
+  score: number;
+  streak: number;
+  isCheckIn?: boolean;
+  isDuelWinner?: boolean;
+  wager?: bigint;
+}): { trivq: number; celoWin: bigint } {
+  let trivq = 0;
+  let celoWin = BigInt(0);
+
+  if (params.score > 0) {
+    trivq += params.score * 100 * getMultiplier(params.streak);
+  }
+  if (params.isCheckIn) {
+    trivq += 100;
+    trivq += getStreakBonus(params.streak);
+  }
+  if (params.isDuelWinner && params.wager) {
+    celoWin = getDuelNetPrize(params.wager);
+  }
+
+  return { trivq, celoWin };
+}
