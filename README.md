@@ -37,7 +37,7 @@ Celo's mission is financial inclusion for the unbanked. With **57% of African ad
 - $TRIVQ live price tracker (Ubeswap v3)
 - MiniPay compatible — auto wallet connect
 - Multi-chain — Celo Mainnet + Base Mainnet
-- 4 languages — FR / EN / ES / IT
+- 8 languages — FR / EN / ES / IT / PT / AR / ZH / SW
 - PWA installable on Android
 - Discord Bot 24/7
 - 🆕 AI Mode — questions by Groq AI (LLaMA 3.1)
@@ -140,7 +140,7 @@ Every AI request made by the bot is cryptographically signed with ECDSA — veri
 | Web3 | Wagmi + Viem + RainbowKit |
 | AI | Groq API (LLaMA 3.1-8b-instant) |
 | AI Agent | Self Protocol — Agent #103 🆕 |
-| i18n | next-intl (FR, EN, ES, IT) |
+| i18n | next-intl (FR, EN, ES, IT, PT, AR, ZH, SW) |
 | Bot | discord.js v14 + ethers.js v6 |
 | Bot Hosting | Railway (24/7) |
 | Deploy | Vercel + GitHub Actions |
