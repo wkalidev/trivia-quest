@@ -105,6 +105,7 @@ Every AI request made by the bot is cryptographically signed with ECDSA — veri
 | TriviaQuest | `0x1e2c209412ec30915ccf922654f0593faf61fcfb` |
 | DailyCheckIn | `0x0f19851d5cd905d110c000a7d26d74a2f21f8ff9` |
 | Referral | `0x4fb5285263354e1e75f044c65166ab22c3840074` |
+| Treasury (fee recipient) | `0x995aC10d5B6778B90eF060b7ab585D854C1Ed914` |
 
 ## 💎 $TRIVQ Tokenomics
 
