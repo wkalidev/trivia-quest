@@ -391,7 +391,7 @@ export default function Home() {
             className="rounded-xl p-3 text-center text-xs font-bold"
             style={{ background: "rgba(251,205,0,0.08)", border: "1px solid rgba(251,205,0,0.25)", color: "#FBCD00" }}
           >
-            ⚡ Token v3 en cours de déploiement — récompenses bientôt augmentées
+            {t("tokenV3Banner")}
           </motion.div>
         )}
 
@@ -461,7 +461,7 @@ export default function Home() {
           >
             <span>⚔️</span>
             <span>Trivia Duel</span>
-            <span className="text-purple-400/50 text-sm font-normal">— Défie un joueur</span>
+            <span className="text-purple-400/50 text-sm font-normal">— {t("duelChallenge")}</span>
             <span className="absolute right-4 text-xs bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded-full border border-purple-500/30">
               NEW
             </span>

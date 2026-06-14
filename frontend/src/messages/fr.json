@@ -8,7 +8,9 @@
     "connectWallet": "Connecter le Wallet",
     "playNow": "Jouer maintenant 🎮",
     "poweredBy": "Propulsé par Celo blockchain",
-    "miniPayDetected": "MiniPay détecté"
+    "miniPayDetected": "MiniPay détecté",
+    "tokenV3Banner": "⚡ Token v3 en cours de déploiement — récompenses bientôt augmentées",
+    "duelChallenge": "Défie un joueur"
   },
   "quiz": {
     "joinTitle": "Rejoindre la partie",

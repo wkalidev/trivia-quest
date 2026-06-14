@@ -4,6 +4,7 @@ import { Providers } from "./providers";
 import { getLocale, getMessages } from "next-intl/server";
 import { NextIntlClientProvider } from "next-intl";
 import { SupportButton } from "@/components/SupportButton";
+import FarcasterAutoConnect from "@/components/FarcasterAutoConnect";
 import Link from "next/link";
 import "./globals.css";
 
@@ -72,6 +73,7 @@ export default async function RootLayout({
       <body>
         <NextIntlClientProvider messages={messages}>
           <Providers>
+            <FarcasterAutoConnect />
             <main>{children}</main>
             <SupportButton />
             <footer
