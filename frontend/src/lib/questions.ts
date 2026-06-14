@@ -5,6 +5,8 @@ export type Question = {
   category: string;
 };
 
+import { EXTRA_QUESTIONS } from "./questions-extra";
+
 export const QUESTIONS: Question[] = [
   {
     "question": "Quel est le plus grand fleuve d'Amérique du Sud ?",
@@ -4914,15 +4916,17 @@ export const QUESTIONS: Question[] = [
   }
 ];
 
+const ALL_QUESTIONS: Question[] = [...QUESTIONS, ...EXTRA_QUESTIONS];
+
 export function getRandomQuestions(count: number = 10): Question[] {
-  const shuffled = [...QUESTIONS].sort(() => Math.random() - 0.5);
+  const shuffled = [...ALL_QUESTIONS].sort(() => Math.random() - 0.5);
   return shuffled.slice(0, count);
 }
 
 export function getQuestionsByCategory(category: string, count: number = 10): Question[] {
-  const filtered = QUESTIONS.filter(q => q.category === category);
+  const filtered = ALL_QUESTIONS.filter(q => q.category === category);
   const shuffled = filtered.sort(() => Math.random() - 0.5);
   return shuffled.slice(0, count);
 }
 
-export const CATEGORIES = [...new Set(QUESTIONS.map(q => q.category))];
+export const CATEGORIES = [...new Set(ALL_QUESTIONS.map(q => q.category))];
