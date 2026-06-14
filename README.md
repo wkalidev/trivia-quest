@@ -101,10 +101,10 @@ Every AI request made by the bot is cryptographically signed with ECDSA — veri
 ### Base Mainnet
 | Contract | Address |
 |---|---|
-| TriviaQToken ($TRIVQ) | `0x3217e21a74a068779902213ab06ad3301a8e6a02` |
-| TriviaQuest | `0xf44dfec3230bcf917ca7ccc59b4e67df2507e21f` |
-| DailyCheckIn | `0x8a6f59c5f1f11a7ae75c54b1eb95c477405f1bda` |
-| Referral | `0x4dafb4d844ce8bd52ce3ad4cee2a4e73780d0c91` |
+| TriviaQToken ($TRIVQ) | `0x8ecc1dc70f3bc5be941b61b42707eb7dbddb54c3` |
+| TriviaQuest | `0x1e2c209412ec30915ccf922654f0593faf61fcfb` |
+| DailyCheckIn | `0x0f19851d5cd905d110c000a7d26d74a2f21f8ff9` |
+| Referral | `0x4fb5285263354e1e75f044c65166ab22c3840074` |
 
 ## 💎 $TRIVQ Tokenomics
 
