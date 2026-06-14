@@ -1,8 +1,8 @@
 "use client";
 
-import { useReadContract, useEnsName } from "wagmi";
+import { useReadContract, useEnsName, useChainId } from "wagmi";
 import { useRouter } from "next/navigation";
-import { CONTRACT_ADDRESS, CONTRACT_ABI } from "@/lib/web3";
+import { CONTRACT_ABI, getContractAddress } from "@/lib/web3";
 import { motion, AnimatePresence } from "framer-motion";
 import { mainnet } from "viem/chains";
 import { useState, useEffect } from "react";
@@ -89,6 +89,8 @@ function PodiumCard({ entry, rank, delay }: { entry: LeaderboardEntry; rank: num
 
 export default function LeaderboardPage() {
   const router = useRouter();
+  const chainId = useChainId();
+  const contractAddress = getContractAddress(chainId, "game");
   const [tick, setTick] = useState(0);
 
   useEffect(() => {
@@ -97,13 +99,13 @@ export default function LeaderboardPage() {
   }, []);
 
   const { data: leaderboard, isLoading, refetch } = useReadContract({
-    address: CONTRACT_ADDRESS,
+    address: contractAddress,
     abi: CONTRACT_ABI,
     functionName: "getLeaderboard",
   });
 
   const { data: totalPlayers } = useReadContract({
-    address: CONTRACT_ADDRESS,
+    address: contractAddress,
     abi: CONTRACT_ABI,
     functionName: "getTotalPlayers",
   });
