@@ -20,19 +20,19 @@ const config: HardhatUserConfig & { sourcify?: any } = {
   networks: {
     celoSepolia: {
       type: "http",
-      url: process.env.CELO_SEPOLIA_RPC!,
+      url: process.env.CELO_SEPOLIA_RPC ?? "https://alfajores-forno.celo-testnet.org",
       accounts: [process.env.PRIVATE_KEY!],
       chainId: 11142220,
     },
     alfajores: {
       type: "http",
-      url: process.env.ALFAJORES_RPC!,
+      url: process.env.ALFAJORES_RPC ?? "https://alfajores-forno.celo-testnet.org",
       accounts: [process.env.PRIVATE_KEY!],
       chainId: 44787,
     },
     celo: {
       type: "http",
-      url: process.env.CELO_RPC!,
+      url: process.env.CELO_RPC ?? "https://forno.celo.org",
       accounts: [process.env.PRIVATE_KEY!],
       chainId: 42220,
     },
