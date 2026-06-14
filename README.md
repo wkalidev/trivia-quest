@@ -19,6 +19,7 @@ Celo's mission is financial inclusion for the unbanked. With **57% of African ad
 | Duel 1v1 | https://trivia-quest-eight.vercel.app/duel |
 | SDK | `npm install @wkalidev/trivia-quest-sdk` |
 | Stats API | `GET /api/stats` |
+| MCP Server | https://trivia-quest-eight.vercel.app/api/mcp |
 | GitHub | https://github.com/wkalidev/trivia-quest |
 
 ## 🎮 Features
@@ -53,6 +54,15 @@ Questions generated in real-time by Groq AI (LLaMA 3.1-8b-instant):
 - Questions preloaded in background while you play
 - Accessible via /quiz → Mode IA button
 - API: `GET /api/ai-question?category=Web3%20%26%20Crypto`
+
+## 🔐 Security
+
+- Submit score requires ECDSA wallet signature (prevents fake scores)
+- Rate limited: 5 submissions/hour per wallet
+- Cron endpoint protected by CRON_SECRET
+- AI endpoint rate limited: 10 req/min (Self Agents bypass)
+
+**Agent registration note:** The ERC-8004 `register-agent.ts` script only supports initial registration. To update the on-chain `agentURI` to `https://trivia-quest-eight.vercel.app/api/agent-metadata`, the owner must call `updateAgent` directly on the ERC-8004 Identity Registry (`0x8004A169FB4a3325136EB29fA0ceB6D2e539a432`) on Celo Mainnet.
 
 ## 🔐 Self Agent ID (NEW — May 2026)
 
@@ -185,6 +195,9 @@ npx hardhat compile
 - [x] Discord AI Agent /ask /askcat 🆕
 - [x] Self Agent ID — verified onchain AI agent #103 🆕
 - [x] Farcaster Push Notifications (daily reminders) 🆕
+- [x] MCP Server endpoint — /api/mcp 🆕
+- [x] 8004scan score improved (MCP unlocks full Service scoring) 🆕
+- [x] Submit score signature verification 🆕
 
 ## 👤 Author
 
