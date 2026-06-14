@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useAccount, useWriteContract, useReadContract, useChainId } from "wagmi";
 import { useRouter, useSearchParams } from "next/navigation";
 import { parseEther } from "viem";
@@ -26,11 +26,12 @@ function getStreakLabel(streak: number): string {
 }
 
 function getCategoryEmoji(cat: string): string {
-  if (cat === "Géographie Africaine") return "🌍";
+  if (cat === "Géographie Africaine" || cat === "African Geography") return "🌍";
   if (cat === "Web3 & Crypto") return "💰";
-  if (cat === "Histoire & Culture") return "📖";
+  if (cat === "Histoire & Culture" || cat === "History & Culture") return "📖";
   if (cat === "Science & Tech") return "🔬";
   if (cat === "Sports") return "⚽";
+  if (cat === "Culture Générale" || cat === "General Knowledge") return "🧠";
   return "🧠";
 }
 
@@ -59,6 +60,7 @@ export default function QuizPage() {
   const [isCorrectAnswer, setIsCorrectAnswer] = useState<boolean | null>(null);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [joinError, setJoinError] = useState<string | null>(null);
+  const locked = useRef(false);
 
   // ✅ AI Mode
   const [aiMode, setAIMode] = useState(false);
@@ -157,9 +159,15 @@ export default function QuizPage() {
     });
   }, [questions, current, score, totalPoints, router, aiMode, prefetchNextAIQuestion, isDuelMode, duelId, address]);
 
+  // Reset lock when question advances
+  useEffect(() => {
+    locked.current = false;
+  }, [current]);
+
   useEffect(() => {
     if (!joined || finished || questions.length === 0) return;
     if (timer === 0) {
+      locked.current = true;
       handleNext();
       return;
     }
@@ -195,7 +203,8 @@ export default function QuizPage() {
   };
 
   const handleAnswer = (idx: number) => {
-    if (selected !== null || questions.length === 0) return;
+    if (locked.current || selected !== null || questions.length === 0) return;
+    locked.current = true;
     setSelected(idx);
     const isCorrect = idx === questions[current].answer;
     setIsCorrectAnswer(isCorrect);
