@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { formatEther } from "viem";
 import { motion } from "framer-motion";
 import { getContractAddress, DUEL_ABI } from "@/lib/contract";
+import { useTranslations } from "next-intl";
 
 const DUEL_STATUS = ["Open", "Active", "Finished", "Cancelled"] as const;
 
@@ -48,6 +49,7 @@ export default function DuelDetailPage() {
   const router = useRouter();
   const params = useParams();
   const duelId = params?.id as string;
+  const t = useTranslations("duel");
 
   const DUEL_ADDRESS = getContractAddress(chainId, "duel");
   const { writeContract, isPending } = useWriteContract();
@@ -120,7 +122,7 @@ export default function DuelDetailPage() {
         onClick={() => router.push("/duel")}
         className="flex items-center gap-2 text-white/40 hover:text-white text-sm mb-6 transition-all"
       >
-        ← Retour aux duels
+        {t("backToDuels")}
       </button>
 
       {/* Header */}
@@ -134,40 +136,40 @@ export default function DuelDetailPage() {
         </div>
       </div>
 
-      {/* Cagnotte */}
+      {/* Pot */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="bg-white/5 rounded-3xl p-5 mb-4 text-center"
         style={{ border: "1px solid rgba(251,205,0,0.2)" }}
       >
-        <p className="text-white/40 text-xs mb-1">Cagnotte totale</p>
+        <p className="text-white/40 text-xs mb-1">{t("totalPot")}</p>
         <p className="text-[#FBCD00] font-black text-3xl">
           {(Number(formatEther(duel.wager)) * 2).toFixed(3)} CELO
         </p>
         <p className="text-white/30 text-xs mt-1">
-          Mise par joueur: {formatEther(duel.wager)} CELO · Gains nets: {netPrize.toFixed(3)} CELO
+          {t("wagerPerPlayer", { wager: formatEther(duel.wager), prize: netPrize.toFixed(3) })}
         </p>
       </motion.div>
 
-      {/* Joueurs */}
+      {/* Players */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
         className="bg-white/10 rounded-3xl p-5 mb-4"
       >
-        <h2 className="text-white font-black text-lg mb-4">👥 Joueurs</h2>
+        <h2 className="text-white font-black text-lg mb-4">{t("playersSection")}</h2>
 
         <div className="grid grid-cols-2 gap-3">
-          {/* Joueur A */}
+          {/* Player A */}
           <div className={`rounded-2xl p-4 text-center ${
             duel.status === 2 && duel.winner.toLowerCase() === duel.playerA.toLowerCase()
               ? "bg-[#FBCD00]/10 border border-[#FBCD00]/40"
               : "bg-white/5"
           }`}>
             <p className="text-white/40 text-xs mb-1">
-              {address?.toLowerCase() === duel.playerA.toLowerCase() ? "👤 Toi" : "🎮 Joueur A"}
+              {address?.toLowerCase() === duel.playerA.toLowerCase() ? t("youLabel") : t("playerALabel")}
             </p>
             <p className="text-white font-bold text-sm mb-2">{shortAddress(duel.playerA)}</p>
             {duel.scoreASubmitted ? (
@@ -177,18 +179,18 @@ export default function DuelDetailPage() {
               </div>
             ) : (
               <p className="text-white/30 text-sm">
-                {duel.status === 0 ? "—" : "⏳ En attente"}
+                {duel.status === 0 ? "—" : t("awaitingScore")}
               </p>
             )}
             {duel.status === 2 && duel.winner.toLowerCase() === duel.playerA.toLowerCase() && (
-              <p className="text-[#FBCD00] font-black text-xs mt-2">🏆 Gagnant</p>
+              <p className="text-[#FBCD00] font-black text-xs mt-2">{t("winnerLabel")}</p>
             )}
           </div>
 
           {/* VS */}
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden" />
 
-          {/* Joueur B */}
+          {/* Player B */}
           <div className={`rounded-2xl p-4 text-center ${
             duel.status === 2 && duel.winner.toLowerCase() === duel.playerB.toLowerCase()
               ? "bg-[#FBCD00]/10 border border-[#FBCD00]/40"
@@ -196,14 +198,14 @@ export default function DuelDetailPage() {
           }`}>
             <p className="text-white/40 text-xs mb-1">
               {duel.playerB === "0x0000000000000000000000000000000000000000"
-                ? "🔍 En attente..."
+                ? t("waitingForPlayer")
                 : address?.toLowerCase() === duel.playerB.toLowerCase()
-                ? "👤 Toi"
-                : "🎮 Joueur B"}
+                ? t("youLabel")
+                : t("playerBLabel")}
             </p>
             <p className="text-white font-bold text-sm mb-2">
               {duel.playerB === "0x0000000000000000000000000000000000000000"
-                ? "Pas encore rejoint"
+                ? t("notJoined")
                 : shortAddress(duel.playerB)}
             </p>
             {duel.scoreBSubmitted ? (
@@ -213,25 +215,25 @@ export default function DuelDetailPage() {
               </div>
             ) : (
               <p className="text-white/30 text-sm">
-                {duel.status === 0 ? "—" : "⏳ En attente"}
+                {duel.status === 0 ? "—" : t("awaitingScore")}
               </p>
             )}
             {duel.status === 2 && duel.winner.toLowerCase() === duel.playerB.toLowerCase() && (
-              <p className="text-[#FBCD00] font-black text-xs mt-2">🏆 Gagnant</p>
+              <p className="text-[#FBCD00] font-black text-xs mt-2">{t("winnerLabel")}</p>
             )}
           </div>
         </div>
 
-        {/* Égalité */}
+        {/* Tie */}
         {duel.status === 2 &&
           duel.winner === "0x0000000000000000000000000000000000000000" && (
           <div className="mt-4 text-center p-3 rounded-xl bg-white/5">
-            <p className="text-white/60 font-bold">🤝 Égalité — remboursement effectué</p>
+            <p className="text-white/60 font-bold">{t("tie")}</p>
           </div>
         )}
       </motion.div>
 
-      {/* Résultat final */}
+      {/* Final result */}
       {duel.status === 2 && (
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
@@ -246,32 +248,32 @@ export default function DuelDetailPage() {
           {isWinner ? (
             <>
               <p className="text-4xl mb-2">🏆</p>
-              <p className="text-[#FBCD00] font-black text-xl">Tu as gagné !</p>
+              <p className="text-[#FBCD00] font-black text-xl">{t("youWon")}</p>
               <p className="text-white/60 text-sm mt-1">
-                +{netPrize.toFixed(3)} CELO versés automatiquement
+                {t("prizePaid", { prize: netPrize.toFixed(3) })}
               </p>
             </>
           ) : isParticipant ? (
             <>
               <p className="text-4xl mb-2">😔</p>
-              <p className="text-white font-black text-xl">Duel perdu</p>
-              <p className="text-white/40 text-sm mt-1">Meilleure chance la prochaine fois !</p>
+              <p className="text-white font-black text-xl">{t("duelLost")}</p>
+              <p className="text-white/40 text-sm mt-1">{t("betterLuck")}</p>
             </>
           ) : (
             <>
               <p className="text-4xl mb-2">🏆</p>
               <p className="text-white font-black text-xl">
-                Gagnant: {shortAddress(duel.winner)}
+                {t("winnerIs", { addr: shortAddress(duel.winner) })}
               </p>
               <p className="text-white/40 text-sm mt-1">
-                +{netPrize.toFixed(3)} CELO versés automatiquement
+                {t("prizePaid", { prize: netPrize.toFixed(3) })}
               </p>
             </>
           )}
         </motion.div>
       )}
 
-      {/* Mon statut si participant actif */}
+      {/* My status if active participant */}
       {isParticipant && duel.status === 1 && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -279,21 +281,21 @@ export default function DuelDetailPage() {
           transition={{ delay: 0.2 }}
           className="bg-white/5 rounded-2xl p-4 mb-4"
         >
-          <p className="text-white/60 text-sm mb-1">Mon statut</p>
+          <p className="text-white/60 text-sm mb-1">{t("myStatus")}</p>
           {myScoreSubmitted ? (
             <div className="flex items-center gap-2">
-              <span className="text-[#35D07F] font-bold">✅ Score soumis : {myScore.toString()}/10</span>
+              <span className="text-[#35D07F] font-bold">{t("scoreSubmitted", { score: myScore.toString() })}</span>
               {!opponentScoreSubmitted && (
-                <span className="text-white/40 text-xs">— En attente de l'adversaire</span>
+                <span className="text-white/40 text-xs">{t("waitingOpponent")}</span>
               )}
             </div>
           ) : (
-            <p className="text-yellow-400 font-bold">⏳ Tu n'as pas encore joué ce duel</p>
+            <p className="text-yellow-400 font-bold">{t("notPlayedYet")}</p>
           )}
         </motion.div>
       )}
 
-      {/* Bouton JOUER */}
+      {/* Play button */}
       {canPlay && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -305,15 +307,15 @@ export default function DuelDetailPage() {
             onClick={() => router.push(`/quiz?duelId=${duelId}`)}
             className="w-full bg-[#FBCD00] text-[#1A1A2E] font-black text-lg py-4 rounded-2xl active:scale-95 transition-all"
           >
-            🎮 Jouer ce duel maintenant
+            {t("playDuelNow")}
           </button>
           <p className="text-white/30 text-xs text-center mt-2">
-            Ton score sera soumis automatiquement à la fin
+            {t("scoreAutoSubmit")}
           </p>
         </motion.div>
       )}
 
-      {/* Partage */}
+      {/* Share */}
       {duel.status === 0 && isPlayerA && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -321,20 +323,20 @@ export default function DuelDetailPage() {
           transition={{ delay: 0.3 }}
           className="bg-white/5 rounded-2xl p-4 mb-4"
         >
-          <p className="text-white/60 text-sm mb-2">📤 Partage ce duel</p>
+          <p className="text-white/60 text-sm mb-2">{t("shareDuel")}</p>
           <div className="bg-white/10 rounded-xl px-4 py-3 flex justify-between items-center">
-            <span className="text-white/60 text-sm">ID du duel : <span className="text-white font-bold">#{duelId}</span></span>
+            <span className="text-white/60 text-sm">{t("duelIdLabel")} <span className="text-white font-bold">#{duelId}</span></span>
             <button
               onClick={() => navigator.clipboard.writeText(`${window.location.origin}/duel/${duelId}`)}
               className="text-[#FBCD00] text-xs font-bold"
             >
-              Copier le lien
+              {t("copyLink")}
             </button>
           </div>
         </motion.div>
       )}
 
-      {/* Annuler si expiré */}
+      {/* Cancel if expired */}
       {duel.status === 0 && isPlayerA && (
         <motion.div
           initial={{ opacity: 0 }}
@@ -346,10 +348,10 @@ export default function DuelDetailPage() {
             disabled={isPending}
             className="w-full bg-red-500/10 border border-red-500/30 text-red-400 font-bold py-3 rounded-2xl text-sm disabled:opacity-50"
           >
-            {isPending ? "⏳ Annulation..." : "❌ Annuler et récupérer ma mise"}
+            {isPending ? t("cancellingBtn") : t("cancelBtn")}
           </button>
           <p className="text-white/20 text-xs text-center mt-1">
-            Disponible si le duel n'a pas été rejoint
+            {t("cancelNote")}
           </p>
         </motion.div>
       )}

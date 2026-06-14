@@ -194,8 +194,8 @@ export default function QuizPage() {
           console.error("joinRound failed:", err);
           setJoinError(
             err.message?.includes("insufficient")
-              ? `Solde insuffisant. Il te faut ${feeDisplay} ${nativeToken} + gas.`
-              : "Transaction échouée. Vérifie que tu es sur la bonne chain."
+              ? t("errInsufficientBalance", { fee: feeDisplay, token: nativeToken })
+              : t("errTxFailed")
           );
         },
       }
@@ -253,7 +253,7 @@ export default function QuizPage() {
           {/* Category selector */}
           <div className="mb-6">
             <p className="text-white/60 text-sm mb-3 text-left font-bold">
-              🎯 Choisir une catégorie :
+              {t("chooseCategory")}
             </p>
             <div className="grid grid-cols-2 gap-2">
               {/* Bouton Toutes */}
@@ -265,7 +265,7 @@ export default function QuizPage() {
                     : "bg-white/10 text-white/70 hover:bg-white/20"
                 }`}
               >
-                🌐 Toutes
+                {t("allCategories")}
               </button>
 
               {/* Bouton Mode IA */}
@@ -278,7 +278,7 @@ export default function QuizPage() {
                     : "bg-white/10 text-white/70 hover:bg-white/20"
                 }`}
               >
-                {aiLoading ? "⏳ Chargement..." : aiReady ? "✅ Mode IA" : "🤖 Mode IA"}
+                {aiLoading ? t("aiLoading") : aiReady ? t("aiReady") : t("aiMode")}
               </button>
 
               {/* Catégories */}
@@ -302,9 +302,9 @@ export default function QuizPage() {
             <li>✅ {t("feature1")}</li>
             <li>✅ {t("feature2")}</li>
             <li>✅ {t("feature3")}</li>
-            <li>🔥 Streak x2 / x3 bonus multiplier !</li>
+            <li>{t("streakBonus")}</li>
             {aiMode && aiReady && (
-              <li>🤖 Questions générées par IA en temps réel !</li>
+              <li>{t("aiFeature")}</li>
             )}
           </ul>
 
@@ -317,7 +317,7 @@ export default function QuizPage() {
           {/* Message si Mode IA pas encore prêt */}
           {aiMode && !aiReady && (
             <div className="mb-4 p-3 rounded-xl bg-purple-500/10 border border-purple-500/30 text-purple-300 text-sm">
-              ⏳ Génération des questions IA en cours...
+              {t("aiGenerating")}
             </div>
           )}
 

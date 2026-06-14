@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { parseEther, formatEther } from "viem";
 import { motion, AnimatePresence } from "framer-motion";
 import { getContractAddress, DUEL_ABI } from "@/lib/contract";
+import { useTranslations } from "next-intl";
 
 // ── Types ──────────────────────────────────────────────
 const DUEL_STATUS = ["Open", "Active", "Finished", "Cancelled"] as const;
@@ -48,6 +49,7 @@ export default function DuelPage() {
   const chainId = useChainId();
   const router = useRouter();
   const DUEL_ADDRESS = getContractAddress(chainId, "duel");
+  const t = useTranslations("duel");
 
   const [tab, setTab] = useState<"create" | "join" | "mine">("create");
   const [wager, setWager] = useState("0.01");
@@ -95,14 +97,14 @@ export default function DuelPage() {
       },
       {
         onSuccess: () => {
-          setTxSuccess(`✅ Duel créé avec une mise de ${wager} CELO ! Partage l'ID à ton adversaire.`);
+          setTxSuccess(t("successCreated", { wager }));
           refetchOpen();
           refetchMine();
         },
         onError: (err) => {
           setTxError(err.message?.includes("insufficient")
-            ? `Solde insuffisant. Il te faut ${wager} CELO + gas.`
-            : "Transaction échouée.");
+            ? t("errInsufficientBalance", { wager })
+            : t("errTxFailed"));
         },
       }
     );
@@ -125,14 +127,14 @@ export default function DuelPage() {
       },
       {
         onSuccess: () => {
-          setTxSuccess(`✅ Tu as rejoint le duel #${duel.id} ! Joue maintenant pour soumettre ton score.`);
+          setTxSuccess(t("successJoined", { id: duel.id.toString() }));
           refetchOpen();
           refetchMine();
         },
         onError: (err) => {
           setTxError(err.message?.includes("insufficient")
-            ? `Solde insuffisant. Il te faut ${formatEther(duel.wager)} CELO + gas.`
-            : "Transaction échouée.");
+            ? t("errInsufficientBalance", { wager: formatEther(duel.wager) })
+            : t("errTxFailed"));
         },
       }
     );
@@ -157,11 +159,11 @@ export default function DuelPage() {
       },
       {
         onSuccess: () => {
-          setTxSuccess(`✅ Duel #${joinDuelId} rejoint !`);
+          setTxSuccess(t("successJoinedById", { id: joinDuelId }));
           refetchOpen();
         },
         onError: (err) => {
-          setTxError("Transaction échouée. Vérifie l'ID du duel et la mise.");
+          setTxError(t("errTxFailed"));
         },
       }
     );
@@ -173,11 +175,8 @@ export default function DuelPage() {
       <main className="min-h-screen flex items-center justify-center bg-[#1A1A2E] px-6">
         <div className="bg-white/10 rounded-3xl p-8 max-w-sm w-full text-center">
           <div className="text-5xl mb-4">⚠️</div>
-          <h2 className="text-white font-black text-xl mb-2">Réseau non supporté</h2>
-          <p className="text-white/60 text-sm">
-            Les duels sont disponibles sur Celo Alfajores (testnet) pour l'instant.
-            Le mainnet arrive bientôt !
-          </p>
+          <h2 className="text-white font-black text-xl mb-2">{t("networkUnsupported")}</h2>
+          <p className="text-white/60 text-sm">{t("networkMsg")}</p>
         </div>
       </main>
     );
@@ -190,20 +189,20 @@ export default function DuelPage() {
       <div className="text-center mb-6">
         <div className="text-4xl mb-2">⚔️</div>
         <h1 className="text-white font-black text-2xl">Trivia Duel</h1>
-        <p className="text-white/50 text-sm mt-1">Défie un joueur — le meilleur score remporte la mise</p>
+        <p className="text-white/50 text-sm mt-1">{t("subtitle")}</p>
       </div>
 
       {/* Tabs */}
       <div className="flex gap-2 mb-6 bg-white/5 rounded-2xl p-1">
-        {(["create", "join", "mine"] as const).map((t) => (
+        {(["create", "join", "mine"] as const).map((tabKey) => (
           <button
-            key={t}
-            onClick={() => setTab(t)}
+            key={tabKey}
+            onClick={() => setTab(tabKey)}
             className={`flex-1 py-2 rounded-xl text-sm font-bold transition-all ${
-              tab === t ? "bg-[#FBCD00] text-[#1A1A2E]" : "text-white/50 hover:text-white"
+              tab === tabKey ? "bg-[#FBCD00] text-[#1A1A2E]" : "text-white/50 hover:text-white"
             }`}
           >
-            {t === "create" ? "🆕 Créer" : t === "join" ? "⚔️ Rejoindre" : "📋 Mes duels"}
+            {tabKey === "create" ? t("tabCreate") : tabKey === "join" ? t("tabJoin") : t("tabMine")}
           </button>
         ))}
       </div>
@@ -236,7 +235,7 @@ export default function DuelPage() {
       {tab === "create" && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
           <div className="bg-white/10 rounded-3xl p-6">
-            <h2 className="text-white font-black text-lg mb-4">💰 Choisir ta mise</h2>
+            <h2 className="text-white font-black text-lg mb-4">{t("chooseWager")}</h2>
             <div className="grid grid-cols-2 gap-3 mb-6">
               {WAGER_OPTIONS.map((opt) => (
                 <button
@@ -255,19 +254,19 @@ export default function DuelPage() {
 
             <div className="bg-white/5 rounded-2xl p-4 mb-6 space-y-2 text-sm">
               <div className="flex justify-between text-white/60">
-                <span>Ta mise</span>
+                <span>{t("yourWager")}</span>
                 <span className="text-white font-bold">{wager} CELO</span>
               </div>
               <div className="flex justify-between text-white/60">
-                <span>Cagnotte totale</span>
+                <span>{t("totalPot")}</span>
                 <span className="text-[#FBCD00] font-bold">{(parseFloat(wager) * 2).toFixed(3)} CELO</span>
               </div>
               <div className="flex justify-between text-white/60">
-                <span>Frais (10%)</span>
+                <span>{t("fees")}</span>
                 <span>{(parseFloat(wager) * 2 * 0.1).toFixed(3)} CELO</span>
               </div>
               <div className="flex justify-between text-white/60 border-t border-white/10 pt-2">
-                <span>Tu gagnes</span>
+                <span>{t("youWin")}</span>
                 <span className="text-[#35D07F] font-black">{(parseFloat(wager) * 2 * 0.9).toFixed(3)} CELO</span>
               </div>
             </div>
@@ -277,14 +276,14 @@ export default function DuelPage() {
               disabled={isPending}
               className="w-full bg-[#FBCD00] text-[#1A1A2E] font-black text-lg py-4 rounded-2xl active:scale-95 transition-all disabled:opacity-50"
             >
-              {isPending ? "⏳ Transaction..." : "⚔️ Créer le duel"}
+              {isPending ? t("transacting") : t("createBtn")}
             </button>
           </div>
 
           <div className="bg-white/5 rounded-2xl p-4 text-white/50 text-xs space-y-1">
-            <p>• Le duel expire en 24h si personne ne le rejoint</p>
-            <p>• Tu seras remboursé si le duel expire</p>
-            <p>• Partage l'ID du duel à ton adversaire pour qu'il rejoigne</p>
+            <p>• {t("rule1")}</p>
+            <p>• {t("rule2")}</p>
+            <p>• {t("rule3")}</p>
           </div>
         </motion.div>
       )}
@@ -295,7 +294,7 @@ export default function DuelPage() {
 
           {/* Rejoindre par ID */}
           <div className="bg-white/10 rounded-3xl p-6">
-            <h2 className="text-white font-black text-lg mb-4">🔢 Rejoindre par ID</h2>
+            <h2 className="text-white font-black text-lg mb-4">{t("joinById")}</h2>
             <input
               type="number"
               placeholder="ID du duel (ex: 42)"
@@ -303,23 +302,23 @@ export default function DuelPage() {
               onChange={(e) => setJoinDuelId(e.target.value)}
               className="w-full bg-white/10 text-white placeholder-white/30 rounded-xl px-4 py-3 mb-3 outline-none border border-white/10 focus:border-[#FBCD00]"
             />
-            <p className="text-white/40 text-xs mb-4">Assure-toi de connaître la mise avant de rejoindre</p>
+            <p className="text-white/40 text-xs mb-4">{t("checkWager")}</p>
             <button
               onClick={handleJoinById}
               disabled={isPending || !joinDuelId}
               className="w-full bg-purple-500 text-white font-black py-3 rounded-2xl active:scale-95 transition-all disabled:opacity-50"
             >
-              {isPending ? "⏳ Transaction..." : "⚔️ Rejoindre"}
+              {isPending ? t("transacting") : t("joinBtn")}
             </button>
           </div>
 
           {/* Duels ouverts */}
           <div className="bg-white/10 rounded-3xl p-6">
             <h2 className="text-white font-black text-lg mb-4">
-              🟢 Duels ouverts ({(openDuels as Duel[] | undefined)?.filter(d => d.playerA !== address).length ?? 0})
+              {t("openDuels", { count: (openDuels as Duel[] | undefined)?.filter(d => d.playerA !== address).length ?? 0 })}
             </h2>
             {!openDuels || (openDuels as Duel[]).length === 0 ? (
-              <p className="text-white/40 text-sm text-center py-4">Aucun duel ouvert pour l'instant</p>
+              <p className="text-white/40 text-sm text-center py-4">{t("noOpenDuels")}</p>
             ) : (
               <div className="space-y-3">
                 {(openDuels as Duel[])
@@ -334,19 +333,19 @@ export default function DuelPage() {
                       </div>
                       <div className="flex justify-between items-center">
                         <div>
-                          <p className="text-white/50 text-xs">Créé par</p>
+                          <p className="text-white/50 text-xs">{t("createdBy")}</p>
                           <p className="text-white font-bold text-sm">{shortAddress(duel.playerA)}</p>
                         </div>
                         <div className="text-center">
                           <p className="text-[#FBCD00] font-black text-lg">{formatEther(duel.wager)} CELO</p>
-                          <p className="text-white/40 text-xs">par joueur</p>
+                          <p className="text-white/40 text-xs">{t("perPlayer")}</p>
                         </div>
                         <button
                           onClick={() => handleJoin(duel)}
                           disabled={isPending}
                           className="bg-[#FBCD00] text-[#1A1A2E] font-black text-sm px-4 py-2 rounded-xl active:scale-95 disabled:opacity-50"
                         >
-                          Rejoindre
+                          {t("joinAction")}
                         </button>
                       </div>
                     </div>
@@ -361,15 +360,15 @@ export default function DuelPage() {
       {tab === "mine" && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
           <div className="bg-white/10 rounded-3xl p-6">
-            <h2 className="text-white font-black text-lg mb-4">📋 Mes duels</h2>
+            <h2 className="text-white font-black text-lg mb-4">{t("myDuels")}</h2>
             {!myDuelIds || (myDuelIds as bigint[]).length === 0 ? (
               <div className="text-center py-8">
-                <p className="text-white/40 text-sm">Tu n'as pas encore de duels</p>
+                <p className="text-white/40 text-sm">{t("noDuels")}</p>
                 <button
                   onClick={() => setTab("create")}
                   className="mt-4 bg-[#FBCD00] text-[#1A1A2E] font-black px-6 py-2 rounded-xl"
                 >
-                  Créer mon premier duel
+                  {t("createFirst")}
                 </button>
               </div>
             ) : (
@@ -381,7 +380,7 @@ export default function DuelPage() {
                     className="w-full bg-white/5 hover:bg-white/10 rounded-xl px-4 py-3 flex justify-between items-center transition-all"
                   >
                     <span className="text-white font-bold">Duel #{id.toString()}</span>
-                    <span className="text-[#FBCD00] text-xs font-bold">Voir détails →</span>
+                    <span className="text-[#FBCD00] text-xs font-bold">{t("viewDetails")}</span>
                   </button>
                 ))}
               </div>
