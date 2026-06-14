@@ -3,7 +3,7 @@
 > Play. Learn. Earn on Celo & Base.
 
 [![Live Demo](https://img.shields.io/badge/Live-trivia--quest--eight.vercel.app-FBCD00?style=for-the-badge)](https://trivia-quest-eight.vercel.app)
-[![npm](https://img.shields.io/badge/SDK-npm-CB3837?style=for-the-badge&logo=npm)](https://www.npmjs.com/package/@wkalidev/trivia-quest-sdk)
+[![npm](https://img.shields.io/badge/SDK_v3.1.0-npm-CB3837?style=for-the-badge&logo=npm)](https://www.npmjs.com/package/@wkalidev/trivia-quest-sdk)
 [![Self Agent](https://img.shields.io/badge/Self_Agent-ID_%23103-6366f1?style=for-the-badge)](https://app.ai.self.xyz/agents)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 
@@ -17,7 +17,7 @@ Celo's mission is financial inclusion for the unbanked. With **57% of African ad
 |---|---|
 | App | https://trivia-quest-eight.vercel.app |
 | Duel 1v1 | https://trivia-quest-eight.vercel.app/duel |
-| SDK v3.0.0 | `npm install @wkalidev/trivia-quest-sdk` |
+| SDK v3.1.0 | `npm install @wkalidev/trivia-quest-sdk` |
 | Stats API | `GET /api/stats` |
 | MCP Server | https://trivia-quest-eight.vercel.app/api/mcp |
 | GitHub | https://github.com/wkalidev/trivia-quest |
@@ -38,6 +38,7 @@ Celo's mission is financial inclusion for the unbanked. With **57% of African ad
 - MiniPay compatible — auto wallet connect
 - Multi-chain — Celo Mainnet + Base Mainnet
 - 8 languages — FR / EN / ES / IT / PT / AR / ZH / SW
+- 🆕 Base Mainnet fully live — rounds, rewards, treasury configured
 - PWA installable on Android
 - Discord Bot 24/7
 - 🆕 AI Mode — questions by Groq AI (LLaMA 3.1)
@@ -199,6 +200,10 @@ npx hardhat compile
 - [x] MCP Server endpoint — /api/mcp 🆕
 - [x] 8004scan score improved (MCP unlocks full Service scoring) 🆕
 - [x] Submit score signature verification 🆕
+- [x] Base Mainnet fully operational — rounds auto-managed via cron 🆕
+- [x] 8 i18n languages (FR, EN, ES, IT, PT, AR, ZH, SW) 🆕
+- [x] 1200+ questions (446 base + 754 extra) 🆕
+- [x] SDK v3.1.0 — treasury, LANGUAGES, TOTAL_QUESTIONS, finishRound ABI 🆕
 
 ## 👤 Author
 

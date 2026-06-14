@@ -1,4 +1,4 @@
-export declare const SDK_VERSION = "3.0.0";
+export declare const SDK_VERSION = "3.1.0";
 export declare const TRIVIA_QUEST_ADDRESS_CELO: "0xffe22d3d1b63866ac9da8ac92fdb9ceddeadb0bb";
 export declare const TRIVQ_TOKEN_ADDRESS_CELO: "0xe65fc5cacaf9a5aebbc0e151dee08a53f24a05c5";
 export declare const CHECKIN_ADDRESS_CELO: "0x8650e6c477f8ae3933dc6d61d85e65c90cf71828";
@@ -8,6 +8,18 @@ export declare const TRIVIA_QUEST_ADDRESS_BASE: "0x1e2c209412ec30915ccf922654f05
 export declare const TRIVQ_TOKEN_ADDRESS_BASE: "0x8ecc1dc70f3bc5be941b61b42707eb7dbddb54c3";
 export declare const CHECKIN_ADDRESS_BASE: "0x0f19851d5cd905d110c000a7d26d74a2f21f8ff9";
 export declare const REFERRAL_ADDRESS_BASE: "0x4fb5285263354e1e75f044c65166ab22c3840074";
+export declare const TREASURY_ADDRESS_BASE: "0x995aC10d5B6778B90eF060b7ab585D854C1Ed914";
+export declare const TOTAL_QUESTIONS: 1200;
+export declare const LANGUAGES: readonly [
+    { readonly code: "fr"; readonly name: "Français";  readonly flag: "🇫🇷" },
+    { readonly code: "en"; readonly name: "English";   readonly flag: "🇬🇧" },
+    { readonly code: "es"; readonly name: "Español";   readonly flag: "🇪🇸" },
+    { readonly code: "it"; readonly name: "Italiano";  readonly flag: "🇮🇹" },
+    { readonly code: "pt"; readonly name: "Português"; readonly flag: "🇧🇷" },
+    { readonly code: "ar"; readonly name: "العربية";   readonly flag: "🇸🇦" },
+    { readonly code: "zh"; readonly name: "中文";      readonly flag: "🇨🇳" },
+    { readonly code: "sw"; readonly name: "Kiswahili"; readonly flag: "🇰🇪" },
+];
 export declare const CONTRACT_ADDRESS_MAINNET: "0xffe22d3d1b63866ac9da8ac92fdb9ceddeadb0bb";
 export declare const CONTRACT_ADDRESS_TESTNET: "0x50b20728ba0ad803679b5428f267c89aede9a378";
 export declare const CELO_MAINNET: {
@@ -163,6 +175,24 @@ export declare const CONTRACT_ABI: readonly [{
     }, {
         readonly name: "points";
         readonly type: "uint256";
+    }];
+    readonly outputs: readonly [];
+}, {
+    readonly name: "finishRound";
+    readonly type: "function";
+    readonly stateMutability: "nonpayable";
+    readonly inputs: readonly [{
+        readonly name: "topWinners";
+        readonly type: "address[]";
+    }];
+    readonly outputs: readonly [];
+}, {
+    readonly name: "setTreasury";
+    readonly type: "function";
+    readonly stateMutability: "nonpayable";
+    readonly inputs: readonly [{
+        readonly name: "_treasury";
+        readonly type: "address";
     }];
     readonly outputs: readonly [];
 }];

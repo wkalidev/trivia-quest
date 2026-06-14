@@ -3,7 +3,7 @@
 // Blockchain quiz game on Celo & Base
 // https://trivia-quest-eight.vercel.app
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CATEGORIES = exports.REFERRAL_ABI = exports.CHECKIN_ABI = exports.DuelStatus = exports.TRIVQ_ABI = exports.DUEL_ABI = exports.CONTRACT_ABI = exports.CELO_TESTNET = exports.BASE_MAINNET = exports.CELO_MAINNET = exports.CONTRACT_ADDRESS_TESTNET = exports.CONTRACT_ADDRESS_MAINNET = exports.REFERRAL_ADDRESS_BASE = exports.CHECKIN_ADDRESS_BASE = exports.TRIVQ_TOKEN_ADDRESS_BASE = exports.TRIVIA_QUEST_ADDRESS_BASE = exports.DUEL_ADDRESS_CELO = exports.REFERRAL_ADDRESS_CELO = exports.CHECKIN_ADDRESS_CELO = exports.TRIVQ_TOKEN_ADDRESS_CELO = exports.TRIVIA_QUEST_ADDRESS_CELO = exports.SDK_VERSION = void 0;
+exports.CATEGORIES = exports.REFERRAL_ABI = exports.CHECKIN_ABI = exports.DuelStatus = exports.TRIVQ_ABI = exports.DUEL_ABI = exports.CONTRACT_ABI = exports.CELO_TESTNET = exports.BASE_MAINNET = exports.CELO_MAINNET = exports.CONTRACT_ADDRESS_TESTNET = exports.CONTRACT_ADDRESS_MAINNET = exports.LANGUAGES = exports.TOTAL_QUESTIONS = exports.TREASURY_ADDRESS_BASE = exports.REFERRAL_ADDRESS_BASE = exports.CHECKIN_ADDRESS_BASE = exports.TRIVQ_TOKEN_ADDRESS_BASE = exports.TRIVIA_QUEST_ADDRESS_BASE = exports.DUEL_ADDRESS_CELO = exports.REFERRAL_ADDRESS_CELO = exports.CHECKIN_ADDRESS_CELO = exports.TRIVQ_TOKEN_ADDRESS_CELO = exports.TRIVIA_QUEST_ADDRESS_CELO = exports.SDK_VERSION = void 0;
 exports.getAddress = getAddress;
 exports.getMultiplier = getMultiplier;
 exports.calculatePoints = calculatePoints;
@@ -26,7 +26,7 @@ exports.calculateRewards = calculateRewards;
 exports.getMCPEndpoint = getMCPEndpoint;
 exports.generateQuestion = generateQuestion;
 exports.getStats = getStats;
-exports.SDK_VERSION = "3.0.0";
+exports.SDK_VERSION = "3.1.0";
 // ── Contract Addresses ─────────────────────────────────────
 // Celo Mainnet
 exports.TRIVIA_QUEST_ADDRESS_CELO = "0xffe22d3d1b63866ac9da8ac92fdb9ceddeadb0bb";
@@ -39,6 +39,19 @@ exports.TRIVIA_QUEST_ADDRESS_BASE = "0x1e2c209412ec30915ccf922654f0593faf61fcfb"
 exports.TRIVQ_TOKEN_ADDRESS_BASE = "0x8ecc1dc70f3bc5be941b61b42707eb7dbddb54c3";
 exports.CHECKIN_ADDRESS_BASE = "0x0f19851d5cd905d110c000a7d26d74a2f21f8ff9";
 exports.REFERRAL_ADDRESS_BASE = "0x4fb5285263354e1e75f044c65166ab22c3840074";
+exports.TREASURY_ADDRESS_BASE = "0x995aC10d5B6778B90eF060b7ab585D854C1Ed914";
+// ── Global Constants ───────────────────────────────────────
+exports.TOTAL_QUESTIONS = 1200;
+exports.LANGUAGES = [
+    { code: "fr", name: "Français",  flag: "🇫🇷" },
+    { code: "en", name: "English",   flag: "🇬🇧" },
+    { code: "es", name: "Español",   flag: "🇪🇸" },
+    { code: "it", name: "Italiano",  flag: "🇮🇹" },
+    { code: "pt", name: "Português", flag: "🇧🇷" },
+    { code: "ar", name: "العربية",   flag: "🇸🇦" },
+    { code: "zh", name: "中文",      flag: "🇨🇳" },
+    { code: "sw", name: "Kiswahili", flag: "🇰🇪" },
+];
 // Legacy exports (backwards compatibility)
 exports.CONTRACT_ADDRESS_MAINNET = exports.TRIVIA_QUEST_ADDRESS_CELO;
 exports.CONTRACT_ADDRESS_TESTNET = "0x50b20728ba0ad803679b5428f267c89aede9a378";
@@ -177,6 +190,20 @@ exports.CONTRACT_ABI = [
             { name: "score", type: "uint256" },
             { name: "points", type: "uint256" },
         ],
+        outputs: [],
+    },
+    {
+        name: "finishRound",
+        type: "function",
+        stateMutability: "nonpayable",
+        inputs: [{ name: "topWinners", type: "address[]" }],
+        outputs: [],
+    },
+    {
+        name: "setTreasury",
+        type: "function",
+        stateMutability: "nonpayable",
+        inputs: [{ name: "_treasury", type: "address" }],
         outputs: [],
     },
 ];
