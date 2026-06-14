@@ -1,6 +1,8 @@
 import hre from "hardhat";
 
 const BASE_GAME = "0xf44dfec3230bcf917ca7ccc59b4e67df2507e21f" as `0x${string}`;
+// Plain EOA used when prize pool is 0 — avoids contract-wallet fallback OOG on transfer()
+const PLACEHOLDER_WINNER = "0x000000000000000000000000000000000000dEaD" as `0x${string}`;
 
 async function main() {
   const { viem } = await hre.network.connect();
@@ -32,11 +34,22 @@ async function main() {
     return;
   }
 
-  console.log("\nCalling finishRound([]) to end expired round and start new one...");
-  const tx = await contract.write.finishRound([[ownerAddress]]);
+  // When prize pool is 0 (no players), use a plain EOA as the winner to avoid
+  // contract-wallet fallback OOG when transfer(0) is called by finishRound().
+  const winners: `0x${string}`[] =
+    round[1] === 0n ? [PLACEHOLDER_WINNER] : [ownerAddress];
+
+  console.log("\nCalling finishRound to end expired round and start new one...");
+  console.log("  Winners:", winners);
+  const tx = await contract.write.finishRound([winners]);
   console.log("  Tx hash:", tx);
 
-  await publicClient.waitForTransactionReceipt({ hash: tx });
+  const receipt = await publicClient.waitForTransactionReceipt({ hash: tx });
+  if (receipt.status === "reverted") {
+    console.error("\nTransaction reverted ❌");
+    process.exit(1);
+  }
+
   console.log("\nSuccess! New round started automatically on Base.");
 
   const newRound = await contract.read.getCurrentRound();
