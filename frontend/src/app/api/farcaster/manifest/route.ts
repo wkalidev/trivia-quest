@@ -14,7 +14,7 @@ const manifest = {
     iconUrl: "https://trivia-quest-eight.vercel.app/icon-512.png",
     homeUrl: "https://trivia-quest-eight.vercel.app",
     imageUrl: "https://trivia-quest-eight.vercel.app/opengraph-image",
-    buttonTitle: "Play and Earn 🎮",
+    buttonTitle: "Play and Earn",
     splashImageUrl: "https://trivia-quest-eight.vercel.app/icon-512.png",
     splashBackgroundColor: "#0a0f1e",
     webhookUrl: "https://trivia-quest-eight.vercel.app/api/farcaster/webhook",
