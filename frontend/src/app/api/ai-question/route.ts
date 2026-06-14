@@ -4,12 +4,12 @@ import { SelfAgentVerifier } from "@selfxyz/agent-sdk";
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 
 const CATEGORIES = [
-  "Géographie Africaine",
+  "African Geography",
   "Web3 & Crypto",
-  "Histoire & Culture",
+  "History & Culture",
   "Science & Tech",
   "Sports",
-  "Culture Générale",
+  "General Knowledge",
 ];
 
 // ✅ Rate limiting — 10 req/min par IP
@@ -52,6 +52,17 @@ async function isSelfAgent(req: NextRequest): Promise<boolean> {
 }
 
 export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+
+  if (searchParams.get("health") === "1" || req.headers.get("x-health-check") === "true") {
+    return NextResponse.json({
+      status: "healthy",
+      service: "ai-question",
+      model: "llama-3.1-8b-instant",
+      categories: CATEGORIES
+    });
+  }
+
   const ip = req.headers.get("x-forwarded-for") ?? "unknown";
 
   // ✅ Self Agent vérifié → bypass rate limit
@@ -64,7 +75,6 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  const { searchParams } = new URL(req.url);
   const category =
     searchParams.get("category") ??
     CATEGORIES[Math.floor(Math.random() * CATEGORIES.length)];

@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 
 export async function GET() {
   return NextResponse.json({
+    "@context": "https://erc8004.xyz/schema/v1",
+    "@type": "Agent",
     name: "TriviaQ AI Agent",
     type: "agent",
     image: "https://trivia-quest-eight.vercel.app/icon-512.png",
@@ -10,6 +12,11 @@ export async function GET() {
     version: "1.0.0",
     services: [
       {
+        type: "mcp",
+        url: "https://trivia-quest-eight.vercel.app/api/mcp",
+        description: "TriviaQ MCP Server — generate questions, get stats, leaderboard, duel info"
+      },
+      {
         type: "custom",
         endpoint: "https://trivia-quest-eight.vercel.app/api/ai-question",
         description: "AI trivia question generator powered by Groq LLaMA 3.1"
@@ -17,7 +24,7 @@ export async function GET() {
       {
         type: "custom",
         endpoint: "https://trivia-quest-eight.vercel.app/api/stats",
-        description: "TriviaQ public stats API"
+        description: "TriviaQ public stats API — live on-chain data"
       }
     ],
     registrations: [
@@ -27,6 +34,16 @@ export async function GET() {
       }
     ],
     description: "AI agent that generates trivia questions on Celo, powers 1v1 duels and runs Discord commands /ask /askcat. Powered by Groq LLaMA 3.1.",
-    supportedTrust: ["reputation"]
+    supportedTrust: ["reputation"],
+    capabilities: ["trivia", "quiz", "ai-questions", "1v1-duel", "blockchain", "earn"],
+    tags: ["trivia", "quiz", "celo", "blockchain", "earn", "minipay", "farcaster", "ai"],
+    category: "gaming",
+    subcategory: "quiz",
+    supportedChains: [42220, 8453],
+  }, {
+    headers: {
+      'Content-Type': 'application/json',
+      'Cache-Control': 'public, max-age=3600',
+    }
   })
 }
