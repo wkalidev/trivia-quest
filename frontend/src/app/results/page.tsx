@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
-import { useAccount } from "wagmi";
+import { useAccount, useSignMessage } from "wagmi";
 import { Suspense, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
@@ -19,6 +19,7 @@ function ResultsContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { address } = useAccount();
+  const { signMessageAsync } = useSignMessage();
   const t = useTranslations("results");
   const [submitted, setSubmitted] = useState(false);
   const [rank, setRank] = useState<number | null>(null);
@@ -37,10 +38,12 @@ function ResultsContent() {
     if (!address || submitted) return;
     const submitScore = async () => {
       try {
+        const message = `TriviaQ score: ${score} points: ${points} player: ${address.toLowerCase()}`;
+        const signature = await signMessageAsync({ account: address as `0x${string}`, message });
         const res = await fetch("/api/submit-score", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ player: address, score, points }),
+          body: JSON.stringify({ player: address, score, points, signature, message }),
         });
         const data = await res.json();
         if (data?.rank) setRank(data.rank);
@@ -50,7 +53,7 @@ function ResultsContent() {
       }
     };
     submitScore();
-  }, [address, score, points, submitted]);
+  }, [address, score, points, submitted, signMessageAsync]);
 
   const getPerf = () => {
     if (percentage === 100) return { label: t("perfect"), color: "text-[#FBCD00]", glow: "#FBCD00", emoji: "🏆" };
