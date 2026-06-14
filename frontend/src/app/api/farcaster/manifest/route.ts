@@ -27,7 +27,7 @@ const manifest = {
     heroImageUrl: "https://trivia-quest-eight.vercel.app/opengraph-image",
     ogTitle: "TriviaQ - Play. Learn. Earn.",
     ogDescription:
-      "Quiz game with real token rewards. 1200+ questions, on-chain leaderboard, MiniPay compatible.",
+      "Quiz game with real token rewards. 1200 questions, on-chain leaderboard, MiniPay compatible.",
     token: "eip155:42220/erc20:0xe65fc5cacaf9a5aebbc0e151dee08a53f24a05c5",
     ogImageUrl: "https://trivia-quest-eight.vercel.app/opengraph-image",
     castShareUrl: "https://trivia-quest-eight.vercel.app",
