@@ -181,19 +181,13 @@ export declare const CONTRACT_ABI: readonly [{
     readonly name: "finishRound";
     readonly type: "function";
     readonly stateMutability: "nonpayable";
-    readonly inputs: readonly [{
-        readonly name: "topWinners";
-        readonly type: "address[]";
-    }];
+    readonly inputs: readonly [{ readonly name: "topWinners"; readonly type: "address[]" }];
     readonly outputs: readonly [];
 }, {
     readonly name: "setTreasury";
     readonly type: "function";
     readonly stateMutability: "nonpayable";
-    readonly inputs: readonly [{
-        readonly name: "_treasury";
-        readonly type: "address";
-    }];
+    readonly inputs: readonly [{ readonly name: "_treasury"; readonly type: "address" }];
     readonly outputs: readonly [];
 }];
 export declare const DUEL_ABI: readonly [{
