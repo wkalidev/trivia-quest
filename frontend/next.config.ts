@@ -9,6 +9,8 @@ const nextConfig: NextConfig = {
   // ✅ Compression gzip/brotli
   compress: true,
 
+  poweredByHeader: false,
+
   async headers() {
     return [
       {

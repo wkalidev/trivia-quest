@@ -17,14 +17,14 @@ Celo's mission is financial inclusion for the unbanked. With **57% of African ad
 |---|---|
 | App | https://trivia-quest-eight.vercel.app |
 | Duel 1v1 | https://trivia-quest-eight.vercel.app/duel |
-| SDK | `npm install @wkalidev/trivia-quest-sdk` |
+| SDK v3.0.0 | `npm install @wkalidev/trivia-quest-sdk` |
 | Stats API | `GET /api/stats` |
 | MCP Server | https://trivia-quest-eight.vercel.app/api/mcp |
 | GitHub | https://github.com/wkalidev/trivia-quest |
 
 ## 🎮 Features
 
-- 446 questions across 6 categories
+- 1200+ questions across 6 categories
 - 10 random questions per game, 15s timer
 - Streak system x2 / x3 multiplier
 - $TRIVQ tokens minted on-chain after every game
