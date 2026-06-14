@@ -106,7 +106,7 @@ export default async function Image() {
               Play. Learn. Earn on Celo.
             </span>
             <span style={{ fontSize: 22, color: 'rgba(255,255,255,0.35)' }}>
-              446 questions · 6 categories · Real rewards
+              1200+ questions · 6 categories · Real rewards
             </span>
           </div>
 
@@ -173,7 +173,7 @@ export default async function Image() {
             border: '1px solid rgba(139,92,246,0.15)',
             borderRadius: 20, padding: '20px 28px',
           }}>
-            <span style={{ fontSize: 52, color: '#A78BFA', fontWeight: 900, lineHeight: 1 }}>446</span>
+            <span style={{ fontSize: 52, color: '#A78BFA', fontWeight: 900, lineHeight: 1 }}>1200+</span>
             <span style={{ fontSize: 18, color: 'rgba(139,92,246,0.5)', marginTop: 6 }}>Questions</span>
           </div>
         </div>

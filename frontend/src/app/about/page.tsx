@@ -7,9 +7,9 @@ import { formatUnits } from "viem";
 import { useChainId } from "wagmi";
 
 const STATS = [
-  { label: "Questions", value: "446", icon: "❓", color: "#FBCD00" },
+  { label: "Questions", value: "1200+", icon: "❓", color: "#FBCD00" },
   { label: "Categories", value: "6", icon: "🎯", color: "#35D07F" },
-  { label: "Languages", value: "4", icon: "🌍", color: "#8B5CF6" },
+  { label: "Languages", value: "8", icon: "🌍", color: "#8B5CF6" },
   { label: "NFT Badges", value: "150", icon: "🎨", color: "#EF4444" },
   { label: "Contracts", value: "9", icon: "📜", color: "#06B6D4" },
   { label: "Chains", value: "2", icon: "⛓", color: "#FBCD00" },

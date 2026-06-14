@@ -4916,7 +4916,8 @@ export const QUESTIONS: Question[] = [
   }
 ];
 
-const ALL_QUESTIONS: Question[] = [...QUESTIONS, ...EXTRA_QUESTIONS];
+export const ALL_QUESTIONS: Question[] = [...QUESTIONS, ...EXTRA_QUESTIONS];
+export const TOTAL_QUESTIONS = ALL_QUESTIONS.length;
 
 export function getRandomQuestions(count: number = 10): Question[] {
   const shuffled = [...ALL_QUESTIONS].sort(() => Math.random() - 0.5);
