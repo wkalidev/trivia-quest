@@ -33,7 +33,7 @@ export const metadata: Metadata = {
   version: "next",
   imageUrl: "https://trivia-quest-eight.vercel.app/opengraph-image",
   button: {
-    title: "Jouer maintenant 🎮",
+    title: "Play Now 🎮",
     action: {
       type: "launch_frame",
       name: "Trivia Q",          // ← ajoute cette ligne
