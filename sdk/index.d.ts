@@ -1,4 +1,4 @@
-export declare const SDK_VERSION = "2.0.0";
+export declare const SDK_VERSION = "3.0.0";
 export declare const TRIVIA_QUEST_ADDRESS_CELO: "0xffe22d3d1b63866ac9da8ac92fdb9ceddeadb0bb";
 export declare const TRIVQ_TOKEN_ADDRESS_CELO: "0xe65fc5cacaf9a5aebbc0e151dee08a53f24a05c5";
 export declare const CHECKIN_ADDRESS_CELO: "0x8650e6c477f8ae3933dc6d61d85e65c90cf71828";
@@ -404,4 +404,194 @@ export declare function getMiniPayAccount(): Promise<string | null>;
 export declare function formatAddress(address: string): string;
 export declare function formatTrivq(raw: bigint): string;
 export declare function formatCelo(wei: bigint): string;
+export declare const CHECKIN_ABI: readonly [{
+    readonly name: "checkIn";
+    readonly type: "function";
+    readonly stateMutability: "nonpayable";
+    readonly inputs: readonly [{
+        readonly name: "categoryId";
+        readonly type: "uint256";
+    }];
+    readonly outputs: readonly [];
+}, {
+    readonly name: "getPlayerData";
+    readonly type: "function";
+    readonly stateMutability: "view";
+    readonly inputs: readonly [{
+        readonly name: "player";
+        readonly type: "address";
+    }];
+    readonly outputs: readonly [{
+        readonly name: "lastCheckIn";
+        readonly type: "uint256";
+    }, {
+        readonly name: "streak";
+        readonly type: "uint256";
+    }, {
+        readonly name: "totalCheckIns";
+        readonly type: "uint256";
+    }, {
+        readonly name: "checkInAvailable";
+        readonly type: "bool";
+    }, {
+        readonly name: "secondsUntilNext";
+        readonly type: "uint256";
+    }];
+}, {
+    readonly name: "totalCheckIns";
+    readonly type: "function";
+    readonly stateMutability: "view";
+    readonly inputs: readonly [];
+    readonly outputs: readonly [{
+        readonly type: "uint256";
+    }];
+}];
+export declare const REFERRAL_ABI: readonly [{
+    readonly name: "registerReferral";
+    readonly type: "function";
+    readonly stateMutability: "nonpayable";
+    readonly inputs: readonly [{
+        readonly name: "referrer";
+        readonly type: "address";
+    }];
+    readonly outputs: readonly [];
+}, {
+    readonly name: "getReferrer";
+    readonly type: "function";
+    readonly stateMutability: "view";
+    readonly inputs: readonly [{
+        readonly name: "user";
+        readonly type: "address";
+    }];
+    readonly outputs: readonly [{
+        readonly type: "address";
+    }];
+}, {
+    readonly name: "getReferralCount";
+    readonly type: "function";
+    readonly stateMutability: "view";
+    readonly inputs: readonly [{
+        readonly name: "referrer";
+        readonly type: "address";
+    }];
+    readonly outputs: readonly [{
+        readonly type: "uint256";
+    }];
+}];
+export type CheckInData = {
+    lastCheckIn: bigint;
+    streak: bigint;
+    totalCheckIns: bigint;
+    checkInAvailable: boolean;
+    secondsUntilNext: bigint;
+};
+export type NetworkStats = {
+    players: number;
+    roundId: number;
+    prizePool: string;
+    totalCheckins: number;
+};
+export declare function fetchNetworkStats(): Promise<NetworkStats>;
+export declare function getStreakBonus(streak: number): number;
+export declare function getNextStreakMilestone(streak: number): number;
+export declare function formatCountdown(seconds: number): string;
+export declare const CATEGORIES: readonly [{
+    readonly id: 1;
+    readonly name: "Africa Explorer";
+    readonly emoji: "🌍";
+    readonly description: "African Geography";
+}, {
+    readonly id: 2;
+    readonly name: "Crypto Master";
+    readonly emoji: "⛓";
+    readonly description: "Web3 & Crypto";
+}, {
+    readonly id: 3;
+    readonly name: "Culture Keeper";
+    readonly emoji: "📜";
+    readonly description: "History & Culture";
+}, {
+    readonly id: 4;
+    readonly name: "Tech Wizard";
+    readonly emoji: "⚡";
+    readonly description: "Science & Tech";
+}, {
+    readonly id: 5;
+    readonly name: "Sport Champion";
+    readonly emoji: "🏆";
+    readonly description: "Sports";
+}, {
+    readonly id: 6;
+    readonly name: "Trivia Legend";
+    readonly emoji: "✨";
+    readonly description: "General Knowledge";
+}];
+export declare function getCategoryById(id: number): {
+    readonly id: 1;
+    readonly name: "Africa Explorer";
+    readonly emoji: "🌍";
+    readonly description: "African Geography";
+} | {
+    readonly id: 2;
+    readonly name: "Crypto Master";
+    readonly emoji: "⛓";
+    readonly description: "Web3 & Crypto";
+} | {
+    readonly id: 3;
+    readonly name: "Culture Keeper";
+    readonly emoji: "📜";
+    readonly description: "History & Culture";
+} | {
+    readonly id: 4;
+    readonly name: "Tech Wizard";
+    readonly emoji: "⚡";
+    readonly description: "Science & Tech";
+} | {
+    readonly id: 5;
+    readonly name: "Sport Champion";
+    readonly emoji: "🏆";
+    readonly description: "Sports";
+} | {
+    readonly id: 6;
+    readonly name: "Trivia Legend";
+    readonly emoji: "✨";
+    readonly description: "General Knowledge";
+};
+export declare function calculateRewards(params: {
+    score: number;
+    streak: number;
+    isCheckIn?: boolean;
+    isDuelWinner?: boolean;
+    wager?: bigint;
+}): {
+    trivq: number;
+    celoWin: bigint;
+};
+/** Returns the MCP server endpoint URL. */
+export declare function getMCPEndpoint(): string;
+export type GeneratedQuestion = {
+    question: string;
+    options: string[];
+    answer: number;
+    category: string;
+};
+/**
+ * Fetches an AI-generated question from the TriviaQ AI endpoint.
+ * @param category Optional category (e.g. "Web3 & Crypto"). Uses random if omitted.
+ */
+export declare function generateQuestion(category?: string): Promise<GeneratedQuestion>;
+export type StatsResponse = {
+    players: number;
+    roundId: number;
+    prizePool: string;
+    totalCheckins: number;
+    chains: {
+        celo: boolean;
+        base: boolean;
+    };
+};
+/**
+ * Fetches live TriviaQ network statistics from the public stats API.
+ */
+export declare function getStats(): Promise<StatsResponse>;
 //# sourceMappingURL=index.d.ts.map

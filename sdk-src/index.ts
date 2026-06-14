@@ -1,8 +1,8 @@
-// TriviaQuest SDK v2.0.0
+// TriviaQuest SDK v3.0.0
 // Blockchain quiz game on Celo & Base
 // https://trivia-quest-eight.vercel.app
 
-export const SDK_VERSION = "2.0.0";
+export const SDK_VERSION = "3.0.0";
 
 // ── Contract Addresses ─────────────────────────────────────
 
@@ -578,4 +578,65 @@ export function calculateRewards(params: {
   }
 
   return { trivq, celoWin };
+}
+
+// ── MCP & AI ───────────────────────────────────────────────
+
+const APP_URL = "https://trivia-quest-eight.vercel.app";
+
+/** Returns the MCP server endpoint URL. */
+export function getMCPEndpoint(): string {
+  return `${APP_URL}/api/mcp`;
+}
+
+export type GeneratedQuestion = {
+  question: string;
+  options: string[];
+  answer: number;
+  category: string;
+};
+
+/**
+ * Fetches an AI-generated question from the TriviaQ AI endpoint.
+ * @param category Optional category (e.g. "Web3 & Crypto"). Uses random if omitted.
+ */
+export async function generateQuestion(category?: string): Promise<GeneratedQuestion> {
+  const url = new URL(`${APP_URL}/api/ai-question`);
+  if (category) url.searchParams.set("category", category);
+  const res = await fetch(url.toString());
+  if (!res.ok) throw new Error(`AI question fetch failed: ${res.status}`);
+  const data = await res.json();
+  return {
+    question: data.question,
+    options: data.options,
+    answer: data.answer,
+    category: data.category ?? category ?? "",
+  };
+}
+
+export type StatsResponse = {
+  players: number;
+  roundId: number;
+  prizePool: string;
+  totalCheckins: number;
+  chains: { celo: boolean; base: boolean };
+};
+
+/**
+ * Fetches live TriviaQ network statistics from the public stats API.
+ */
+export async function getStats(): Promise<StatsResponse> {
+  const res = await fetch(`${APP_URL}/api/stats`);
+  if (!res.ok) throw new Error(`Stats fetch failed: ${res.status}`);
+  const data = await res.json();
+  return {
+    players: data.live_stats?.players ?? 0,
+    roundId: data.live_stats?.round_id ?? 0,
+    prizePool: data.live_stats?.prize_pool ?? "0",
+    totalCheckins: data.live_stats?.total_checkins ?? 0,
+    chains: {
+      celo: data.chains?.celo ?? true,
+      base: data.chains?.base ?? false,
+    },
+  };
 }

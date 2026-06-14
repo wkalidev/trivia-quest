@@ -1,9 +1,9 @@
 "use strict";
-// TriviaQuest SDK v2.0.0
+// TriviaQuest SDK v3.0.0
 // Blockchain quiz game on Celo & Base
 // https://trivia-quest-eight.vercel.app
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DuelStatus = exports.TRIVQ_ABI = exports.DUEL_ABI = exports.CONTRACT_ABI = exports.CELO_TESTNET = exports.BASE_MAINNET = exports.CELO_MAINNET = exports.CONTRACT_ADDRESS_TESTNET = exports.CONTRACT_ADDRESS_MAINNET = exports.REFERRAL_ADDRESS_BASE = exports.CHECKIN_ADDRESS_BASE = exports.TRIVQ_TOKEN_ADDRESS_BASE = exports.TRIVIA_QUEST_ADDRESS_BASE = exports.DUEL_ADDRESS_CELO = exports.REFERRAL_ADDRESS_CELO = exports.CHECKIN_ADDRESS_CELO = exports.TRIVQ_TOKEN_ADDRESS_CELO = exports.TRIVIA_QUEST_ADDRESS_CELO = exports.SDK_VERSION = void 0;
+exports.CATEGORIES = exports.REFERRAL_ABI = exports.CHECKIN_ABI = exports.DuelStatus = exports.TRIVQ_ABI = exports.DUEL_ABI = exports.CONTRACT_ABI = exports.CELO_TESTNET = exports.BASE_MAINNET = exports.CELO_MAINNET = exports.CONTRACT_ADDRESS_TESTNET = exports.CONTRACT_ADDRESS_MAINNET = exports.REFERRAL_ADDRESS_BASE = exports.CHECKIN_ADDRESS_BASE = exports.TRIVQ_TOKEN_ADDRESS_BASE = exports.TRIVIA_QUEST_ADDRESS_BASE = exports.DUEL_ADDRESS_CELO = exports.REFERRAL_ADDRESS_CELO = exports.CHECKIN_ADDRESS_CELO = exports.TRIVQ_TOKEN_ADDRESS_CELO = exports.TRIVIA_QUEST_ADDRESS_CELO = exports.SDK_VERSION = void 0;
 exports.getAddress = getAddress;
 exports.getMultiplier = getMultiplier;
 exports.calculatePoints = calculatePoints;
@@ -17,7 +17,16 @@ exports.getMiniPayAccount = getMiniPayAccount;
 exports.formatAddress = formatAddress;
 exports.formatTrivq = formatTrivq;
 exports.formatCelo = formatCelo;
-exports.SDK_VERSION = "2.0.0";
+exports.fetchNetworkStats = fetchNetworkStats;
+exports.getStreakBonus = getStreakBonus;
+exports.getNextStreakMilestone = getNextStreakMilestone;
+exports.formatCountdown = formatCountdown;
+exports.getCategoryById = getCategoryById;
+exports.calculateRewards = calculateRewards;
+exports.getMCPEndpoint = getMCPEndpoint;
+exports.generateQuestion = generateQuestion;
+exports.getStats = getStats;
+exports.SDK_VERSION = "3.0.0";
 // ── Contract Addresses ─────────────────────────────────────
 // Celo Mainnet
 exports.TRIVIA_QUEST_ADDRESS_CELO = "0xffe22d3d1b63866ac9da8ac92fdb9ceddeadb0bb";
@@ -386,5 +395,155 @@ function formatCelo(wei) {
     if (n < 0.001)
         return "<0.001";
     return n.toFixed(3);
+}
+// ── CheckIn ABI ────────────────────────────────────────────
+exports.CHECKIN_ABI = [
+    {
+        name: "checkIn",
+        type: "function",
+        stateMutability: "nonpayable",
+        inputs: [{ name: "categoryId", type: "uint256" }],
+        outputs: [],
+    },
+    {
+        name: "getPlayerData",
+        type: "function",
+        stateMutability: "view",
+        inputs: [{ name: "player", type: "address" }],
+        outputs: [
+            { name: "lastCheckIn", type: "uint256" },
+            { name: "streak", type: "uint256" },
+            { name: "totalCheckIns", type: "uint256" },
+            { name: "checkInAvailable", type: "bool" },
+            { name: "secondsUntilNext", type: "uint256" },
+        ],
+    },
+    {
+        name: "totalCheckIns",
+        type: "function",
+        stateMutability: "view",
+        inputs: [],
+        outputs: [{ type: "uint256" }],
+    },
+];
+// ── Referral ABI ───────────────────────────────────────────
+exports.REFERRAL_ABI = [
+    {
+        name: "registerReferral",
+        type: "function",
+        stateMutability: "nonpayable",
+        inputs: [{ name: "referrer", type: "address" }],
+        outputs: [],
+    },
+    {
+        name: "getReferrer",
+        type: "function",
+        stateMutability: "view",
+        inputs: [{ name: "user", type: "address" }],
+        outputs: [{ type: "address" }],
+    },
+    {
+        name: "getReferralCount",
+        type: "function",
+        stateMutability: "view",
+        inputs: [{ name: "referrer", type: "address" }],
+        outputs: [{ type: "uint256" }],
+    },
+];
+// ── Network Stats Fetcher ──────────────────────────────────
+async function fetchNetworkStats() {
+    const res = await fetch("https://trivia-quest-eight.vercel.app/api/stats");
+    const data = await res.json();
+    return {
+        players: data.live_stats?.players ?? 0,
+        roundId: data.live_stats?.round_id ?? 0,
+        prizePool: data.live_stats?.prize_pool ?? "0",
+        totalCheckins: data.live_stats?.total_checkins ?? 0,
+    };
+}
+// ── Streak Utils ───────────────────────────────────────────
+function getStreakBonus(streak) {
+    return streak > 0 && streak % 7 === 0 ? 2000 : 0;
+}
+function getNextStreakMilestone(streak) {
+    return 7 - (streak % 7);
+}
+function formatCountdown(seconds) {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+    return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+}
+// ── Category Utils ─────────────────────────────────────────
+exports.CATEGORIES = [
+    { id: 1, name: "Africa Explorer", emoji: "🌍", description: "African Geography" },
+    { id: 2, name: "Crypto Master", emoji: "⛓", description: "Web3 & Crypto" },
+    { id: 3, name: "Culture Keeper", emoji: "📜", description: "History & Culture" },
+    { id: 4, name: "Tech Wizard", emoji: "⚡", description: "Science & Tech" },
+    { id: 5, name: "Sport Champion", emoji: "🏆", description: "Sports" },
+    { id: 6, name: "Trivia Legend", emoji: "✨", description: "General Knowledge" },
+];
+function getCategoryById(id) {
+    return exports.CATEGORIES.find(c => c.id === id) ?? null;
+}
+// ── Reward Calculator ──────────────────────────────────────
+function calculateRewards(params) {
+    let trivq = 0;
+    let celoWin = BigInt(0);
+    if (params.score > 0) {
+        trivq += params.score * 100 * getMultiplier(params.streak);
+    }
+    if (params.isCheckIn) {
+        trivq += 100;
+        trivq += getStreakBonus(params.streak);
+    }
+    if (params.isDuelWinner && params.wager) {
+        celoWin = getDuelNetPrize(params.wager);
+    }
+    return { trivq, celoWin };
+}
+// ── MCP & AI ───────────────────────────────────────────────
+const APP_URL = "https://trivia-quest-eight.vercel.app";
+/** Returns the MCP server endpoint URL. */
+function getMCPEndpoint() {
+    return `${APP_URL}/api/mcp`;
+}
+/**
+ * Fetches an AI-generated question from the TriviaQ AI endpoint.
+ * @param category Optional category (e.g. "Web3 & Crypto"). Uses random if omitted.
+ */
+async function generateQuestion(category) {
+    const url = new URL(`${APP_URL}/api/ai-question`);
+    if (category)
+        url.searchParams.set("category", category);
+    const res = await fetch(url.toString());
+    if (!res.ok)
+        throw new Error(`AI question fetch failed: ${res.status}`);
+    const data = await res.json();
+    return {
+        question: data.question,
+        options: data.options,
+        answer: data.answer,
+        category: data.category ?? category ?? "",
+    };
+}
+/**
+ * Fetches live TriviaQ network statistics from the public stats API.
+ */
+async function getStats() {
+    const res = await fetch(`${APP_URL}/api/stats`);
+    if (!res.ok)
+        throw new Error(`Stats fetch failed: ${res.status}`);
+    const data = await res.json();
+    return {
+        players: data.live_stats?.players ?? 0,
+        roundId: data.live_stats?.round_id ?? 0,
+        prizePool: data.live_stats?.prize_pool ?? "0",
+        totalCheckins: data.live_stats?.total_checkins ?? 0,
+        chains: {
+            celo: data.chains?.celo ?? true,
+            base: data.chains?.base ?? false,
+        },
+    };
 }
 //# sourceMappingURL=index.js.map
