@@ -9,7 +9,7 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
-  finish-round:
+  finish-round-celo:
     runs-on: ubuntu-latest
 
     steps:
@@ -33,3 +33,26 @@ jobs:
           CELO_RPC: "https://forno.celo.org"
           CELO_SEPOLIA_RPC: "https://alfajores-forno.celo-testnet.org"
           ALFAJORES_RPC: "https://alfajores-forno.celo-testnet.org"
+
+  finish-round-base:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: contracts/package-lock.json
+
+      - name: Install dependencies
+        run: cd contracts && npm install
+
+      - name: Run start-round-base script
+        run: cd contracts && npx hardhat run scripts/start-round-base.ts --network base
+        env:
+          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+          BASE_RPC: "https://mainnet.base.org"
