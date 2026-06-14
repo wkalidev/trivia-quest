@@ -1,6 +1,6 @@
 import hre from "hardhat";
 
-const BASE_GAME = "0xf44dfec3230bcf917ca7ccc59b4e67df2507e21f" as `0x${string}`;
+const BASE_GAME = "0x1e2c209412ec30915ccf922654f0593faf61fcfb" as `0x${string}`;
 // Plain EOA used when prize pool is 0 — avoids contract-wallet fallback OOG on transfer()
 const PLACEHOLDER_WINNER = "0x000000000000000000000000000000000000dEaD" as `0x${string}`;
 
