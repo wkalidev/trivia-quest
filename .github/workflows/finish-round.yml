@@ -51,8 +51,8 @@ jobs:
       - name: Install dependencies
         run: cd contracts && npm install
 
-      - name: Run start-round-base script
-        run: cd contracts && npx hardhat run scripts/start-round-base.ts --network base
+      - name: Run finish-round-base script
+        run: cd contracts && npx hardhat run scripts/finish-round-base.ts --network base
         env:
           PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
           BASE_RPC: "https://mainnet.base.org"
