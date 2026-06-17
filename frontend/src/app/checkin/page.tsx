@@ -1,12 +1,11 @@
 "use client";
 
 import { sdk } from '@farcaster/miniapp-sdk';
-import { useAccount, useReadContract, useWriteContract } from "wagmi";
+import { useAccount, useChainId, useReadContract, useWriteContract } from "wagmi";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-
-const CHECKIN_ADDRESS = (process.env.NEXT_PUBLIC_CHECKIN_ADDRESS ?? "0x0") as `0x${string}`;
+import { getContractAddress } from "@/lib/contract";
 
 const CHECKIN_ABI = [
   {
@@ -49,6 +48,8 @@ function formatCountdown(seconds: number): string {
 
 export default function CheckInPage() {
   const { address, isConnected } = useAccount();
+  const chainId = useChainId();
+  const checkinAddress = getContractAddress(chainId, "checkin");
   const router = useRouter();
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [countdown, setCountdown] = useState(0);
@@ -57,7 +58,7 @@ export default function CheckInPage() {
   const [notifLoading, setNotifLoading] = useState(false);
 
   const { data: playerData, refetch } = useReadContract({
-    address: CHECKIN_ADDRESS,
+    address: checkinAddress,
     abi: CHECKIN_ABI,
     functionName: "getPlayerData",
     args: address ? [address] : undefined,
@@ -87,7 +88,7 @@ export default function CheckInPage() {
   const handleCheckIn = () => {
     if (!selectedCategory) return;
     writeContract({
-      address: CHECKIN_ADDRESS,
+      address: checkinAddress,
       abi: CHECKIN_ABI,
       functionName: "checkIn",
       args: [BigInt(selectedCategory)],
