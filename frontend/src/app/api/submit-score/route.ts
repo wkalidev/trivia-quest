@@ -89,7 +89,11 @@ export async function POST(request: Request) {
       account,
     });
 
-    await publicClient.waitForTransactionReceipt({ hash });
+    const receipt = await publicClient.waitForTransactionReceipt({ hash });
+    if (receipt.status === "reverted") {
+      console.error(`[submit-score] tx reverted: ${hash} chainId=${resolvedChainId} player=${player}`);
+      return Response.json({ error: "Score submission reverted — player may not be in the current round", hash }, { status: 422 });
+    }
 
     return Response.json({ success: true, hash });
 

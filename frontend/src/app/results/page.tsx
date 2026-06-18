@@ -48,13 +48,13 @@ function ResultsContent() {
         });
         const data = await res.json();
         if (data?.rank) setRank(data.rank);
-        setSubmitted(true);
+        if (res.ok && data?.success) setSubmitted(true);
       } catch (error) {
         console.error("Failed to submit score:", error);
       }
     };
     submitScore();
-  }, [address, score, points, submitted, signMessageAsync]);
+  }, [address, score, points, submitted, signMessageAsync, chainId]);
 
   const getPerf = () => {
     if (percentage === 100) return { label: t("perfect"), color: "text-[#FBCD00]", glow: "#FBCD00", emoji: "🏆" };
