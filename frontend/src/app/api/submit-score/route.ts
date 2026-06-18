@@ -61,13 +61,14 @@ export async function POST(request: Request) {
       return Response.json({ error: "Server config error" }, { status: 500 });
     }
 
-    const resolvedChainId = chainId === base.id ? base.id : celo.id;
+    const resolvedChainId = Number(chainId) === base.id ? base.id : celo.id;
     const { chain, rpc } = CHAIN_CONFIG[resolvedChainId];
     const contractAddress = CONTRACTS[resolvedChainId].game;
 
     console.log(`[submit-score] chainId=${resolvedChainId} contract=${contractAddress}`);
 
-    const account = privateKeyToAccount(`0x${privateKey}`);
+    const normalizedKey = (privateKey.startsWith("0x") ? privateKey : `0x${privateKey}`) as `0x${string}`;
+    const account = privateKeyToAccount(normalizedKey);
 
     const walletClient = createWalletClient({
       account,

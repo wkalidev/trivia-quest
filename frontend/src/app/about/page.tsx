@@ -16,11 +16,15 @@ const STATS = [
 ]
 
 const CONTRACTS = [
-  { name: "TriviaQuest v3", address: "0xffe22d3d1b63866ac9da8ac92fdb9ceddeadb0bb", chain: "Celo" },
-  { name: "TRIVQ Token v2", address: "0xe65fc5cacaf9a5aebbc0e151dee08a53f24a05c5", chain: "Celo" },
-  { name: "DailyCheckIn v2", address: "0x8650e6c477f8ae3933dc6d61d85e65c90cf71828", chain: "Celo" },
-  { name: "TriviaDuel v1", address: "0xee7be00cd5454b9bea56d864d82076b8b5de5ca1", chain: "Celo" },
-  { name: "Referral v2", address: "0xa0fcd85a25ecb71ca1ea9d63da058c832c27c62e", chain: "Celo" },
+  { name: "TriviaQuest v3", address: "0xffe22d3d1b63866ac9da8ac92fdb9ceddeadb0bb", chain: "Celo", explorer: "https://celoscan.io" },
+  { name: "TRIVQ Token v2", address: "0xe65fc5cacaf9a5aebbc0e151dee08a53f24a05c5", chain: "Celo", explorer: "https://celoscan.io" },
+  { name: "DailyCheckIn v2", address: "0x8650e6c477f8ae3933dc6d61d85e65c90cf71828", chain: "Celo", explorer: "https://celoscan.io" },
+  { name: "TriviaDuel v1", address: "0xee7be00cd5454b9bea56d864d82076b8b5de5ca1", chain: "Celo", explorer: "https://celoscan.io" },
+  { name: "Referral v2", address: "0xa0fcd85a25ecb71ca1ea9d63da058c832c27c62e", chain: "Celo", explorer: "https://celoscan.io" },
+  { name: "TriviaQuest", address: "0x1e2c209412ec30915ccf922654f0593faf61fcfb", chain: "Base", explorer: "https://basescan.org" },
+  { name: "DailyCheckIn", address: "0x0f19851d5cd905d110c000a7d26d74a2f21f8ff9", chain: "Base", explorer: "https://basescan.org" },
+  { name: "QuestGame", address: "0xE355F73B188713f60F42552d942383303EDE313f", chain: "Base", explorer: "https://basescan.org" },
+  { name: "QuestCheckIn", address: "0x63529080bb946ED0611c4DC6521a9CcC7579b2FB", chain: "Base", explorer: "https://basescan.org" },
 ]
 
 const TEAM = [
@@ -112,17 +116,17 @@ export default function AboutPage() {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
           className="rounded-2xl p-5 border border-white/8"
           style={{ background: "rgba(255,255,255,0.03)" }}>
-          <p className="text-white/40 text-xs mb-4 uppercase tracking-wider">Smart Contracts · Celo Mainnet</p>
+          <p className="text-white/40 text-xs mb-4 uppercase tracking-wider">Smart Contracts · Celo + Base</p>
           <div className="space-y-2">
             {CONTRACTS.map((c, i) => (
-              <a key={i} href={`https://celoscan.io/address/${c.address}`} target="_blank" rel="noreferrer"
+              <a key={i} href={`${c.explorer}/address/${c.address}`} target="_blank" rel="noreferrer"
                 className="flex items-center justify-between p-3 rounded-xl transition-all hover:bg-white/5"
                 style={{ border: "1px solid rgba(255,255,255,0.06)" }}>
                 <div>
                   <p className="text-white text-sm font-bold">{c.name}</p>
                   <p className="text-white/30 text-xs font-mono">{c.address.slice(0, 10)}...{c.address.slice(-8)}</p>
                 </div>
-                <span className="text-white/20 text-xs">{c.chain} ↗</span>
+                <span className="text-white/20 text-xs" style={{ color: c.chain === "Base" ? "#0052ff" : "#35D07F" }}>{c.chain} ↗</span>
               </a>
             ))}
           </div>
