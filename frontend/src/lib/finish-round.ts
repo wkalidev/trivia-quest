@@ -30,12 +30,7 @@ export async function finishExpiredRound(
   const rpc = isBase ? "https://mainnet.base.org" : "https://forno.celo.org";
   const gameAddress = isBase ? CONTRACTS[base.id].game : CONTRACTS[celo.id].game;
 
-  const privateKey = process.env.PRIVATE_KEY;
-  if (!privateKey) throw new Error("PRIVATE_KEY not set");
-
-  const account = privateKeyToAccount(`0x${privateKey}` as `0x${string}`);
   const publicClient = createPublicClient({ chain, transport: http(rpc) });
-  const walletClient = createWalletClient({ account, chain, transport: http(rpc) });
 
   const round = (await publicClient.readContract({
     address: gameAddress,
@@ -51,6 +46,13 @@ export async function finishExpiredRound(
   if (isFinished) return { status: "already_finished" };
   if (now < endTime)
     return { status: "active", endsAt: new Date(Number(endTime) * 1000).toISOString() };
+
+  // Only need the private key from here — check late so active-round reads work without it
+  const privateKey = process.env.PRIVATE_KEY;
+  if (!privateKey) throw new Error("PRIVATE_KEY not set");
+
+  const account = privateKeyToAccount(`0x${privateKey}` as `0x${string}`);
+  const walletClient = createWalletClient({ account, chain, transport: http(rpc) });
 
   const leaderboard = (await publicClient.readContract({
     address: gameAddress,
