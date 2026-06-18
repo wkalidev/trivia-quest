@@ -4,7 +4,7 @@ import { sdk } from '@farcaster/miniapp-sdk';
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAccount, useReadContract, useChainId } from "wagmi";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useCallback, memo } from "react";
+import { useEffect, useRef, useState, useCallback, memo } from "react";
 import { useMiniPay } from "@/hooks/useMiniPay";
 import { useTranslations, useLocale } from "next-intl";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
@@ -207,12 +207,38 @@ export default function Home() {
     query: { enabled: !!walletAddress },
   });
 
-  const { data: currentRound } = useReadContract({
+  const { data: currentRound, refetch: refetchRound } = useReadContract({
     address: CONTRACT_ADDRESS,
     abi: CONTRACT_ABI,
     functionName: "getCurrentRound",
     query: { refetchInterval: 15_000 },
   });
+
+  // On-demand round management: when the client detects an expired round, hit
+  // the server-side API to call finishRound on-chain immediately, without
+  // waiting for any cron or manual trigger.
+  const roundFixSent = useRef(false);
+  useEffect(() => {
+    if (!currentRound) return;
+    const now = Math.floor(Date.now() / 1000);
+    const isExpired = !currentRound[5] && now > Number(currentRound[3]);
+    if (!isExpired) {
+      roundFixSent.current = false; // reset so next expiry triggers a new call
+      return;
+    }
+    if (roundFixSent.current) return;
+    roundFixSent.current = true;
+    fetch(`/api/round?chain=${chainId}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.status === "sent" || data.status === "finished") {
+          // Tx submitted — poll wagmi until the new round lands
+          setTimeout(() => refetchRound(), 4_000);
+          setTimeout(() => refetchRound(), 10_000);
+        }
+      })
+      .catch(() => {});
+  }, [currentRound, chainId, refetchRound]);
 
   const { data: totalPlayers } = useReadContract({
     address: CONTRACT_ADDRESS,
