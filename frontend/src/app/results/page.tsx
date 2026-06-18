@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
-import { useAccount, useSignMessage } from "wagmi";
+import { useAccount, useSignMessage, useChainId } from "wagmi";
 import { Suspense, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
@@ -20,6 +20,7 @@ function ResultsContent() {
   const router = useRouter();
   const { address } = useAccount();
   const { signMessageAsync } = useSignMessage();
+  const chainId = useChainId();
   const t = useTranslations("results");
   const [submitted, setSubmitted] = useState(false);
   const [rank, setRank] = useState<number | null>(null);
@@ -43,7 +44,7 @@ function ResultsContent() {
         const res = await fetch("/api/submit-score", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ player: address, score, points, signature, message }),
+          body: JSON.stringify({ player: address, score, points, signature, message, chainId }),
         });
         const data = await res.json();
         if (data?.rank) setRank(data.rank);

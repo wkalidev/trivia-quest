@@ -1,7 +1,7 @@
 import { createWalletClient, createPublicClient, http, verifyMessage } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { celo } from "viem/chains";
-import { CONTRACT_ADDRESS, CONTRACT_ABI } from "@/lib/contract";
+import { celo, base } from "viem/chains";
+import { CONTRACTS, CONTRACT_ABI } from "@/lib/contract";
 
 const scoreRateLimit = new Map<string, { count: number; resetTime: number }>();
 function isScoreRateLimited(player: string): boolean {
@@ -16,10 +16,15 @@ function isScoreRateLimited(player: string): boolean {
   return false;
 }
 
+const CHAIN_CONFIG: Record<number, { chain: typeof celo | typeof base; rpc: string }> = {
+  [celo.id]: { chain: celo, rpc: "https://forno.celo.org" },
+  [base.id]: { chain: base, rpc: "https://mainnet.base.org" },
+};
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { player, score, points, signature, message } = body;
+    const { player, score, points, signature, message, chainId } = body;
 
     if (!player || score === undefined || points === undefined) {
       return Response.json({ error: "Missing params" }, { status: 400 });
@@ -34,7 +39,6 @@ export async function POST(request: Request) {
       return Response.json({ error: "Missing signature" }, { status: 401 });
     }
 
-    const expectedMessage = `TriviaQ score: ${score} points: ${points} player: ${player.toLowerCase()}`;
     if (!message.includes(score.toString()) || !message.includes(player.toLowerCase())) {
       return Response.json({ error: "Invalid message" }, { status: 401 });
     }
@@ -57,25 +61,31 @@ export async function POST(request: Request) {
       return Response.json({ error: "Server config error" }, { status: 500 });
     }
 
+    const resolvedChainId = chainId === base.id ? base.id : celo.id;
+    const { chain, rpc } = CHAIN_CONFIG[resolvedChainId];
+    const contractAddress = CONTRACTS[resolvedChainId].game;
+
+    console.log(`[submit-score] chainId=${resolvedChainId} contract=${contractAddress}`);
+
     const account = privateKeyToAccount(`0x${privateKey}`);
 
     const walletClient = createWalletClient({
       account,
-      chain: celo,
-      transport: http("https://forno.celo.org"),
+      chain,
+      transport: http(rpc),
     });
 
     const publicClient = createPublicClient({
-      chain: celo,
-      transport: http("https://forno.celo.org"),
+      chain,
+      transport: http(rpc),
     });
 
     const hash = await walletClient.writeContract({
-      address: CONTRACT_ADDRESS,
+      address: contractAddress,
       abi: CONTRACT_ABI,
       functionName: "submitScore",
       args: [player as `0x${string}`, BigInt(score), BigInt(points)],
-      chain: celo,
+      chain,
       account,
     });
 
