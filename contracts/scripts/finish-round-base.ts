@@ -57,7 +57,13 @@ if (!finished && now > endTime) {
 
   try {
     const tx = await contract.write.finishRound([topWinners]);
-    console.log("✅ finishRound() sent! TX:", tx);
+    console.log("⏳ finishRound() sent! TX:", tx, "— waiting for receipt...");
+    const receipt = await publicClient.waitForTransactionReceipt({ hash: tx });
+    if (receipt.status === "reverted") {
+      console.error("❌ finishRound() reverted on-chain!");
+      process.exit(1);
+    }
+    console.log("✅ finishRound() confirmed! Block:", receipt.blockNumber.toString());
   } catch (err: any) {
     console.error("❌ Error finishRound:", err.message ?? err);
     process.exit(1);
