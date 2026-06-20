@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 type EthereumProvider = {
-  request: (args: { method: string; params?: unknown[] }) => Promise<string[]>;
+  request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
   isMiniPay?: boolean;
 };
 
@@ -27,11 +27,20 @@ export function useMiniPay() {
 
       if (ethereum && ethereum.isMiniPay) {
         setIsInMiniPay(true);
+        // Force Celo mainnet (chainId 42220 = 0xA4EC) — MiniPay only runs on Celo
+        try {
+          await ethereum.request({
+            method: "wallet_switchEthereumChain",
+            params: [{ chainId: "0xA4EC" }],
+          });
+        } catch {
+          // MiniPay is always on Celo; ignore if switch is unnecessary or unsupported
+        }
         try {
           const accounts = await ethereum.request({
             method: "eth_requestAccounts",
             params: [],
-          });
+          }) as string[];
           setMiniPayAddress(accounts[0] ?? null);
         } catch {
           setMiniPayAddress(null);

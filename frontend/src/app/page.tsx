@@ -430,14 +430,22 @@ export default function Home() {
 
         {isInMiniPay && miniPayAddress && (
           <motion.div variants={itemVariants}
-            className="rounded-2xl p-3 flex items-center gap-3"
+            className="rounded-2xl p-3 flex items-center justify-between"
             style={{ background: "rgba(53,208,127,0.06)", border: "1px solid rgba(53,208,127,0.15)" }}
           >
-            <span className="text-xl">📱</span>
-            <div>
-              <p className="text-[#35D07F] font-bold text-sm">{t("miniPayDetected")}</p>
-              <p className="text-white/30 text-xs">{addressToAlias(miniPayAddress)}</p>
+            <div className="flex items-center gap-3">
+              <span className="text-xl">📱</span>
+              <div>
+                <p className="text-[#35D07F] font-bold text-sm">{t("miniPayDetected")}</p>
+                <p className="text-white/30 text-xs">{addressToAlias(miniPayAddress)}</p>
+              </div>
             </div>
+            <a
+              href={`celo://wallet/pay?address=${miniPayAddress}&token=TRIVQ`}
+              className="text-[10px] text-[#35D07F]/50 hover:text-[#35D07F] transition-colors shrink-0"
+            >
+              💳 Receive
+            </a>
           </motion.div>
         )}
 

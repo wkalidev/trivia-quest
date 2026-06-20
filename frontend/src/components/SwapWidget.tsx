@@ -16,6 +16,7 @@ import {
 } from "viem";
 import { celo } from "viem/chains";
 import { motion, AnimatePresence } from "framer-motion";
+import { useMiniPay } from "@/hooks/useMiniPay";
 
 // Ubeswap V3 Universal Router on Celo mainnet
 const UBESWAP_ROUTER = "0x3C255DED9B25f0BFB4EF1D14234BD2514d7A7A0d" as `0x${string}`;
@@ -31,8 +32,8 @@ const POOL_FEE = 3000; // 0.30%
 const COMMANDS = "0x0b00" as `0x${string}`;
 
 // Universal Router magic constants used as recipient in execute() inputs
-const ADDRESS_THIS = "0x0000000000000000000000000000000000000002" as `0x${string}`; // keeps tokens in router (WRAP_ETH step)
-const MSG_SENDER   = "0x0000000000000000000000000000000000000002" as `0x${string}`; // routes output to msg.sender (V3_SWAP_EXACT_IN step)
+const ADDRESS_THIS = "0x0000000000000000000000000000000000000002" as `0x${string}`; // router keeps tokens (WRAP_ETH recipient)
+const MSG_SENDER   = "0x0000000000000000000000000000000000000001" as `0x${string}`; // output goes to msg.sender (V3_SWAP_EXACT_IN recipient)
 
 const ROUTER_ABI = [
   {
@@ -84,6 +85,7 @@ export default function SwapWidget() {
   const [quoteLoading, setQuoteLoading] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
 
+  const { isInMiniPay, miniPayAddress } = useMiniPay();
   const isOnCelo = chainId === celo.id;
 
   const { data: trivqBalance, refetch: refetchBalance } = useReadContract({
@@ -374,6 +376,24 @@ export default function SwapWidget() {
                     <p className="text-[10px] text-center text-white/25">
                       Your TRIVQ: {fmtTrivq(trivqBalance as bigint)}
                     </p>
+                  )}
+
+                  {/* MiniPay deeplinks */}
+                  {isInMiniPay && celoBalance && parseFloat(celoBalance.formatted) < parseFloat(celoInput || "0") && (
+                    <a
+                      href="https://minipay.opera.com/add_cash"
+                      className="block text-center text-[10px] text-[#35D07F]/60 hover:text-[#35D07F] transition-colors"
+                    >
+                      Low CELO — Add cash via MiniPay ↗
+                    </a>
+                  )}
+                  {isInMiniPay && miniPayAddress && (
+                    <a
+                      href={`celo://wallet/pay?address=${miniPayAddress}&token=TRIVQ`}
+                      className="block text-center text-[10px] text-[#35D07F]/40 hover:text-[#35D07F]/70 transition-colors"
+                    >
+                      💳 Receive TRIVQ via MiniPay
+                    </a>
                   )}
 
                   {/* Success / TX link */}
