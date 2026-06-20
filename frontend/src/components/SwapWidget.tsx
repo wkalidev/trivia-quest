@@ -194,7 +194,8 @@ export default function SwapWidget() {
       [WCELO, POOL_FEE, TRIVQ]
     );
 
-    // V3_SWAP_EXACT_IN input: payerIsUser=false → router pays from its WCELO balance
+    // V3_SWAP_EXACT_IN input: payerIsUser=true → router (ADDRESS_THIS) pays from its WCELO balance
+    // WRAP_ETH deposits WCELO to the router, so the router must be the payer, not MSG_SENDER
     // recipient must be the MSG_SENDER constant (not the user's actual address — causes simulation revert)
     const swapInput = encodeAbiParameters(
       [
@@ -204,7 +205,7 @@ export default function SwapWidget() {
         { type: "bytes" },
         { type: "bool" },
       ],
-      [MSG_SENDER, amountIn, amountOutMin, path, false]
+      [MSG_SENDER, amountIn, amountOutMin, path, true]
     );
 
     // wagmi infers account + chain from connector at runtime; explicit here for tsc
