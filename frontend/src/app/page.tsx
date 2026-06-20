@@ -22,6 +22,13 @@ const TrivqPrice = dynamic_(() => import("@/components/TrivqPrice"), {
   ),
 });
 
+const SwapWidget = dynamic_(() => import("@/components/SwapWidget"), {
+  ssr: false,
+  loading: () => (
+    <div className="h-12 rounded-2xl animate-pulse" style={{ background: "rgba(53,208,127,0.08)", border: "1px solid rgba(53,208,127,0.2)" }} />
+  ),
+});
+
 const TRIVQ_ABI = [
   {
     name: "balanceOf",
@@ -494,19 +501,15 @@ export default function Home() {
           </motion.button>
         </motion.div>
 
-        <motion.div variants={itemVariants} className="grid grid-cols-2 gap-2">
+        <motion.div variants={itemVariants} className="grid grid-cols-2 gap-2 items-start">
           {isReady && referralLink && (
             <ActionButton onClick={copyReferral} variant="blue">
               {copied ? "✅ Copied!" : "🔗 Invite & Earn"}
             </ActionButton>
           )}
-          <ActionButton
-            onClick={() => window.open(`https://app.ubeswap.org/#/swap?outputCurrency=${TRIVQ_ADDR}`, "_blank")}
-            variant="green"
-            className={isReady && referralLink ? "" : "col-span-2"}
-          >
-            💱 Swap TRIVQ
-          </ActionButton>
+          <div className={isReady && referralLink ? "" : "col-span-2"}>
+            <SwapWidget />
+          </div>
         </motion.div>
 
         <motion.div variants={itemVariants} className="grid grid-cols-2 gap-2">
