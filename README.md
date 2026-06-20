@@ -169,6 +169,20 @@ cd ../contracts && npm install
 npx hardhat compile
 ```
 
+## 🔄 Inline CELO → TRIVQ Swap
+
+The home page embeds a one-click swap widget powered by the Ubeswap V3 Universal Router:
+
+| Step | Detail |
+|---|---|
+| Router | `0x3C255DED9B25f0BFB4EF1D14234BD2514d7A7A0d` (Ubeswap V3 on Celo) |
+| Path | WCELO → TRIVQ (fee 0.30%) |
+| Commands | `WRAP_ETH (0x0b)` → `V3_SWAP_EXACT_IN (0x00)` |
+| Slippage | 1% max |
+| Price oracle | GeckoTerminal CELO/TRIVQ ratio (live) |
+
+No external DEX page needed — swap directly inside the Mini App.
+
 ## 🎯 Proof of Ship Checklist
 
 - [x] Build For MiniPay
@@ -204,6 +218,8 @@ npx hardhat compile
 - [x] 8 i18n languages (FR, EN, ES, IT, PT, AR, ZH, SW) 🆕
 - [x] 1200+ questions (446 base + 754 extra) 🆕
 - [x] SDK v3.1.0 — treasury, LANGUAGES, TOTAL_QUESTIONS, finishRound ABI 🆕
+- [x] Inline CELO→TRIVQ swap via Ubeswap V3 Universal Router 🆕
+- [x] MiniPay full compatibility audit — wagmi injected() connector, address aliasing, checkin fallback 🆕
 
 ## 👤 Author
 
