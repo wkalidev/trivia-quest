@@ -30,8 +30,9 @@ const POOL_FEE = 3000; // 0.30%
 //   0x00 = V3_SWAP_EXACT_IN  (swap WCELO → TRIVQ via the pool)
 const COMMANDS = "0x0b00" as `0x${string}`;
 
-// Universal Router ADDRESS_THIS constant (recipient = the router itself, used in WRAP_ETH step)
-const ADDRESS_THIS = "0x0000000000000000000000000000000000000002" as `0x${string}`;
+// Universal Router magic constants used as recipient in execute() inputs
+const ADDRESS_THIS = "0x0000000000000000000000000000000000000002" as `0x${string}`; // keeps tokens in router (WRAP_ETH step)
+const MSG_SENDER   = "0x0000000000000000000000000000000000000002" as `0x${string}`; // routes output to msg.sender (V3_SWAP_EXACT_IN step)
 
 const ROUTER_ABI = [
   {
@@ -194,6 +195,7 @@ export default function SwapWidget() {
     );
 
     // V3_SWAP_EXACT_IN input: payerIsUser=false → router pays from its WCELO balance
+    // recipient must be the MSG_SENDER constant (not the user's actual address — causes simulation revert)
     const swapInput = encodeAbiParameters(
       [
         { type: "address" },
@@ -202,7 +204,7 @@ export default function SwapWidget() {
         { type: "bytes" },
         { type: "bool" },
       ],
-      [address, amountIn, amountOutMin, path, false]
+      [MSG_SENDER, amountIn, amountOutMin, path, false]
     );
 
     // wagmi infers account + chain from connector at runtime; explicit here for tsc

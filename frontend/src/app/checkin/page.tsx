@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getContractAddress } from "@/lib/contract";
+import { useMiniPay } from "@/hooks/useMiniPay";
 
 const CHECKIN_ABI = [
   {
@@ -48,6 +49,9 @@ function formatCountdown(seconds: number): string {
 
 export default function CheckInPage() {
   const { address, isConnected } = useAccount();
+  const { miniPayAddress } = useMiniPay();
+  const effectiveAddress = (address ?? miniPayAddress ?? undefined) as `0x${string}` | undefined;
+  const isReady = isConnected || !!miniPayAddress;
   const chainId = useChainId();
   const checkinAddress = getContractAddress(chainId, "checkin");
   const router = useRouter();
@@ -61,8 +65,8 @@ export default function CheckInPage() {
     address: checkinAddress,
     abi: CHECKIN_ABI,
     functionName: "getPlayerData",
-    args: address ? [address] : undefined,
-    query: { enabled: !!address, refetchInterval: 10_000 },
+    args: effectiveAddress ? [effectiveAddress] : undefined,
+    query: { enabled: !!effectiveAddress, refetchInterval: 10_000 },
   });
 
   const { writeContract, isPending } = useWriteContract();
@@ -117,7 +121,7 @@ export default function CheckInPage() {
     }
   };
 
-  if (!isConnected) {
+  if (!isReady) {
     return (
       <main className="min-h-screen flex items-center justify-center px-4"
         style={{ background: "radial-gradient(ellipse 80% 60% at 50% -10%, #1a2744 0%, #0a0b0f 60%)" }}

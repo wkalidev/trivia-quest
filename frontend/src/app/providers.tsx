@@ -1,6 +1,7 @@
 "use client";
 
 import { WagmiProvider, createConfig, http } from "wagmi";
+import { injected } from "wagmi/connectors";
 import { celo } from "viem/chains";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RainbowKitProvider } from "@rainbow-me/rainbowkit";
@@ -9,11 +10,12 @@ import { useEffect, useState, type ReactNode } from "react";
 import "@rainbow-me/rainbowkit/styles.css";
 import { fullConfig } from "@/lib/fullConfig";
 
-/**
- * Config légère pour MiniPay — pas de WalletConnect, pas d'eval.
- */
+// Lightweight config for MiniPay — no WalletConnect, no eval.
+// Must include injected() so wagmi auto-reconnects to window.ethereum (MiniPay)
+// after the provider switch, keeping isConnected=true on all pages.
 const lightConfig = createConfig({
   chains: [celo],
+  connectors: [injected()],
   transports: { [celo.id]: http("https://forno.celo.org") },
   ssr: false,
 });
