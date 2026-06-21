@@ -106,11 +106,11 @@ Key differentiators:
 
 | Allocation | % | Tokens |
 |---|---|---|
-| Player Rewards | 50% | 500,000,000 |
-| Liquidity | 20% | 200,000,000 |
-| Team | 15% | 150,000,000 |
-| Ecosystem | 10% | 100,000,000 |
-| Marketing | 5% | 50,000,000 |
+| Player Rewards | 50% | 250,000,000 |
+| Liquidity | 20% | 100,000,000 |
+| Team | 15% | 75,000,000 |
+| Ecosystem | 10% | 50,000,000 |
+| Marketing | 5% | 25,000,000 |
 
 ### Token Utility
 

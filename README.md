@@ -112,11 +112,11 @@ Every AI request made by the bot is cryptographically signed with ECDSA — veri
 
 | Allocation | Amount | % |
 |---|---|---|
-| Player Rewards | 500,000,000 | 50% |
-| Liquidity | 200,000,000 | 20% |
-| Team | 150,000,000 | 15% |
-| Ecosystem | 100,000,000 | 10% |
-| Marketing | 50,000,000 | 5% |
+| Player Rewards | 250,000,000 | 50% |
+| Liquidity | 100,000,000 | 20% |
+| Team | 75,000,000 | 15% |
+| Ecosystem | 50,000,000 | 10% |
+| Marketing | 25,000,000 | 5% |
 
 ## 🔥 Reward System
 
