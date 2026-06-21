@@ -1,10 +1,10 @@
 "use client";
 
-import { useAccount, useReadContract, useEnsName } from "wagmi";
+import { useAccount, useReadContract, useEnsName, useChainId } from "wagmi";
 import { useRouter } from "next/navigation";
-import { CONTRACT_ADDRESS, CONTRACT_ABI } from "@/lib/web3";
+import { getContractAddress, CONTRACT_ABI } from "@/lib/web3";
 import { motion } from "framer-motion";
-import { mainnet } from "viem/chains";
+import { mainnet, base } from "viem/chains";
 
 function getRank(pts: number) {
   if (pts >= 5000) return { label: "Legend", emoji: "🏆", color: "text-[#FBCD00]", next: null };
@@ -18,6 +18,9 @@ function getRank(pts: number) {
 export default function ProfilePage() {
   const { address, isConnected } = useAccount();
   const router = useRouter();
+  const chainId = useChainId();
+  const CONTRACT_ADDRESS = getContractAddress(chainId, "game");
+  const isBase = chainId === base.id;
 
   const { data: ensName } = useEnsName({
     address: address,
@@ -64,7 +67,7 @@ export default function ProfilePage() {
     { label: "Total Points", value: pts.toLocaleString(), color: "text-[#FBCD00]" },
     { label: "Games Played", value: stats?.gamesPlayed?.toString() ?? "0", color: "text-[#35D07F]" },
     { label: "Best Score", value: `${stats?.bestScore?.toString() ?? "0"}/10`, color: "text-white" },
-    { label: "CELO Won", value: stats?.totalWinnings ? (Number(stats.totalWinnings) / 1e18).toFixed(4) : "0", color: "text-purple-400" },
+    { label: isBase ? "ETH Won" : "CELO Won", value: stats?.totalWinnings ? (Number(stats.totalWinnings) / 1e18).toFixed(4) : "0", color: "text-purple-400" },
   ];
 
   return (
@@ -182,6 +185,36 @@ export default function ProfilePage() {
                 className="w-full border border-white/10 text-white font-bold py-3 rounded-2xl active:scale-95 transition-all text-sm"
                 style={{ background: "rgba(255,255,255,0.04)" }}
               >🏆 Leaderboard</button>
+            </motion.div>
+
+            {/* Add TRIVQ to wallet */}
+            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}
+              className="rounded-2xl border p-4 space-y-2"
+              style={{ background: "rgba(251,205,0,0.03)", borderColor: "rgba(251,205,0,0.12)" }}
+            >
+              <p className="text-white/40 text-xs uppercase tracking-wider">Add TRIVQ to your wallet</p>
+              <a
+                href={`celo://wallet/add-token?address=0xe65fc5cacaf9a5aebbc0e151dee08a53f24a05c5`}
+                className="flex items-center justify-between rounded-xl px-3 py-2.5 transition-all hover:bg-white/5"
+                style={{ border: "1px solid rgba(53,208,127,0.15)" }}
+              >
+                <div>
+                  <p className="text-[#35D07F] font-bold text-sm">TRIVQ · Celo</p>
+                  <p className="text-white/25 text-[10px] font-mono">0xe65fc5...4a05c5</p>
+                </div>
+                <span className="text-[10px] text-[#35D07F]/50">+ Add ↗</span>
+              </a>
+              <a
+                href="celo://wallet/add-token?address=0x8ecc1dc70f3bc5be941b61b42707eb7dbddb54c3&chainId=8453"
+                className="flex items-center justify-between rounded-xl px-3 py-2.5 transition-all hover:bg-white/5"
+                style={{ border: "1px solid rgba(0,82,255,0.15)" }}
+              >
+                <div>
+                  <p className="text-[#0052FF] font-bold text-sm">TRIVQ · Base</p>
+                  <p className="text-white/25 text-[10px] font-mono">0x8ecc1d...ddb54c3</p>
+                </div>
+                <span className="text-[10px] text-[#0052FF]/50">+ Add ↗</span>
+              </a>
             </motion.div>
           </div>
         )}

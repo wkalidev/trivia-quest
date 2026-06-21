@@ -14,7 +14,7 @@ import {
   encodeAbiParameters,
   encodePacked,
 } from "viem";
-import { celo } from "viem/chains";
+import { celo, base } from "viem/chains";
 import { motion, AnimatePresence } from "framer-motion";
 import { useMiniPay } from "@/hooks/useMiniPay";
 
@@ -283,9 +283,24 @@ export default function SwapWidget() {
               </div>
 
               {!isOnCelo ? (
-                <p className="text-xs text-center py-2 text-[#FBCD00]/80">
-                  Switch to Celo network to swap inline
-                </p>
+                <div className="py-3 text-center space-y-1.5">
+                  {chainId === base.id ? (
+                    <>
+                      <p className="text-xs text-[#0052FF]/80 font-bold">No TRIVQ liquidity pool on Base yet.</p>
+                      <p className="text-[10px] text-white/30">Switch to Celo to swap CELO → TRIVQ</p>
+                      <a
+                        href="celo://wallet/add-token?address=0x8ecc1dc70f3bc5be941b61b42707eb7dbddb54c3&chainId=8453"
+                        className="block text-[10px] text-[#0052FF]/50 hover:text-[#0052FF] transition-colors mt-1"
+                      >
+                        + Add TRIVQ (Base) to wallet ↗
+                      </a>
+                    </>
+                  ) : (
+                    <p className="text-xs text-[#FBCD00]/80">
+                      Switch to Celo network to swap inline
+                    </p>
+                  )}
+                </div>
               ) : (
                 <>
                   {/* Live price rate */}

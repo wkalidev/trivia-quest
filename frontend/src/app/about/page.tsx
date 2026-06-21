@@ -22,9 +22,9 @@ const CONTRACTS = [
   { name: "TriviaDuel v1", address: "0xee7be00cd5454b9bea56d864d82076b8b5de5ca1", chain: "Celo", explorer: "https://celoscan.io" },
   { name: "Referral v2", address: "0xa0fcd85a25ecb71ca1ea9d63da058c832c27c62e", chain: "Celo", explorer: "https://celoscan.io" },
   { name: "TriviaQuest", address: "0x1e2c209412ec30915ccf922654f0593faf61fcfb", chain: "Base", explorer: "https://basescan.org" },
+  { name: "TRIVQ Token", address: "0x8ecc1dc70f3bc5be941b61b42707eb7dbddb54c3", chain: "Base", explorer: "https://basescan.org" },
   { name: "DailyCheckIn", address: "0x0f19851d5cd905d110c000a7d26d74a2f21f8ff9", chain: "Base", explorer: "https://basescan.org" },
-  { name: "QuestGame", address: "0xE355F73B188713f60F42552d942383303EDE313f", chain: "Base", explorer: "https://basescan.org" },
-  { name: "QuestCheckIn", address: "0x63529080bb946ED0611c4DC6521a9CcC7579b2FB", chain: "Base", explorer: "https://basescan.org" },
+  { name: "Referral", address: "0x4fb5285263354e1e75f044c65166ab22c3840074", chain: "Base", explorer: "https://basescan.org" },
 ]
 
 const TEAM = [
