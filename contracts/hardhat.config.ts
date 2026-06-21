@@ -3,7 +3,7 @@ import { HardhatUserConfig } from "hardhat/config";
 import * as dotenv from "dotenv";
 dotenv.config();
 
-const config: HardhatUserConfig & { sourcify?: any } = {
+const config: HardhatUserConfig & { verify?: any } = {
   plugins: [hardhatToolboxViem],
   solidity: {
     compilers: [
@@ -49,8 +49,13 @@ const config: HardhatUserConfig & { sourcify?: any } = {
       chainId: 84532,
     },
   },
-  sourcify: {
-    enabled: true,
+  verify: {
+    etherscan: {
+      apiKey: process.env.BASESCAN_API_KEY ?? "",
+    },
+    sourcify: {
+      enabled: true,
+    },
   },
 };
 
