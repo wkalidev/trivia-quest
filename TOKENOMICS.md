@@ -1,46 +1,48 @@
 # $TRIVQ Token — Distribution Plan
 
 **TriviaQ Community Token**  
-Total Supply: 500,000,000 TRIVQ  
+Total Supply: 1,000,000,000 TRIVQ  
 Status: Live on Celo Mainnet & Base Mainnet  
-Token: `0xe65fc5cacaf9a5aebbc0e151dee08a53f24a05c5` (Celo)
+Token (Celo): `0xe65fc5cacaf9a5aebbc0e151dee08a53f24a05c5`  
+Token (Base): `0x8ecc1dc70f3bc5be941b61b42707eb7dbddb54c3`
 
 ---
 
-## ⚠️ Transparency First
+## Transparency First
 
 **What already exists (on-chain, verifiable):**
-- ✅ TriviaQuest contract: `0xffe22d3d1b63866ac9da8ac92fdb9ceddeadb0bb`
-- ✅ TriviaDuel 1v1: `0xee7be00cd5454b9bea56d864d82076b8b5de5ca1`
-- ✅ TRIVQ Token live on Celo + Base
-- ✅ SDK published: `@wkalidev/trivia-quest-sdk`
-- ✅ Live demo: https://trivia-quest-eight.vercel.app
-- ✅ Open source: https://github.com/wkalidev/trivia-quest
-- ✅ Proof of Ship: #9 — $250 claimed
+- TriviaQuest v3 (Celo): `0xffe22d3d1b63866ac9da8ac92fdb9ceddeadb0bb`
+- TriviaQuest (Base): `0x1e2c209412ec30915ccf922654f0593faf61fcfb`
+- TriviaDuel 1v1 (Celo): `0xee7be00cd5454b9bea56d864d82076b8b5de5ca1`
+- TRIVQ Token live on Celo + Base
+- SDK published: `@wkalidev/trivia-quest-sdk`
+- Live demo: https://trivia-quest-eight.vercel.app
+- Open source: https://github.com/wkalidev/trivia-quest
+- Proof of Ship #9 — $250 claimed
 
 ---
 
-## 🎯 Purpose of $TRIVQ
+## Purpose of $TRIVQ
 
 1. **Reward** — Players who answer questions and maintain daily streaks
-2. **Incentivize** — African culture & Web3 education on-chain
-3. **Govern** — Future direction of the game
+2. **Incentivize** — African culture and Web3 education on-chain
+3. **Govern** — Future direction of the game (DAO — Q1 2027)
 
 ---
 
-## 📊 Distribution
+## Distribution
 
-| Allocation | % | Tokens | Notes |
-|---|---|---|---|
-| 🎮 Play-to-Earn | 40% | 200,000,000 | Quiz rewards, streaks, daily check-ins |
-| 👥 Community Airdrop | 20% | 100,000,000 | MiniPay users, Celo ecosystem participants |
-| 🏗️ Ecosystem & Partners | 20% | 100,000,000 | Integrations, partnerships, liquidity |
-| 👨‍💻 Founder (wkalidev) | 10% | 50,000,000 | 12-month cliff, 24-month linear vest |
-| 💧 Liquidity | 10% | 50,000,000 | Ubeswap/Uniswap pools on Celo & Base |
+| Allocation | % | Tokens |
+|---|---|---|
+| Player Rewards | 50% | 500,000,000 |
+| Liquidity | 20% | 200,000,000 |
+| Team | 15% | 150,000,000 |
+| Ecosystem | 10% | 100,000,000 |
+| Marketing | 5% | 50,000,000 |
 
 ---
 
-## 🎮 Play-to-Earn — How to earn TRIVQ
+## Play-to-Earn — How to earn TRIVQ
 
 | Action | Reward |
 |---|---|
@@ -48,32 +50,37 @@ Token: `0xe65fc5cacaf9a5aebbc0e151dee08a53f24a05c5` (Celo)
 | Daily check-in | 100 TRIVQ |
 | 7-day streak bonus | 2,000 TRIVQ |
 | Referral reward | 500 TRIVQ |
-| Duel winner | 90% of wager |
+| Round winner 1st | 50% of prize pool |
+| Round winner 2nd | 30% of prize pool |
+| Round winner 3rd | 20% of prize pool |
+| Duel winner | 90% of total wager |
 
 ---
 
-## 🔐 Vesting — Founder Allocation (10%)
+## Vesting — Team Allocation (15%)
 
 - Month 0–12: Full lock. Zero tokens released.
-- Month 13–36: Linear release over 24 months (~2,083,333 TRIVQ/month)
+- Month 13–36: Linear release over 24 months (~6,250,000 TRIVQ/month)
 
 ---
 
-## 🗺️ Roadmap
+## Roadmap
 
 | Phase | Timeline | Goal |
 |---|---|---|
-| Now | Q2 2026 | Live on Celo + Base, SDK published |
-| Phase 2 | Q3 2026 | MiniPay integration, 1000+ players |
-| Phase 3 | Q4 2026 | African trivia expansion, DAO exploration |
-| Phase 4 | 2027 | Community governance launch |
+| Live | Q2 2026 | Live on Celo + Base, SDK published, 23 active players |
+| Phase 2 | Q3 2026 | 100 holders, liquidity pool seeded on Ubeswap v3 |
+| Phase 3 | Q4 2026 | 500 players, governance vote mechanism deployed |
+| Phase 4 | Q1 2027 | DAO launch, additional chain expansion |
 
 ---
 
-## 🔗 Verify on-chain
+## Verify on-chain
 
-- Contract: https://celoscan.io/address/0xffe22d3d1b63866ac9da8ac92fdb9ceddeadb0bb
-- Token: https://celoscan.io/token/0xe65fc5cacaf9a5aebbc0e151dee08a53f24a05c5
+- Contract (Celo): https://celoscan.io/address/0xffe22d3d1b63866ac9da8ac92fdb9ceddeadb0bb
+- Token (Celo): https://celoscan.io/token/0xe65fc5cacaf9a5aebbc0e151dee08a53f24a05c5
+- Contract (Base): https://basescan.org/address/0x1e2c209412ec30915ccf922654f0593faf61fcfb
+- Token (Base): https://basescan.org/token/0x8ecc1dc70f3bc5be941b61b42707eb7dbddb54c3
 - GitHub: https://github.com/wkalidev/trivia-quest
 - SDK: https://npmjs.com/package/@wkalidev/trivia-quest-sdk
 - Demo: https://trivia-quest-eight.vercel.app
