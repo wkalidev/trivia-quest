@@ -203,8 +203,9 @@ export default function SwapWidget() {
       [WCELO, POOL_FEE, TRIVQ]
     );
 
-    // V3_SWAP_EXACT_IN: router pays from its WCELO balance (payerIsUser=true means payer is ADDRESS_THIS here,
-    // since WRAP_ETH deposited to the router). Recipient = MSG_SENDER (0x...0001) sends output to msg.sender.
+    // V3_SWAP_EXACT_IN: payerIsUser=false → router pays from its own WCELO balance
+    // (WRAP_ETH deposited WCELO to the router, not to msg.sender).
+    // Recipient = MSG_SENDER (0x...0001) → TRIVQ output delivered to msg.sender.
     const swapInput = encodeAbiParameters(
       [
         { type: "address" },
@@ -213,7 +214,7 @@ export default function SwapWidget() {
         { type: "bytes" },
         { type: "bool" },
       ],
-      [MSG_SENDER, amountIn, amountOutMin, path, true]
+      [MSG_SENDER, amountIn, amountOutMin, path, false]
     );
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
