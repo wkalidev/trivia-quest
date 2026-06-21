@@ -135,11 +135,12 @@ export default function SwapWidget() {
           setEstimatedOut(BigInt(Math.floor(val * ratio * 1e18)));
           setPriceLabel(`1 CELO ≈ ${Math.round(ratio).toLocaleString()} TRIVQ`);
         } else {
-          setEstimatedOut(BigInt(Math.floor(val * 100_000 * 1e18)));
-          setPriceLabel("~100,000 TRIVQ / CELO");
+          setEstimatedOut(null);
+          setPriceLabel("Price unavailable — using 1 TRIVQ minimum");
         }
       } catch {
-        setEstimatedOut(BigInt(Math.floor(val * 100_000 * 1e18)));
+        setEstimatedOut(null);
+        setPriceLabel("Price unavailable — using 1 TRIVQ minimum");
       } finally {
         setQuoteLoading(false);
       }
@@ -163,7 +164,7 @@ export default function SwapWidget() {
   }, [txHash, refetchBalance]);
 
   const handleSwap = useCallback(() => {
-    if (!address || !estimatedOut) return;
+    if (!address) return;
     setLocalError(null);
     resetWrite();
 
@@ -181,7 +182,11 @@ export default function SwapWidget() {
       return;
     }
 
-    const amountOutMin = (estimatedOut * BigInt(99)) / BigInt(100); // 1% slippage
+    // 5% slippage; fall back to 1 TRIVQ minimum if price data unavailable
+    const amountOutMin = estimatedOut
+      ? (estimatedOut * BigInt(95)) / BigInt(100)
+      : parseEther("1");
+    console.log("[SwapWidget] amountOutMinimum:", amountOutMin.toString(), "estimatedOut:", estimatedOut?.toString() ?? "null");
     const deadline = BigInt(Math.floor(Date.now() / 1000) + 1200); // 20 min
 
     // WRAP_ETH input: router wraps msg.value, holds WCELO at ADDRESS_THIS
@@ -358,7 +363,7 @@ export default function SwapWidget() {
                     </span>
                   </div>
 
-                  <p className="text-[10px] text-white/20 text-center">1% max slippage</p>
+                  <p className="text-[10px] text-white/20 text-center">5% max slippage</p>
 
                   {/* Buy button */}
                   <motion.button

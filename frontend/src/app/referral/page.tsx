@@ -37,12 +37,10 @@ export default function ReferralPage() {
     query: { enabled: !!address },
   });
 
-  const referralLink = address
-    ? `https://trivia-quest-eight.vercel.app?ref=${address}`
-    : null;
+  const APP_URL = "https://trivia-quest-eight.vercel.app";
+  const referralLink = address ? `${APP_URL}?ref=${address}` : APP_URL;
 
   const copyLink = useCallback(() => {
-    if (!referralLink) return;
     navigator.clipboard.writeText(referralLink);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -122,51 +120,48 @@ export default function ReferralPage() {
         </motion.div>
 
         {/* Referral link */}
-        {isConnected && referralLink ? (
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
-            className="rounded-2xl p-4 border border-white/8 mb-4"
-            style={{ background: "rgba(255,255,255,0.03)" }}>
-            <p className="text-white/40 text-xs mb-2 uppercase tracking-wider">Your referral link</p>
-            <div className="flex gap-2">
-              <div className="flex-1 rounded-xl px-3 py-2 text-xs font-mono text-white/50 overflow-hidden text-ellipsis whitespace-nowrap"
-                style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-                {referralLink}
-              </div>
-              <motion.button whileTap={{ scale: 0.95 }} onClick={copyLink}
-                className="px-4 py-2 rounded-xl font-bold text-sm flex-shrink-0 transition-all"
-                style={{
-                  background: copied ? "rgba(53,208,127,0.15)" : "rgba(251,205,0,0.1)",
-                  border: copied ? "1px solid rgba(53,208,127,0.3)" : "1px solid rgba(251,205,0,0.3)",
-                  color: copied ? "#35D07F" : "#FBCD00",
-                }}>
-                {copied ? "✅ Copied!" : "Copy"}
-              </motion.button>
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
+          className="rounded-2xl p-4 border border-white/8 mb-4"
+          style={{ background: "rgba(255,255,255,0.03)" }}>
+          <p className="text-white/40 text-xs mb-2 uppercase tracking-wider">
+            {isConnected ? "Your referral link" : "App link"}
+          </p>
+          <div className="flex gap-2">
+            <div className="flex-1 rounded-xl px-3 py-2 text-xs font-mono text-white/50 overflow-hidden text-ellipsis whitespace-nowrap"
+              style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+              {referralLink}
             </div>
-          </motion.div>
-        ) : !isConnected ? (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-            className="rounded-2xl p-5 border border-white/8 mb-4 text-center"
-            style={{ background: "rgba(255,255,255,0.03)" }}>
-            <p className="text-white/40 text-sm">Connect your wallet to get your referral link</p>
-          </motion.div>
-        ) : null}
+            <motion.button whileTap={{ scale: 0.95 }} onClick={copyLink}
+              className="px-4 py-2 rounded-xl font-bold text-sm flex-shrink-0 transition-all"
+              style={{
+                background: copied ? "rgba(53,208,127,0.15)" : "rgba(251,205,0,0.1)",
+                border: copied ? "1px solid rgba(53,208,127,0.3)" : "1px solid rgba(251,205,0,0.3)",
+                color: copied ? "#35D07F" : "#FBCD00",
+              }}>
+              {copied ? "✅ Copied!" : "Copy"}
+            </motion.button>
+          </div>
+          {!isConnected && (
+            <p className="text-white/25 text-xs mt-2">
+              Connect wallet to get your personal referral link
+            </p>
+          )}
+        </motion.div>
 
         {/* Share buttons */}
-        {isConnected && referralLink && (
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-            className="grid grid-cols-2 gap-3 mb-4">
-            <button onClick={shareOnFarcaster}
-              className="py-3 rounded-2xl font-bold text-sm transition-all"
-              style={{ background: "rgba(139,92,246,0.1)", border: "1px solid rgba(139,92,246,0.3)", color: "#A78BFA" }}>
-              🟣 Share on Warpcast
-            </button>
-            <button onClick={shareOnTwitter}
-              className="py-3 rounded-2xl font-bold text-sm transition-all"
-              style={{ background: "rgba(29,161,242,0.1)", border: "1px solid rgba(29,161,242,0.3)", color: "#60A5FA" }}>
-              𝕏 Share on Twitter
-            </button>
-          </motion.div>
-        )}
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
+          className="grid grid-cols-2 gap-3 mb-4">
+          <button onClick={shareOnFarcaster}
+            className="py-3 rounded-2xl font-bold text-sm transition-all"
+            style={{ background: "rgba(139,92,246,0.1)", border: "1px solid rgba(139,92,246,0.3)", color: "#A78BFA" }}>
+            🟣 Share on Warpcast
+          </button>
+          <button onClick={shareOnTwitter}
+            className="py-3 rounded-2xl font-bold text-sm transition-all"
+            style={{ background: "rgba(29,161,242,0.1)", border: "1px solid rgba(29,161,242,0.3)", color: "#60A5FA" }}>
+            𝕏 Share on Twitter
+          </button>
+        </motion.div>
 
         {/* Reward info */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.25 }}

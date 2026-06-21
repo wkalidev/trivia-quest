@@ -265,10 +265,10 @@ export default function Home() {
   const prizePool = currentRound ? formatCelo(currentRound[1]) : "0";
   const endTime = currentRound ? currentRound[3] : BigInt(0);
   const players = totalPlayers ? totalPlayers.toString() : "0";
-  const referralLink = address ? `https://trivia-quest-eight.vercel.app?ref=${address}` : null;
+  const APP_URL = "https://trivia-quest-eight.vercel.app";
+  const referralLink = address ? `${APP_URL}?ref=${address}` : APP_URL;
 
   const copyReferral = useCallback(() => {
-    if (!referralLink) return;
     navigator.clipboard.writeText(referralLink);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -510,12 +510,10 @@ export default function Home() {
         </motion.div>
 
         <motion.div variants={itemVariants} className="grid grid-cols-2 gap-2 items-start">
-          {isReady && referralLink && (
-            <ActionButton onClick={copyReferral} variant="blue">
-              {copied ? "✅ Copied!" : "🔗 Invite & Earn"}
-            </ActionButton>
-          )}
-          <div className={isReady && referralLink ? "" : "col-span-2"}>
+          <ActionButton onClick={copyReferral} variant="blue">
+            {copied ? "✅ Copied!" : "🔗 Invite & Earn"}
+          </ActionButton>
+          <div>
             <SwapWidget />
           </div>
         </motion.div>
