@@ -21,6 +21,7 @@ Celo's mission is financial inclusion for the unbanked. With **57% of African ad
 | Stats API | `GET /api/stats` |
 | MCP Server | https://trivia-quest-eight.vercel.app/api/mcp |
 | GitHub | https://github.com/wkalidev/trivia-quest |
+| Whitepaper | https://github.com/wkalidev/trivia-quest/blob/main/WHITEPAPER.md |
 
 ## 🎮 Features
 
