@@ -29,14 +29,15 @@ const POOL_FEE = 3000; // 0.30%
 // Fallback price derived from seeded pool: 2,999,990 TRIVQ / 30 CELO
 const FALLBACK_RATIO = 100_000; // TRIVQ per CELO
 
-// Universal Router commands:
-//   0x0b = WRAP_ETH  (wrap native CELO → WCELO, hold in router)
-//   0x00 = V3_SWAP_EXACT_IN  (swap WCELO → TRIVQ via the pool)
-const COMMANDS = "0x0b00" as `0x${string}`;
+// On Celo, native CELO IS the ERC-20 at 0x471... — no WETH9 exists.
+// The router's WETH9 slot is a revert stub, so WRAP_ETH (0x0b) always reverts.
+// Strategy: send native CELO as msg.value; the router's CELO ERC-20 balance
+// increases automatically (Celo native feature), then V3_SWAP_EXACT_IN uses
+// that balance directly (payerIsUser=false → router pays via IERC20.transfer).
+const COMMANDS = "0x00" as `0x${string}`; // V3_SWAP_EXACT_IN only
 
-// Universal Router magic address constants used as recipient in execute() inputs
-const ADDRESS_THIS = "0x0000000000000000000000000000000000000002" as `0x${string}`; // router keeps tokens (WRAP_ETH recipient)
-const MSG_SENDER   = "0x0000000000000000000000000000000000000001" as `0x${string}`; // output goes to msg.sender (V3_SWAP_EXACT_IN recipient)
+// Magic recipient constants for the Universal Router
+const MSG_SENDER = "0x0000000000000000000000000000000000000001" as `0x${string}`; // TRIVQ output → msg.sender
 
 const ROUTER_ABI = [
   {
@@ -191,21 +192,16 @@ export default function SwapWidget() {
     console.log("[SwapWidget] amountOutMinimum:", amountOutMin.toString(), "estimatedOut:", estimatedOut.toString());
     const deadline = BigInt(Math.floor(Date.now() / 1000) + 1200); // 20 min
 
-    // WRAP_ETH input: router wraps msg.value, holds WCELO at ADDRESS_THIS
-    const wrapInput = encodeAbiParameters(
-      [{ type: "address" }, { type: "uint256" }],
-      [ADDRESS_THIS, amountIn]
-    );
-
-    // V3 path: WCELO → TRIVQ, 0.30% fee pool
+    // Path: native CELO (as ERC-20 at WCELO address) → TRIVQ, 0.30% pool
     const path = encodePacked(
       ["address", "uint24", "address"],
       [WCELO, POOL_FEE, TRIVQ]
     );
 
-    // V3_SWAP_EXACT_IN: payerIsUser=false → router pays from its own WCELO balance
-    // (WRAP_ETH deposited WCELO to the router, not to msg.sender).
-    // Recipient = MSG_SENDER (0x...0001) → TRIVQ output delivered to msg.sender.
+    // payerIsUser=false → router pays from its own CELO ERC-20 balance.
+    // Native CELO sent as msg.value auto-increments the router's ERC-20 balance
+    // (Celo native feature: CELO ERC-20 and native token share the same balance).
+    // The callback uses IERC20(CELO).transfer(pool, amount) — no WRAP_ETH needed.
     const swapInput = encodeAbiParameters(
       [
         { type: "address" },
@@ -223,7 +219,7 @@ export default function SwapWidget() {
       address: UBESWAP_ROUTER,
       abi: ROUTER_ABI,
       functionName: "execute",
-      args: [COMMANDS, [wrapInput, swapInput], deadline],
+      args: [COMMANDS, [swapInput], deadline],
       value: amountIn,
       account: address,
       chain: celo,
