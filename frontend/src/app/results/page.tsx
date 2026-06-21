@@ -25,6 +25,7 @@ function ResultsContent() {
   const [submitted, setSubmitted] = useState(false);
   const [rank, setRank] = useState<number | null>(null);
   const [copied, setCopied] = useState(false);
+  const [showGoodDollar, setShowGoodDollar] = useState(false);
 
   const score = parseInt(searchParams.get("score") ?? "0");
   const total = parseInt(searchParams.get("total") ?? "10");
@@ -34,6 +35,10 @@ function ResultsContent() {
   // Dynamic share image URL
   const shareImageUrl = `https://trivia-quest-eight.vercel.app/api/share-image?score=${score}&total=${total}&points=${points}${rank ? `&rank=${rank}` : ""}`;
   const shareUrl = "https://trivia-quest-eight.vercel.app";
+
+  useEffect(() => {
+    if (!localStorage.getItem("gooddollar_joined")) setShowGoodDollar(true);
+  }, []);
 
   useEffect(() => {
     if (!address || submitted) return;
@@ -82,6 +87,12 @@ function ResultsContent() {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {}
+  };
+
+  const handleGoodDollarJoin = () => {
+    localStorage.setItem("gooddollar_joined", "1");
+    setShowGoodDollar(false);
+    window.open("http://goodwallet.xyz?inviteCode=39UwSxN3yv&chainId=122", "_blank");
   };
 
   // Native share (mobile)
@@ -188,6 +199,55 @@ function ResultsContent() {
             </div>
           </motion.div>
         )}
+
+        {/* Earn More */}
+        <div className="mb-3 space-y-2">
+          <p className="text-white/40 text-xs font-bold uppercase tracking-widest px-1">✨ Earn More</p>
+
+          {showGoodDollar && (
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
+              className="rounded-2xl border border-[#4ade80]/20 p-4 flex items-center gap-3"
+              style={{ background: "rgba(74,222,128,0.06)", backdropFilter: "blur(12px)" }}
+            >
+              <span className="text-2xl flex-shrink-0">💚</span>
+              <div className="flex-1 min-w-0">
+                <p className="text-[#4ade80] font-bold text-sm leading-tight">Earn G$ every day — free</p>
+                <p className="text-white/40 text-xs mt-0.5">GoodDollar gives verified humans daily UBI</p>
+              </div>
+              <button
+                onClick={handleGoodDollarJoin}
+                className="flex-shrink-0 px-3 py-2 rounded-xl text-xs font-bold text-[#0a0b0f] active:scale-95 transition-all"
+                style={{ background: "linear-gradient(135deg, #4ade80, #22c55e)" }}
+              >
+                Join
+              </button>
+            </motion.div>
+          )}
+
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7 }}
+            className="rounded-2xl border border-[#FBCD00]/20 p-4 flex items-center gap-3"
+            style={{ background: "rgba(251,205,0,0.06)", backdropFilter: "blur(12px)" }}
+          >
+            <span className="text-2xl flex-shrink-0">🔥</span>
+            <div className="flex-1 min-w-0">
+              <p className="text-[#FBCD00] font-bold text-sm leading-tight">Keep your streak</p>
+              <p className="text-white/40 text-xs mt-0.5">+500 TRIVQ bonus if you check in daily</p>
+            </div>
+            <button
+              onClick={() => router.push("/checkin")}
+              className="flex-shrink-0 px-3 py-2 rounded-xl text-xs font-bold text-[#0a0b0f] active:scale-95 transition-all"
+              style={{ background: "linear-gradient(135deg, #FBCD00, #f0a500)" }}
+            >
+              Check in
+            </button>
+          </motion.div>
+        </div>
 
         {/* Share section */}
         <div className="rounded-2xl border border-white/8 p-4 mb-3"
