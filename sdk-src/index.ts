@@ -1,8 +1,8 @@
-// TriviaQuest SDK v3.0.0
+// TriviaQuest SDK v3.2.0
 // Blockchain quiz game on Celo & Base
 // https://trivia-quest-eight.vercel.app
 
-export const SDK_VERSION = "3.0.0";
+export const SDK_VERSION = "3.2.0";
 
 // ── Contract Addresses ─────────────────────────────────────
 

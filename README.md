@@ -1,9 +1,13 @@
 # Trivia Q 🎮
 
+<p align="center">
+  <img src="trivq-logo-256.png" alt="TRIVQ Logo" width="128" />
+</p>
+
 > Play. Learn. Earn on Celo & Base.
 
 [![Live Demo](https://img.shields.io/badge/Live-trivia--quest--eight.vercel.app-FBCD00?style=for-the-badge)](https://trivia-quest-eight.vercel.app)
-[![npm](https://img.shields.io/badge/SDK_v3.1.0-npm-CB3837?style=for-the-badge&logo=npm)](https://www.npmjs.com/package/@wkalidev/trivia-quest-sdk)
+[![npm](https://img.shields.io/badge/SDK_v3.2.0-npm-CB3837?style=for-the-badge&logo=npm)](https://www.npmjs.com/package/@wkalidev/trivia-quest-sdk)
 [![Self Agent](https://img.shields.io/badge/Self_Agent-ID_%23103-6366f1?style=for-the-badge)](https://app.ai.self.xyz/agents)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 
@@ -17,7 +21,7 @@ Celo's mission is financial inclusion for the unbanked. With **57% of African ad
 |---|---|
 | App | https://trivia-quest-eight.vercel.app |
 | Duel 1v1 | https://trivia-quest-eight.vercel.app/duel |
-| SDK v3.1.0 | `npm install @wkalidev/trivia-quest-sdk` |
+| SDK v3.2.0 | `npm install @wkalidev/trivia-quest-sdk` |
 | Stats API | `GET /api/stats` |
 | MCP Server | https://trivia-quest-eight.vercel.app/api/mcp |
 | GitHub | https://github.com/wkalidev/trivia-quest |
@@ -218,7 +222,7 @@ No external DEX page needed — swap directly inside the Mini App.
 - [x] Base Mainnet fully operational — rounds auto-managed via cron 🆕
 - [x] 8 i18n languages (FR, EN, ES, IT, PT, AR, ZH, SW) 🆕
 - [x] 1200+ questions (446 base + 754 extra) 🆕
-- [x] SDK v3.1.0 — treasury, LANGUAGES, TOTAL_QUESTIONS, finishRound ABI 🆕
+- [x] SDK v3.2.0 — SDK_VERSION constant fixed, TRIVQ logo, all 9 contract addresses verified 🆕
 - [x] Inline CELO→TRIVQ swap via Ubeswap V3 Universal Router 🆕
 - [x] MiniPay full compatibility audit — wagmi injected() connector, address aliasing, checkin fallback 🆕
 

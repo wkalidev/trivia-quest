@@ -1,11 +1,15 @@
 {
   "name": "@wkalidev/trivia-quest-sdk",
-  "version": "3.0.0",
+  "version": "3.2.0",
   "description": "TriviaQ SDK — Interact with TriviaQ smart contracts — Blockchain quiz game on Celo",
   "main": "sdk/index.js",
   "types": "sdk/index.d.ts",
   "files": [
-    "sdk"
+    "sdk/index.js",
+    "sdk/index.d.ts",
+    "sdk/index.js.map",
+    "sdk/index.d.ts.map",
+    "README.md"
   ],
   "scripts": {
     "build:sdk": "tsc -p tsconfig.sdk.json"
