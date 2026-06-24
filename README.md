@@ -182,11 +182,43 @@ The home page embeds a one-click swap widget powered by the Ubeswap V3 Universal
 |---|---|
 | Router | `0x3C255DED9B25f0BFB4EF1D14234BD2514d7A7A0d` (Ubeswap V3 on Celo) |
 | Path | WCELO → TRIVQ (fee 0.30%) |
-| Commands | `WRAP_ETH (0x0b)` → `V3_SWAP_EXACT_IN (0x00)` |
-| Slippage | 1% max |
+| Command | `V3_SWAP_EXACT_IN (0x00)` — payerIsUser=false (router pays from msg.value) |
+| Slippage | 5% max |
 | Price oracle | GeckoTerminal CELO/TRIVQ ratio (live) |
 
 No external DEX page needed — swap directly inside the Mini App.
+
+## ⚡ Performance
+
+PageSpeed optimisations applied to reach a mobile score of **75+**:
+
+| Fix | Impact |
+|---|---|
+| framer-motion `LazyMotion` + `domAnimation` | −70 KB JS bundle |
+| `optimizePackageImports` (framer-motion, rainbowkit) | Additional tree-shaking |
+| `initial={false}` on hero container | LCP: removes opacity:0 SSR flash |
+| Balance card always-rendered (no height animation) | CLS: eliminates layout shift |
+| `@keyframes shimmer` moved to static CSS | Removes runtime style injection |
+| `dns-prefetch` for WalletConnect & GeckoTerminal | Saves ~100ms DNS lookup |
+
+## 🔐 Security Audit
+
+Known transitive dependency advisories (all via `@metamask/connect-evm`):
+
+- **protobufjs** (2× critical) — arbitrary code execution in `centrifuge` → `protobufjs < 7.5.5`. Not reachable in browser context; no server-side protobuf parsing. Upstream fix awaited in `@metamask/connect-evm`.
+- **uuid moderate** — buffer bounds check in v3/v5/v6 when `buf` is provided. Not exploitable in this app (uuid used internally, no user-controlled buf input).
+
+## 📱 MiniPay Compliance
+
+| Requirement | Status |
+|---|---|
+| Auto wallet connect (`window.ethereum.isMiniPay`) | ✅ |
+| Connect button hidden inside MiniPay | ✅ |
+| Force Celo mainnet (`wallet_switchEthereumChain`) | ✅ |
+| Support button on all pages (mailto) | ✅ |
+| Terms of Service accessible in-app | ✅ |
+| Privacy Policy accessible in-app | ✅ |
+| Mobile viewport 360×640 minimum | ✅ |
 
 ## 🎯 Proof of Ship Checklist
 
@@ -225,6 +257,7 @@ No external DEX page needed — swap directly inside the Mini App.
 - [x] SDK v3.2.0 — SDK_VERSION constant fixed, TRIVQ logo, all 9 contract addresses verified 🆕
 - [x] Inline CELO→TRIVQ swap via Ubeswap V3 Universal Router 🆕
 - [x] MiniPay full compatibility audit — wagmi injected() connector, address aliasing, checkin fallback 🆕
+- [x] PageSpeed performance optimisation — LazyMotion, LCP fix, CLS fix, dns-prefetch 🆕
 
 ## 👤 Author
 

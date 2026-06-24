@@ -11,7 +11,7 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Logo } from "@/components/Logo";
 import type { Locale } from "@/i18n/navigation";
 import { formatUnits } from "viem";
-import { motion, AnimatePresence, type Variants } from "framer-motion";
+import { LazyMotion, domAnimation, m, type Variants } from "framer-motion";
 import { CONTRACT_ABI, getContractAddress } from "@/lib/contract";
 import dynamic_ from "next/dynamic";
 
@@ -164,7 +164,7 @@ function ActionButton({
   const s = styles[variant];
 
   return (
-    <motion.button
+    <m.button
       onClick={onClick}
       whileHover={{ scale: 1.02, boxShadow: `0 0 20px ${s.glow}22` }}
       whileTap={{ scale: 0.97 }}
@@ -172,7 +172,7 @@ function ActionButton({
       style={{ background: s.bg, border: `1px solid ${s.border}`, color: s.text }}
     >
       {children}
-    </motion.button>
+    </m.button>
   );
 }
 
@@ -313,13 +313,14 @@ export default function Home() {
         </div>
       </div>
 
-      <motion.div
+      <LazyMotion features={domAnimation}>
+      <m.div
         variants={containerVariants}
-        initial="hidden"
+        initial={false}
         animate="show"
         className="w-full max-w-md z-10 space-y-3"
       >
-        <motion.div variants={itemVariants}>
+        <m.div variants={itemVariants}>
           <div
             className="rounded-3xl p-5 relative overflow-hidden"
             style={{
@@ -370,66 +371,55 @@ export default function Home() {
               <Countdown endTime={endTime} />
             </div>
           </div>
-        </motion.div>
+        </m.div>
 
-        <motion.div variants={itemVariants}>
+        <m.div variants={itemVariants}>
           <TrivqPrice />
-        </motion.div>
+        </m.div>
 
-        <AnimatePresence>
-          {isReady && (
-            <motion.div
-              variants={itemVariants}
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
+        <div
+          className="rounded-2xl p-4 flex items-center justify-between"
+          style={{
+            background: "linear-gradient(135deg, rgba(139,92,246,0.08), rgba(139,92,246,0.03))",
+            border: "1px solid rgba(139,92,246,0.2)"
+          }}
+        >
+          <div>
+            <p className="text-purple-400/60 text-xs mb-1">Your TRIVQ Balance</p>
+            <m.p
+              key={trivqFormatted}
+              initial={{ scale: 1.1 }}
+              animate={{ scale: 1 }}
+              className="text-purple-300 font-black text-3xl tracking-tight"
             >
-              <div
-                className="rounded-2xl p-4 flex items-center justify-between"
-                style={{
-                  background: "linear-gradient(135deg, rgba(139,92,246,0.08), rgba(139,92,246,0.03))",
-                  border: "1px solid rgba(139,92,246,0.2)"
-                }}
-              >
-                <div>
-                  <p className="text-purple-400/60 text-xs mb-1">Your TRIVQ Balance</p>
-                  <motion.p
-                    key={trivqFormatted}
-                    initial={{ scale: 1.1 }}
-                    animate={{ scale: 1 }}
-                    className="text-purple-300 font-black text-3xl tracking-tight"
-                  >
-                    {trivqFormatted}
-                  </motion.p>
-                </div>
-                <div className="text-right">
-                  <p className="text-white/20 text-xs">Rewards cap</p>
-                  <p className="text-white/40 text-sm font-bold mt-0.5">500M total</p>
-                  <div className="mt-2 w-20 h-1 rounded-full overflow-hidden"
-                    style={{ background: "rgba(255,255,255,0.1)" }}
-                  >
-                    <div className="h-full rounded-full bg-gradient-to-r from-purple-500 to-[#FBCD00]"
-                      style={{ width: `${Math.min((Number(trivqBalance ? formatUnits(trivqBalance as bigint, 18) : 0) / 500_000_000) * 100, 100)}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+              {isReady ? trivqFormatted : "—"}
+            </m.p>
+          </div>
+          <div className="text-right">
+            <p className="text-white/20 text-xs">Rewards cap</p>
+            <p className="text-white/40 text-sm font-bold mt-0.5">500M total</p>
+            <div className="mt-2 w-20 h-1 rounded-full overflow-hidden"
+              style={{ background: "rgba(255,255,255,0.1)" }}
+            >
+              <div className="h-full rounded-full bg-gradient-to-r from-purple-500 to-[#FBCD00]"
+                style={{ width: isReady ? `${Math.min((Number(trivqBalance ? formatUnits(trivqBalance as bigint, 18) : 0) / 500_000_000) * 100, 100)}%` : "0%" }}
+              />
+            </div>
+          </div>
+        </div>
 
         {/* ⚡ Bandeau cap rewards */}
         {rewardsRemaining !== undefined && rewardsRemaining < BigInt("10000000000000000000000000") && (
-          <motion.div variants={itemVariants}
+          <m.div variants={itemVariants}
             className="rounded-xl p-3 text-center text-xs font-bold"
             style={{ background: "rgba(251,205,0,0.08)", border: "1px solid rgba(251,205,0,0.25)", color: "#FBCD00" }}
           >
             {t("tokenV3Banner")}
-          </motion.div>
+          </m.div>
         )}
 
         {isInMiniPay && miniPayAddress && (
-          <motion.div variants={itemVariants}
+          <m.div variants={itemVariants}
             className="rounded-2xl p-3 flex items-center justify-between"
             style={{ background: "rgba(53,208,127,0.06)", border: "1px solid rgba(53,208,127,0.15)" }}
           >
@@ -446,12 +436,12 @@ export default function Home() {
             >
               💳 Receive
             </a>
-          </motion.div>
+          </m.div>
         )}
 
-        <motion.div variants={itemVariants}>
+        <m.div variants={itemVariants}>
           {isReady ? (
-            <motion.button
+            <m.button
               onClick={() => router.push("/quiz")}
               whileHover={{ scale: 1.02, boxShadow: "0 0 40px rgba(251,205,0,0.3)" }}
               whileTap={{ scale: 0.97 }}
@@ -470,7 +460,7 @@ export default function Home() {
               <span className="relative z-10 flex items-center justify-center gap-2">
                 {t("playNow")}
               </span>
-            </motion.button>
+            </m.button>
           ) : (
             <div className="rounded-2xl p-5 text-center"
               style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}
@@ -481,15 +471,15 @@ export default function Home() {
               )}
             </div>
           )}
-        </motion.div>
+        </m.div>
 
-        <motion.div variants={itemVariants} className="grid grid-cols-2 gap-2">
+        <m.div variants={itemVariants} className="grid grid-cols-2 gap-2">
           <ActionButton onClick={() => router.push("/badges")} variant="purple">🎨 My Badges</ActionButton>
           <ActionButton onClick={() => router.push("/checkin")} variant="gold">🔥 Check-in</ActionButton>
-        </motion.div>
+        </m.div>
 
-        <motion.div variants={itemVariants}>
-          <motion.button
+        <m.div variants={itemVariants}>
+          <m.button
             onClick={() => router.push("/duel")}
             whileHover={{ scale: 1.02, boxShadow: "0 0 30px rgba(139,92,246,0.3)" }}
             whileTap={{ scale: 0.97 }}
@@ -506,19 +496,19 @@ export default function Home() {
             <span className="absolute right-4 text-xs bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded-full border border-purple-500/30">
               NEW
             </span>
-          </motion.button>
-        </motion.div>
+          </m.button>
+        </m.div>
 
-        <motion.div variants={itemVariants} className="grid grid-cols-2 gap-2 items-start">
+        <m.div variants={itemVariants} className="grid grid-cols-2 gap-2 items-start">
           <ActionButton onClick={copyReferral} variant="blue">
             {copied ? "✅ Copied!" : "🔗 Invite & Earn"}
           </ActionButton>
           <div>
             <SwapWidget />
           </div>
-        </motion.div>
+        </m.div>
 
-        <motion.div variants={itemVariants} className="grid grid-cols-2 gap-2">
+        <m.div variants={itemVariants} className="grid grid-cols-2 gap-2">
           <ActionButton onClick={() => router.push("/leaderboard")} variant="default">
             🏆 {tNav("leaderboard")}
           </ActionButton>
@@ -527,9 +517,9 @@ export default function Home() {
               👤 {tNav("profile")}
             </ActionButton>
           )}
-        </motion.div>
+        </m.div>
 
-        <motion.div variants={itemVariants} className="grid grid-cols-3 gap-2">
+        <m.div variants={itemVariants} className="grid grid-cols-3 gap-2">
           <ActionButton onClick={() => router.push("/stats")} variant="default">
             📊 Stats
           </ActionButton>
@@ -539,9 +529,9 @@ export default function Home() {
           <ActionButton onClick={() => router.push("/referral")} variant="default">
             🔗 Referral
           </ActionButton>
-        </motion.div>
+        </m.div>
 
-        <motion.div variants={itemVariants} className="pt-2 flex items-center justify-center gap-6">
+        <m.div variants={itemVariants} className="pt-2 flex items-center justify-center gap-6">
           {[
             { href: "https://twitter.com/willycodexwar", label: "𝕏" },
             { href: "https://warpcast.com/willywarrior", label: "🟣" },
@@ -553,15 +543,9 @@ export default function Home() {
               {l.label}
             </a>
           ))}
-        </motion.div>
-      </motion.div>
-
-      <style jsx global>{`
-        @keyframes shimmer {
-          0% { transform: translateX(-100%); }
-          100% { transform: translateX(200%); }
-        }
-      `}</style>
+        </m.div>
+      </m.div>
+      </LazyMotion>
     </main>
   );
 }

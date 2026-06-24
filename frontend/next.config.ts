@@ -5,11 +5,12 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-
-  // ✅ Compression gzip/brotli
   compress: true,
-
   poweredByHeader: false,
+
+  experimental: {
+    optimizePackageImports: ["framer-motion", "@rainbow-me/rainbowkit", "@coinbase/onchainkit"],
+  },
 
   async rewrites() {
     return [
