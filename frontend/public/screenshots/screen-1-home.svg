@@ -1,0 +1,178 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" width="1080" height="1920" font-family="'Helvetica Neue',Arial,system-ui,sans-serif">
+  <defs>
+    <linearGradient id="h-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0d1228"/>
+      <stop offset="50%" stop-color="#050709"/>
+      <stop offset="100%" stop-color="#0d1228"/>
+    </linearGradient>
+    <linearGradient id="h-play" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FBCD00"/>
+      <stop offset="55%" stop-color="#f0a500"/>
+      <stop offset="100%" stop-color="#d98c00"/>
+    </linearGradient>
+    <linearGradient id="h-purple" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8B5CF6" stop-opacity="0.14"/>
+      <stop offset="100%" stop-color="#6D28D9" stop-opacity="0.03"/>
+    </linearGradient>
+    <linearGradient id="h-prog" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#8B5CF6"/>
+      <stop offset="100%" stop-color="#FBCD00"/>
+    </linearGradient>
+    <linearGradient id="h-hero" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FBCD00" stop-opacity="0.07"/>
+      <stop offset="100%" stop-color="#35D07F" stop-opacity="0.02"/>
+    </linearGradient>
+    <linearGradient id="h-duel" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8B5CF6" stop-opacity="0.16"/>
+      <stop offset="100%" stop-color="#6D28D9" stop-opacity="0.08"/>
+    </linearGradient>
+    <pattern id="h-kente" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+      <rect x="0" y="0" width="30" height="30" fill="none" stroke="#FBCD00" stroke-width="0.6"/>
+      <rect x="30" y="30" width="30" height="30" fill="none" stroke="#FBCD00" stroke-width="0.6"/>
+      <line x1="0" y1="30" x2="30" y2="0" stroke="#35D07F" stroke-width="0.35"/>
+      <line x1="30" y1="60" x2="60" y2="30" stroke="#35D07F" stroke-width="0.35"/>
+      <circle cx="15" cy="15" r="3" fill="none" stroke="#FBCD00" stroke-width="0.3"/>
+      <circle cx="45" cy="45" r="3" fill="none" stroke="#FBCD00" stroke-width="0.3"/>
+    </pattern>
+    <filter id="h-glow-gold">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="10" result="b"/>
+      <feFlood flood-color="#FBCD00" flood-opacity="0.45" result="c"/>
+      <feComposite in="c" in2="b" operator="in" result="g"/>
+      <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <clipPath id="h-play-clip">
+      <rect x="16" y="492" width="358" height="52" rx="16"/>
+    </clipPath>
+  </defs>
+
+  <!-- ░░░ BACKGROUND ░░░ -->
+  <rect width="390" height="844" fill="url(#h-bg)"/>
+  <rect width="390" height="844" fill="url(#h-kente)" opacity="0.045"/>
+  <!-- Ambient glows -->
+  <circle cx="390" cy="60" r="240" fill="#FBCD00" opacity="0.055"/>
+  <circle cx="-20" cy="740" r="200" fill="#35D07F" opacity="0.04"/>
+  <circle cx="-30" cy="400" r="160" fill="#8B5CF6" opacity="0.03"/>
+
+  <!-- ░░░ STATUS BAR ░░░ -->
+  <rect x="0" y="0" width="390" height="44" fill="#050709" opacity="0.6"/>
+  <text x="22" y="29" font-size="15" font-weight="700" fill="white">9:41</text>
+  <!-- Signal bars -->
+  <rect x="322" y="21" width="3" height="7" rx="1" fill="white" opacity="0.9"/>
+  <rect x="327" y="18" width="3" height="10" rx="1" fill="white" opacity="0.9"/>
+  <rect x="332" y="15" width="3" height="13" rx="1" fill="white" opacity="0.9"/>
+  <rect x="337" y="12" width="3" height="16" rx="1" fill="white" opacity="0.9"/>
+  <!-- Battery -->
+  <rect x="352" y="17" width="24" height="13" rx="3" fill="none" stroke="white" stroke-width="1.3" opacity="0.75"/>
+  <rect x="376" y="21" width="3" height="5" rx="1" fill="white" opacity="0.75"/>
+  <rect x="354" y="19" width="19" height="9" rx="2" fill="#35D07F"/>
+
+  <!-- ░░░ NAVBAR ░░░ -->
+  <rect x="0" y="44" width="390" height="62" fill="#050709" opacity="0.92"/>
+  <line x1="0" y1="106" x2="390" y2="106" stroke="#FBCD00" stroke-width="0.5" opacity="0.12"/>
+
+  <!-- Logo 26px in navbar -->
+  <circle cx="34" cy="75" r="14" fill="#FBCD00"/>
+  <circle cx="34" cy="75" r="10.3" fill="white"/>
+  <text x="34" y="79.5" font-family="'Arial Black',Impact,sans-serif" font-weight="900" font-size="12" fill="#FBCD00" text-anchor="middle">Q</text>
+  <circle cx="42" cy="83" r="3.2" fill="#35D07F" stroke="#050709" stroke-width="1.2"/>
+  <!-- TriviaQ wordmark -->
+  <text x="52" y="81" font-family="'Arial Black',Impact,sans-serif" font-weight="900" font-size="19" fill="white">Trivia</text>
+  <text x="103" y="81" font-family="'Arial Black',Impact,sans-serif" font-weight="900" font-size="19" fill="#FBCD00">Q</text>
+  <!-- Live pulse -->
+  <circle cx="125" cy="73" r="4.5" fill="#35D07F" opacity="0.3"/>
+  <circle cx="125" cy="73" r="2.8" fill="#35D07F"/>
+  <text x="133" y="77.5" font-size="10" font-weight="700" fill="#35D07F" letter-spacing="1.5">LIVE</text>
+  <!-- Wallet badge (connected) -->
+  <rect x="228" y="59" width="148" height="32" rx="16" fill="#FBCD00" fill-opacity="0.08" stroke="#FBCD00" stroke-width="0.8" stroke-opacity="0.3"/>
+  <circle cx="246" cy="75" r="4" fill="#35D07F"/>
+  <text x="254" y="79" font-size="11" font-weight="600" fill="white" fill-opacity="0.85" font-family="'Courier New',monospace">0x3f4a…2E9c</text>
+
+  <!-- ░░░ HERO CARD ░░░ -->
+  <rect x="16" y="120" width="358" height="152" rx="22" fill="url(#h-hero)" stroke="#FBCD00" stroke-width="1" stroke-opacity="0.2"/>
+  <!-- Top-right shine -->
+  <circle cx="374" cy="128" r="80" fill="#FBCD00" opacity="0.06"/>
+
+  <!-- Hero Logo 48px -->
+  <circle cx="52" cy="162" r="24" fill="#FBCD00"/>
+  <circle cx="52" cy="162" r="17.5" fill="white"/>
+  <text x="52" y="167" font-family="'Arial Black',Impact,sans-serif" font-weight="900" font-size="20" fill="#FBCD00" text-anchor="middle">Q</text>
+  <circle cx="64" cy="173" r="5.5" fill="#35D07F" stroke="#0a0f1e" stroke-width="1.5"/>
+
+  <!-- Hero title -->
+  <text x="82" y="153" font-family="'Arial Black',Impact,sans-serif" font-weight="900" font-size="26" fill="white">Trivia</text>
+  <text x="143" y="153" font-family="'Arial Black',Impact,sans-serif" font-weight="900" font-size="26" fill="#FBCD00">Q</text>
+  <text x="82" y="171" font-size="12" fill="white" fill-opacity="0.38">TRIVQ · Celo Mainnet</text>
+  <!-- Network badge -->
+  <text x="318" y="145" font-size="10" fill="white" fill-opacity="0.28" text-anchor="middle">Network</text>
+  <circle cx="296" cy="162" r="3.5" fill="#35D07F"/>
+  <text x="303" y="166" font-size="11" font-weight="700" fill="#35D07F">Celo Mainnet</text>
+
+  <!-- Stats grid 3×1 -->
+  <!-- Prize Pool -->
+  <rect x="24" y="186" width="108" height="78" rx="14" fill="#FBCD00" fill-opacity="0.07" stroke="#FBCD00" stroke-width="1" stroke-opacity="0.14"/>
+  <text x="78" y="218" font-family="'Arial Black',Impact,sans-serif" font-weight="900" font-size="24" fill="#FBCD00" text-anchor="middle">1.5</text>
+  <text x="78" y="234" font-size="10" fill="#FBCD00" fill-opacity="0.5" text-anchor="middle">CELO Prize Pool</text>
+  <!-- Players -->
+  <rect x="140" y="186" width="108" height="78" rx="14" fill="#35D07F" fill-opacity="0.07" stroke="#35D07F" stroke-width="1" stroke-opacity="0.14"/>
+  <text x="194" y="218" font-family="'Arial Black',Impact,sans-serif" font-weight="900" font-size="24" fill="#35D07F" text-anchor="middle">847</text>
+  <text x="194" y="234" font-size="10" fill="#35D07F" fill-opacity="0.5" text-anchor="middle">Players</text>
+  <!-- Countdown -->
+  <rect x="256" y="186" width="110" height="78" rx="14" fill="white" fill-opacity="0.04" stroke="white" stroke-width="1" stroke-opacity="0.1"/>
+  <text x="311" y="215" font-family="'Arial Black',Impact,sans-serif" font-weight="900" font-size="19" fill="white" text-anchor="middle">14h 22m</text>
+  <text x="311" y="234" font-size="10" fill="white" fill-opacity="0.3" text-anchor="middle">Time Left</text>
+
+  <!-- ░░░ PRICE CARD ░░░ -->
+  <rect x="16" y="284" width="358" height="90" rx="16" fill="#FBCD00" fill-opacity="0.04" stroke="#FBCD00" stroke-width="1" stroke-opacity="0.22"/>
+  <text x="32" y="310" font-size="13" font-weight="700" fill="#FBCD00">$TRIVQ</text>
+  <text x="88" y="310" font-size="12" fill="white" fill-opacity="0.3">· Celo</text>
+  <text x="358" y="310" font-size="12" fill="#FBCD00" fill-opacity="0.6" text-anchor="end">Trade ↗</text>
+  <!-- Price -->
+  <text x="32" y="346" font-family="'Arial Black',Impact,sans-serif" font-weight="900" font-size="23" fill="white">$0.00000247</text>
+  <text x="32" y="362" font-size="11" fill="white" fill-opacity="0.28">per TRIVQ</text>
+  <!-- 24h change -->
+  <text x="358" y="346" font-size="15" font-weight="700" fill="#35D07F" text-anchor="end">▲ 12.4%</text>
+  <text x="358" y="362" font-size="11" fill="white" fill-opacity="0.28" text-anchor="end">24h</text>
+
+  <!-- ░░░ BALANCE CARD ░░░ -->
+  <rect x="16" y="386" width="358" height="92" rx="16" fill="url(#h-purple)" stroke="#8B5CF6" stroke-width="1" stroke-opacity="0.28"/>
+  <text x="32" y="410" font-size="12" fill="#A78BFA" fill-opacity="0.85">Your TRIVQ Balance</text>
+  <text x="32" y="453" font-family="'Arial Black',Impact,sans-serif" font-weight="900" font-size="38" fill="#A78BFA">12,450</text>
+  <!-- Right side -->
+  <text x="358" y="412" font-size="11" fill="white" fill-opacity="0.22" text-anchor="end">Rewards cap</text>
+  <text x="358" y="430" font-size="13" font-weight="700" fill="white" fill-opacity="0.38" text-anchor="end">500M total</text>
+  <rect x="278" y="448" width="72" height="4" rx="2" fill="white" fill-opacity="0.1"/>
+  <rect x="278" y="448" width="18" height="4" rx="2" fill="url(#h-prog)"/>
+
+  <!-- ░░░ PLAY NOW BUTTON ░░░ -->
+  <rect x="16" y="492" width="358" height="52" rx="16" fill="url(#h-play)" filter="url(#h-glow-gold)"/>
+  <!-- shimmer sweep -->
+  <rect x="16" y="492" width="50" height="52" fill="white" opacity="0.12" clip-path="url(#h-play-clip)"/>
+  <text x="195" y="523" font-family="'Arial Black',Impact,sans-serif" font-weight="900" font-size="20" fill="#0a0f1e" text-anchor="middle">▶  Play Now</text>
+
+  <!-- ░░░ BADGES + CHECK-IN ░░░ -->
+  <rect x="16" y="558" width="174" height="44" rx="14" fill="#8B5CF6" fill-opacity="0.09" stroke="#8B5CF6" stroke-width="1" stroke-opacity="0.28"/>
+  <text x="103" y="585" font-size="14" font-weight="700" fill="#A78BFA" text-anchor="middle">🎨  My Badges</text>
+  <rect x="198" y="558" width="176" height="44" rx="14" fill="#FBCD00" fill-opacity="0.09" stroke="#FBCD00" stroke-width="1" stroke-opacity="0.28"/>
+  <text x="286" y="585" font-size="14" font-weight="700" fill="#FBCD00" text-anchor="middle">🔥  Check-in</text>
+
+  <!-- ░░░ TRIVIA DUEL ░░░ -->
+  <rect x="16" y="614" width="358" height="50" rx="14" fill="url(#h-duel)" stroke="#8B5CF6" stroke-width="1.5" stroke-opacity="0.42"/>
+  <text x="38" y="644" font-family="'Arial Black',Impact,sans-serif" font-weight="900" font-size="15" fill="#A78BFA">⚔️  Trivia Duel</text>
+  <text x="168" y="644" font-size="13" fill="#A78BFA" fill-opacity="0.48">— Challenge a friend</text>
+  <rect x="313" y="626" width="44" height="20" rx="10" fill="#8B5CF6" fill-opacity="0.28" stroke="#8B5CF6" stroke-width="1" stroke-opacity="0.45"/>
+  <text x="335" y="640" font-size="10" font-weight="700" fill="#C4B5FD" text-anchor="middle">NEW</text>
+
+  <!-- ░░░ INVITE + BUY ░░░ -->
+  <rect x="16" y="676" width="174" height="44" rx="14" fill="#3B82F6" fill-opacity="0.09" stroke="#3B82F6" stroke-width="1" stroke-opacity="0.28"/>
+  <text x="103" y="703" font-size="13" font-weight="700" fill="#93C5FD" text-anchor="middle">🔗  Invite &amp; Earn</text>
+  <rect x="198" y="676" width="176" height="44" rx="14" fill="#35D07F" fill-opacity="0.09" stroke="#35D07F" stroke-width="1" stroke-opacity="0.28"/>
+  <text x="286" y="703" font-size="13" font-weight="700" fill="#35D07F" text-anchor="middle">💱  Buy TRIVQ</text>
+
+  <!-- ░░░ SOCIAL ░░░ -->
+  <text x="165" y="758" font-size="15" fill="white" fill-opacity="0.22" text-anchor="middle">𝕏</text>
+  <text x="195" y="758" font-size="15" fill="white" fill-opacity="0.22" text-anchor="middle">⬡</text>
+  <text x="225" y="758" font-size="15" fill="white" fill-opacity="0.22" text-anchor="middle">◉</text>
+
+  <!-- ░░░ BOTTOM URL ░░░ -->
+  <text x="195" y="800" font-size="11" fill="white" fill-opacity="0.18" text-anchor="middle">trivia-quest-eight.vercel.app</text>
+</svg>

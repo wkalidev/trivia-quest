@@ -1,0 +1,169 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" width="1080" height="1920" font-family="'Helvetica Neue',Arial,system-ui,sans-serif">
+  <defs>
+    <linearGradient id="r-bg" x1="0%" y1="0%" x2="60%" y2="100%">
+      <stop offset="0%" stop-color="#0c0820"/>
+      <stop offset="45%" stop-color="#050709"/>
+      <stop offset="100%" stop-color="#0a1208"/>
+    </linearGradient>
+    <radialGradient id="r-hero-glow" cx="50%" cy="38%" r="45%">
+      <stop offset="0%" stop-color="#FBCD00" stop-opacity="0.14"/>
+      <stop offset="100%" stop-color="#FBCD00" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="r-score-ring" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FBCD00"/>
+      <stop offset="50%" stop-color="#35D07F"/>
+      <stop offset="100%" stop-color="#8B5CF6"/>
+    </linearGradient>
+    <linearGradient id="r-trivq-card" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8B5CF6" stop-opacity="0.16"/>
+      <stop offset="100%" stop-color="#6D28D9" stop-opacity="0.04"/>
+    </linearGradient>
+    <linearGradient id="r-play-again" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FBCD00"/>
+      <stop offset="100%" stop-color="#e09000"/>
+    </linearGradient>
+    <linearGradient id="r-rank-card" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#35D07F" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#16a34a" stop-opacity="0.03"/>
+    </linearGradient>
+    <pattern id="r-kente" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+      <rect x="0" y="0" width="30" height="30" fill="none" stroke="#FBCD00" stroke-width="0.5"/>
+      <rect x="30" y="30" width="30" height="30" fill="none" stroke="#FBCD00" stroke-width="0.5"/>
+      <line x1="0" y1="30" x2="30" y2="0" stroke="#35D07F" stroke-width="0.3"/>
+      <line x1="30" y1="60" x2="60" y2="30" stroke="#35D07F" stroke-width="0.3"/>
+    </pattern>
+    <filter id="r-glow-gold">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="12" result="b"/>
+      <feFlood flood-color="#FBCD00" flood-opacity="0.5" result="c"/>
+      <feComposite in="c" in2="b" operator="in" result="g"/>
+      <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="r-glow-green">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="8" result="b"/>
+      <feFlood flood-color="#35D07F" flood-opacity="0.4" result="c"/>
+      <feComposite in="c" in2="b" operator="in" result="g"/>
+      <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <clipPath id="r-play-clip">
+      <rect x="16" y="716" width="236" height="52" rx="16"/>
+    </clipPath>
+  </defs>
+
+  <!-- ░░░ BACKGROUND ░░░ -->
+  <rect width="390" height="844" fill="url(#r-bg)"/>
+  <rect width="390" height="844" fill="url(#r-kente)" opacity="0.04"/>
+  <rect width="390" height="844" fill="url(#r-hero-glow)"/>
+  <!-- Ambient glows -->
+  <circle cx="195" cy="200" r="280" fill="#FBCD00" opacity="0.04"/>
+  <circle cx="0" cy="600" r="200" fill="#35D07F" opacity="0.04"/>
+  <circle cx="390" cy="700" r="160" fill="#8B5CF6" opacity="0.035"/>
+
+  <!-- ░░░ CONFETTI PARTICLES ░░░ -->
+  <!-- Gold -->
+  <rect x="42" y="80" width="8" height="8" rx="2" fill="#FBCD00" opacity="0.7" transform="rotate(35 46 84)"/>
+  <rect x="310" y="95" width="7" height="7" rx="2" fill="#FBCD00" opacity="0.6" transform="rotate(-20 313 98)"/>
+  <rect x="180" y="56" width="6" height="6" rx="2" fill="#FBCD00" opacity="0.5" transform="rotate(55 183 59)"/>
+  <!-- Green -->
+  <circle cx="70" cy="120" r="4" fill="#35D07F" opacity="0.6"/>
+  <circle cx="330" cy="70" r="3" fill="#35D07F" opacity="0.5"/>
+  <rect x="340" y="130" width="6" height="6" rx="1" fill="#35D07F" opacity="0.55" transform="rotate(40 343 133)"/>
+  <!-- Purple -->
+  <circle cx="50" cy="160" r="3" fill="#A78BFA" opacity="0.5"/>
+  <rect x="290" y="145" width="5" height="5" rx="1" fill="#A78BFA" opacity="0.5" transform="rotate(-30 292 147)"/>
+  <!-- Red -->
+  <circle cx="360" cy="100" r="3" fill="#F87171" opacity="0.4"/>
+  <rect x="120" y="70" width="5" height="5" rx="2" fill="#F87171" opacity="0.45" transform="rotate(60 122 72)"/>
+  <!-- More confetti -->
+  <rect x="225" y="105" width="6" height="6" rx="1" fill="#35D07F" opacity="0.5" transform="rotate(25 228 108)"/>
+  <circle cx="160" cy="90" r="3.5" fill="#FBCD00" opacity="0.55"/>
+  <rect x="265" y="80" width="5" height="5" rx="2" fill="#A78BFA" opacity="0.4" transform="rotate(-45 267 82)"/>
+
+  <!-- ░░░ STATUS BAR ░░░ -->
+  <rect x="0" y="0" width="390" height="44" fill="#050709" opacity="0.55"/>
+  <text x="22" y="29" font-size="15" font-weight="700" fill="white">9:41</text>
+  <rect x="352" y="17" width="24" height="13" rx="3" fill="none" stroke="white" stroke-width="1.3" opacity="0.75"/>
+  <rect x="376" y="21" width="3" height="5" rx="1" fill="white" opacity="0.75"/>
+  <rect x="354" y="19" width="19" height="9" rx="2" fill="#35D07F"/>
+
+  <!-- ░░░ RESULTS NAV ░░░ -->
+  <rect x="0" y="44" width="390" height="62" fill="#050709" opacity="0.88"/>
+  <line x1="0" y1="106" x2="390" y2="106" stroke="#FBCD00" stroke-width="0.5" opacity="0.1"/>
+  <text x="195" y="77" font-family="'Arial Black',Impact,sans-serif" font-weight="900" font-size="18" fill="white" text-anchor="middle">Results</text>
+  <!-- Tx confirmed badge -->
+  <rect x="130" y="86" width="130" height="16" rx="8" fill="#35D07F" fill-opacity="0.14" stroke="#35D07F" stroke-width="0.7" stroke-opacity="0.4"/>
+  <text x="195" y="98" font-size="10" fill="#35D07F" font-weight="600" text-anchor="middle">✓ On-chain confirmed</text>
+
+  <!-- ░░░ SCORE RING ░░░ -->
+  <!-- Outer decorative ring -->
+  <circle cx="195" cy="218" r="80" fill="none" stroke="url(#r-score-ring)" stroke-width="3" stroke-opacity="0.35"/>
+  <circle cx="195" cy="218" r="72" fill="none" stroke="url(#r-score-ring)" stroke-width="1" stroke-opacity="0.15"/>
+  <!-- Score bg -->
+  <circle cx="195" cy="218" r="66" fill="#050709" fill-opacity="0.7"/>
+  <!-- Glow circle -->
+  <circle cx="195" cy="218" r="66" fill="#FBCD00" opacity="0.04"/>
+  <!-- Score number -->
+  <text x="195" y="200" font-family="'Arial Black',Impact,sans-serif" font-weight="900" font-size="54" fill="#FBCD00" text-anchor="middle" dominant-baseline="central" filter="url(#r-glow-gold)">78</text>
+  <text x="195" y="250" font-size="13" fill="white" fill-opacity="0.35" text-anchor="middle">out of 100</text>
+
+  <!-- Grade badge -->
+  <rect x="150" y="306" width="90" height="28" rx="14" fill="#FBCD00" fill-opacity="0.14" stroke="#FBCD00" stroke-width="1" stroke-opacity="0.45"/>
+  <text x="195" y="325" font-family="'Arial Black',Impact,sans-serif" font-weight="900" font-size="13" fill="#FBCD00" text-anchor="middle">EXCELLENT</text>
+
+  <!-- ░░░ STATS ROW ░░░ -->
+  <!-- 3 stats -->
+  <rect x="16" y="346" width="358" height="66" rx="16" fill="white" fill-opacity="0.04" stroke="white" stroke-width="1" stroke-opacity="0.08"/>
+  <!-- Correct answers -->
+  <text x="88" y="368" font-size="11" fill="white" fill-opacity="0.38" text-anchor="middle">Correct</text>
+  <text x="88" y="396" font-family="'Arial Black',Impact,sans-serif" font-weight="900" font-size="24" fill="#35D07F" text-anchor="middle">8/10</text>
+  <!-- Separator -->
+  <line x1="140" y1="356" x2="140" y2="402" stroke="white" stroke-width="0.5" stroke-opacity="0.12"/>
+  <!-- Best streak -->
+  <text x="195" y="368" font-size="11" fill="white" fill-opacity="0.38" text-anchor="middle">Best Streak</text>
+  <text x="195" y="396" font-family="'Arial Black',Impact,sans-serif" font-weight="900" font-size="24" fill="#FBCD00" text-anchor="middle">🔥 x3</text>
+  <!-- Separator -->
+  <line x1="250" y1="356" x2="250" y2="402" stroke="white" stroke-width="0.5" stroke-opacity="0.12"/>
+  <!-- Time -->
+  <text x="310" y="368" font-size="11" fill="white" fill-opacity="0.38" text-anchor="middle">Time</text>
+  <text x="310" y="396" font-family="'Arial Black',Impact,sans-serif" font-weight="900" font-size="24" fill="white" text-anchor="middle">45s</text>
+
+  <!-- ░░░ TRIVQ EARNED CARD ░░░ -->
+  <rect x="16" y="424" width="358" height="100" rx="18" fill="url(#r-trivq-card)" stroke="#8B5CF6" stroke-width="1.5" stroke-opacity="0.35"/>
+  <!-- Sparkle glow -->
+  <circle cx="195" cy="474" r="70" fill="#8B5CF6" opacity="0.05"/>
+  <text x="195" y="448" font-size="13" fill="#A78BFA" fill-opacity="0.8" text-anchor="middle">TRIVQ Tokens Earned</text>
+  <!-- Big reward number -->
+  <text x="195" y="497" font-family="'Arial Black',Impact,sans-serif" font-weight="900" font-size="42" fill="#FBCD00" text-anchor="middle" filter="url(#r-glow-gold)">+7,800</text>
+  <text x="195" y="516" font-size="12" fill="white" fill-opacity="0.32" text-anchor="middle">8 correct × 1,000  ·  streak bonus ×1.5  ·  speed bonus</text>
+
+  <!-- ░░░ RANK CARD ░░░ -->
+  <rect x="16" y="536" width="358" height="66" rx="16" fill="url(#r-rank-card)" stroke="#35D07F" stroke-width="1" stroke-opacity="0.28"/>
+  <!-- Trophy -->
+  <text x="44" y="577" font-size="28" text-anchor="middle">🏆</text>
+  <!-- Rank text -->
+  <text x="68" y="560" font-size="12" fill="#35D07F" fill-opacity="0.7" font-weight="600">Leaderboard Rank</text>
+  <text x="68" y="582" font-family="'Arial Black',Impact,sans-serif" font-weight="900" font-size="20" fill="white">#12 <tspan font-size="13" fill="white" fill-opacity="0.4">of 847 players</tspan></text>
+  <!-- Prize info -->
+  <text x="358" y="560" font-size="11" fill="white" fill-opacity="0.3" text-anchor="end">Prize pool</text>
+  <text x="358" y="578" font-family="'Arial Black',Impact,sans-serif" font-weight="900" font-size="18" fill="#FBCD00" text-anchor="end">1.5 CELO</text>
+
+  <!-- ░░░ ROUND INFO ░░░ -->
+  <rect x="16" y="614" width="358" height="48" rx="12" fill="white" fill-opacity="0.03" stroke="white" stroke-width="0.5" stroke-opacity="0.08"/>
+  <text x="32" y="634" font-size="12" fill="white" fill-opacity="0.5">Round ends in</text>
+  <text x="32" y="652" font-size="12" font-weight="700" fill="white" fill-opacity="0.75">14h 22m  ·  Top 3 split the prize pool</text>
+  <text x="358" y="640" font-size="11" fill="#FBCD00" fill-opacity="0.6" text-anchor="end">View Leaderboard ↗</text>
+
+  <!-- ░░░ ACTION BUTTONS ░░░ -->
+  <!-- Play Again (gold, primary) -->
+  <rect x="16" y="716" width="236" height="52" rx="16" fill="url(#r-play-again)" filter="url(#r-glow-gold)"/>
+  <rect x="16" y="716" width="50" height="52" fill="white" opacity="0.1" clip-path="url(#r-play-clip)"/>
+  <text x="134" y="747" font-family="'Arial Black',Impact,sans-serif" font-weight="900" font-size="18" fill="#0a0f1e" text-anchor="middle">▶  Play Again</text>
+  <!-- Share button -->
+  <rect x="260" y="716" width="114" height="52" rx="16" fill="white" fill-opacity="0.06" stroke="white" stroke-width="1" stroke-opacity="0.14"/>
+  <text x="317" y="747" font-size="15" font-weight="700" fill="white" fill-opacity="0.75" text-anchor="middle">↑  Share</text>
+
+  <!-- ░░░ TX HASH ░░░ -->
+  <text x="195" y="790" font-size="10" fill="white" fill-opacity="0.2" text-anchor="middle">Tx: 0x7f3a…9e2c  ·  CeloScan ↗</text>
+
+  <!-- ░░░ URL ░░░ -->
+  <text x="195" y="820" font-size="11" fill="white" fill-opacity="0.15" text-anchor="middle">trivia-quest-eight.vercel.app</text>
+</svg>

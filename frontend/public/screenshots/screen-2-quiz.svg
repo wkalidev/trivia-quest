@@ -1,0 +1,158 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" width="1080" height="1920" font-family="'Helvetica Neue',Arial,system-ui,sans-serif">
+  <defs>
+    <linearGradient id="q-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0d1a"/>
+      <stop offset="50%" stop-color="#050709"/>
+      <stop offset="100%" stop-color="#0c0f1e"/>
+    </linearGradient>
+    <linearGradient id="q-timer" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#35D07F"/>
+      <stop offset="55%" stop-color="#FBCD00"/>
+      <stop offset="78%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#ef4444"/>
+    </linearGradient>
+    <linearGradient id="q-correct" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#35D07F" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#16a34a" stop-opacity="0.08"/>
+    </linearGradient>
+    <linearGradient id="q-option" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.02"/>
+    </linearGradient>
+    <linearGradient id="q-card" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.06"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.02"/>
+    </linearGradient>
+    <linearGradient id="q-streak" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#FBCD00" stop-opacity="0.08"/>
+    </linearGradient>
+    <pattern id="q-kente" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+      <rect x="0" y="0" width="30" height="30" fill="none" stroke="#FBCD00" stroke-width="0.5"/>
+      <rect x="30" y="30" width="30" height="30" fill="none" stroke="#FBCD00" stroke-width="0.5"/>
+      <line x1="0" y1="30" x2="30" y2="0" stroke="#35D07F" stroke-width="0.3"/>
+      <line x1="30" y1="60" x2="60" y2="30" stroke="#35D07F" stroke-width="0.3"/>
+    </pattern>
+    <filter id="q-glow-green">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="8" result="b"/>
+      <feFlood flood-color="#35D07F" flood-opacity="0.5" result="c"/>
+      <feComposite in="c" in2="b" operator="in" result="g"/>
+      <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="q-correct-glow">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="6" result="b"/>
+      <feFlood flood-color="#35D07F" flood-opacity="0.4" result="c"/>
+      <feComposite in="c" in2="b" operator="in" result="g"/>
+      <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- ░░░ BACKGROUND ░░░ -->
+  <rect width="390" height="844" fill="url(#q-bg)"/>
+  <rect width="390" height="844" fill="url(#q-kente)" opacity="0.04"/>
+  <!-- Ambient glows -->
+  <circle cx="195" cy="380" r="280" fill="#35D07F" opacity="0.03"/>
+  <circle cx="0" cy="180" r="180" fill="#FBCD00" opacity="0.04"/>
+  <circle cx="390" cy="650" r="200" fill="#8B5CF6" opacity="0.03"/>
+
+  <!-- ░░░ STATUS BAR ░░░ -->
+  <rect x="0" y="0" width="390" height="44" fill="#050709" opacity="0.6"/>
+  <text x="22" y="29" font-size="15" font-weight="700" fill="white">9:41</text>
+  <rect x="322" y="21" width="3" height="7" rx="1" fill="white" opacity="0.9"/>
+  <rect x="327" y="18" width="3" height="10" rx="1" fill="white" opacity="0.9"/>
+  <rect x="332" y="15" width="3" height="13" rx="1" fill="white" opacity="0.9"/>
+  <rect x="337" y="12" width="3" height="16" rx="1" fill="white" opacity="0.9"/>
+  <rect x="352" y="17" width="24" height="13" rx="3" fill="none" stroke="white" stroke-width="1.3" opacity="0.75"/>
+  <rect x="376" y="21" width="3" height="5" rx="1" fill="white" opacity="0.75"/>
+  <rect x="354" y="19" width="19" height="9" rx="2" fill="#35D07F"/>
+
+  <!-- ░░░ QUIZ NAV ░░░ -->
+  <rect x="0" y="44" width="390" height="62" fill="#050709" opacity="0.92"/>
+  <line x1="0" y1="106" x2="390" y2="106" stroke="#35D07F" stroke-width="0.5" opacity="0.15"/>
+  <!-- Back arrow -->
+  <text x="22" y="81" font-size="22" fill="white" fill-opacity="0.5">←</text>
+  <!-- Title -->
+  <text x="195" y="77" font-family="'Arial Black',Impact,sans-serif" font-weight="900" font-size="17" fill="white" text-anchor="middle">Quiz</text>
+  <text x="195" y="95" font-size="11" fill="white" fill-opacity="0.4" text-anchor="middle">Question 4 of 10</text>
+  <!-- Score badge -->
+  <rect x="318" y="57" width="60" height="32" rx="16" fill="#35D07F" fill-opacity="0.12" stroke="#35D07F" stroke-width="1" stroke-opacity="0.4"/>
+  <text x="348" y="74" font-family="'Arial Black',Impact,sans-serif" font-weight="900" font-size="14" fill="#35D07F" text-anchor="middle">40 pts</text>
+
+  <!-- ░░░ CATEGORY BADGE ░░░ -->
+  <rect x="110" y="118" width="170" height="30" rx="15" fill="#35D07F" fill-opacity="0.12" stroke="#35D07F" stroke-width="1" stroke-opacity="0.35"/>
+  <text x="195" y="138" font-size="13" font-weight="700" fill="#35D07F" text-anchor="middle">🌍  African Geography</text>
+
+  <!-- ░░░ TIMER BAR ░░░ -->
+  <!-- Timer background track -->
+  <rect x="16" y="162" width="358" height="8" rx="4" fill="white" fill-opacity="0.08"/>
+  <!-- Timer fill (68% = 8.2s of 12s) -->
+  <rect x="16" y="162" width="243" height="8" rx="4" fill="url(#q-timer)"/>
+  <!-- Timer label -->
+  <text x="195" y="152" font-size="11" fill="white" fill-opacity="0.35" text-anchor="middle">8.2s remaining</text>
+
+  <!-- ░░░ STREAK BADGE ░░░ -->
+  <rect x="140" y="182" width="110" height="28" rx="14" fill="url(#q-streak)" stroke="#f59e0b" stroke-width="1" stroke-opacity="0.45"/>
+  <text x="195" y="201" font-size="13" font-weight="700" fill="#FBCD00" text-anchor="middle">🔥 x2 Streak</text>
+
+  <!-- ░░░ QUESTION CARD ░░░ -->
+  <rect x="16" y="224" width="358" height="144" rx="20" fill="url(#q-card)" stroke="white" stroke-width="1" stroke-opacity="0.1"/>
+  <!-- Decorative accent line -->
+  <rect x="16" y="224" width="4" height="144" rx="2" fill="#35D07F" opacity="0.7"/>
+  <!-- Question number -->
+  <text x="40" y="254" font-size="12" fill="#35D07F" font-weight="700" fill-opacity="0.7">Q04</text>
+  <!-- Question text -->
+  <text x="40" y="290" font-family="'Helvetica Neue',Arial,sans-serif" font-size="21" font-weight="700" fill="white">What is the capital city</text>
+  <text x="40" y="316" font-family="'Helvetica Neue',Arial,sans-serif" font-size="21" font-weight="700" fill="white">of Burkina Faso?</text>
+  <!-- Decorative dots -->
+  <circle cx="338" cy="248" r="3" fill="#35D07F" opacity="0.4"/>
+  <circle cx="350" cy="248" r="3" fill="#FBCD00" opacity="0.3"/>
+  <circle cx="362" cy="248" r="3" fill="#8B5CF6" opacity="0.3"/>
+  <!-- Hint line -->
+  <text x="40" y="352" font-size="11" fill="white" fill-opacity="0.28">Category: African Geography  ·  Difficulty: Medium</text>
+
+  <!-- ░░░ ANSWER OPTIONS ░░░ -->
+
+  <!-- Option A — CORRECT (selected + highlighted green) -->
+  <rect x="16" y="382" width="358" height="66" rx="16" fill="url(#q-correct)" stroke="#35D07F" stroke-width="2" filter="url(#q-correct-glow)"/>
+  <!-- Checkmark circle -->
+  <circle cx="44" cy="415" r="14" fill="#35D07F"/>
+  <text x="44" y="420" font-size="14" font-weight="900" fill="white" text-anchor="middle">A</text>
+  <!-- Answer text -->
+  <text x="68" y="410" font-size="16" font-weight="700" fill="#35D07F">Ouagadougou</text>
+  <text x="68" y="430" font-size="12" fill="#35D07F" fill-opacity="0.55">Capital since 1919 · Pop. 3.5M</text>
+  <!-- Correct tick -->
+  <text x="358" y="420" font-size="22" fill="#35D07F" text-anchor="end">✓</text>
+
+  <!-- Option B -->
+  <rect x="16" y="460" width="358" height="58" rx="16" fill="url(#q-option)" stroke="white" stroke-width="1" stroke-opacity="0.1"/>
+  <rect x="30" y="479" width="26" height="26" rx="13" fill="white" fill-opacity="0.08" stroke="white" stroke-width="1" stroke-opacity="0.15"/>
+  <text x="43" y="496" font-size="13" fill="white" fill-opacity="0.5" text-anchor="middle" font-weight="600">B</text>
+  <text x="70" y="494" font-size="16" font-weight="600" fill="white" fill-opacity="0.65">Dakar</text>
+
+  <!-- Option C -->
+  <rect x="16" y="530" width="358" height="58" rx="16" fill="url(#q-option)" stroke="white" stroke-width="1" stroke-opacity="0.1"/>
+  <rect x="30" y="549" width="26" height="26" rx="13" fill="white" fill-opacity="0.08" stroke="white" stroke-width="1" stroke-opacity="0.15"/>
+  <text x="43" y="566" font-size="13" fill="white" fill-opacity="0.5" text-anchor="middle" font-weight="600">C</text>
+  <text x="70" y="564" font-size="16" font-weight="600" fill="white" fill-opacity="0.65">Abidjan</text>
+
+  <!-- Option D -->
+  <rect x="16" y="600" width="358" height="58" rx="16" fill="url(#q-option)" stroke="white" stroke-width="1" stroke-opacity="0.1"/>
+  <rect x="30" y="619" width="26" height="26" rx="13" fill="white" fill-opacity="0.08" stroke="white" stroke-width="1" stroke-opacity="0.15"/>
+  <text x="43" y="636" font-size="13" fill="white" fill-opacity="0.5" text-anchor="middle" font-weight="600">D</text>
+  <text x="70" y="634" font-size="16" font-weight="600" fill="white" fill-opacity="0.65">Bamako</text>
+
+  <!-- ░░░ PROGRESS BAR ░░░ -->
+  <rect x="16" y="680" width="358" height="6" rx="3" fill="white" fill-opacity="0.08"/>
+  <rect x="16" y="680" width="143" height="6" rx="3" fill="#35D07F" opacity="0.8"/>
+  <text x="16" y="700" font-size="11" fill="white" fill-opacity="0.3">4/10 answered</text>
+  <text x="374" y="700" font-size="11" fill="#35D07F" fill-opacity="0.7" text-anchor="end">+1,000 TRIVQ/correct</text>
+
+  <!-- ░░░ BOTTOM INFO ░░░ -->
+  <!-- Correct answer revealed -->
+  <rect x="16" y="716" width="358" height="52" rx="14" fill="#35D07F" fill-opacity="0.08" stroke="#35D07F" stroke-width="1" stroke-opacity="0.3"/>
+  <text x="195" y="738" font-size="13" font-weight="700" fill="#35D07F" text-anchor="middle">✓ Correct!  +1,000 TRIVQ earned</text>
+  <text x="195" y="757" font-size="11" fill="white" fill-opacity="0.35" text-anchor="middle">Streak bonus applied · Next question in 1.5s</text>
+
+  <!-- ░░░ URL ░░░ -->
+  <text x="195" y="810" font-size="11" fill="white" fill-opacity="0.15" text-anchor="middle">trivia-quest-eight.vercel.app</text>
+</svg>
