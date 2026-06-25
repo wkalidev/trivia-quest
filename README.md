@@ -190,7 +190,16 @@ No external DEX page needed — swap directly inside the Mini App.
 
 ## ⚡ Performance
 
-Ongoing PageSpeed optimisations — current mobile score: **53** (was 47):
+Ongoing PageSpeed optimisations — current mobile score: **75** (was 47→53→75):
+
+| Metric | Score |
+|---|---|
+| Performance | 75 |
+| FCP | 0.9s |
+| LCP | 2.4s |
+| TBT | 840ms |
+
+Remaining bottleneck: 572KB unused JavaScript (WalletConnect/RainbowKit bundle, loaded eagerly for non-MiniPay users).
 
 | Fix | Impact |
 |---|---|
