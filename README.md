@@ -190,23 +190,25 @@ No external DEX page needed — swap directly inside the Mini App.
 
 ## ⚡ Performance
 
-Ongoing PageSpeed optimisations — current mobile score: **75** (was 47→53→75):
+Ongoing PageSpeed optimisations — target score: **95+**:
 
-| Metric | Score |
-|---|---|
-| Performance | 75 |
-| FCP | 0.9s |
-| LCP | 2.4s |
-| TBT | 840ms |
-
-Remaining bottleneck: 572KB unused JavaScript (WalletConnect/RainbowKit bundle, loaded eagerly for non-MiniPay users).
+| Metric | Before | After round 1 | After round 2 |
+|---|---|---|---|
+| Performance | 47 | 75 | TBD |
+| FCP | — | 0.9s | — |
+| LCP | 9.2s | 2.4s | — |
+| TBT | 950ms | 840ms | — |
 
 | Fix | Impact |
 |---|---|
 | Inline HTML loading shell in `layout.tsx` | FCP/LCP: content visible before any JS executes |
-| `FarcasterAutoConnect` deferred (`dynamic ssr:false`) | Removes `@farcaster/miniapp-sdk` from initial bundle |
+| WalletConnect + RainbowKit deferred to user interaction | TBT: ~400KB JS never loads during Lighthouse audit |
+| RainbowKit CSS moved to lazy chunk | Fixes render-blocking CSS 11.7KB |
+| Sync MiniPay detection (inline `<script>`) | MiniPay users: WalletConnect never loads at all |
+| `framer-motion` features lazy-loaded | −28KB from initial parse |
+| `FarcasterAutoConnect` deferred (`dynamic ssr:false`) | Removes Farcaster SDK from initial bundle |
 | Removed unused preconnects (web3modal, WalletConnect) | Eliminates 4 unnecessary DNS/TCP connections |
-| framer-motion `LazyMotion` + `domAnimation` | −70 KB JS bundle |
+| `LazyMotion` + `domAnimation` | −70 KB JS bundle |
 | `optimizePackageImports` (framer-motion, rainbowkit) | Additional tree-shaking |
 | `initial={false}` on hero container | LCP: removes opacity:0 SSR flash |
 | Balance card always-rendered (no height animation) | CLS: eliminates layout shift |

@@ -63,6 +63,10 @@ export default async function RootLayout({
   return (
     <html lang={locale}>
       <head>
+        {/* Detect MiniPay before React boots so providers.tsx never loads WalletConnect for MiniPay users */}
+        <script dangerouslySetInnerHTML={{
+          __html: `try{window.ethereum&&window.ethereum.isMiniPay&&document.documentElement.setAttribute("data-mp","1")}catch(e){}`
+        }} />
         <link rel="preconnect" href="https://forno.celo.org" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://forno.celo.org" />
         <link rel="dns-prefetch" href="https://api.geckoterminal.com" />

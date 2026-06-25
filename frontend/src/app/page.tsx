@@ -1,7 +1,7 @@
 "use client";
 
 import { sdk } from '@farcaster/miniapp-sdk';
-import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { useWallet } from "@/app/providers";
 import { useAccount, useReadContract, useChainId } from "wagmi";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useCallback, memo } from "react";
@@ -11,9 +11,18 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Logo } from "@/components/Logo";
 import type { Locale } from "@/i18n/navigation";
 import { formatUnits } from "viem";
-import { LazyMotion, domAnimation, m, type Variants } from "framer-motion";
+import { LazyMotion, m, type Variants } from "framer-motion";
+
+// Lazy-load domAnimation features — defers ~28KB from initial parse
+const loadDomAnimation = () => import("framer-motion").then((mod) => mod.domAnimation);
 import { CONTRACT_ABI, getContractAddress } from "@/lib/contract";
 import dynamic_ from "next/dynamic";
+
+// Loaded only when wallet stack is ready (user clicked connect)
+const ConnectButton = dynamic_(
+  () => import("@rainbow-me/rainbowkit").then((m) => ({ default: m.ConnectButton })),
+  { ssr: false }
+);
 
 const TrivqPrice = dynamic_(() => import("@/components/TrivqPrice"), {
   ssr: false,
@@ -180,6 +189,7 @@ export default function Home() {
   const { isConnected, address } = useAccount();
   const router = useRouter();
   const { isInMiniPay, miniPayAddress, loading } = useMiniPay();
+  const { walletReady, requestWallet } = useWallet();
   const t = useTranslations("home");
   const tNav = useTranslations("nav");
   const locale = useLocale() as Locale;
@@ -314,12 +324,30 @@ export default function Home() {
         <div className="flex items-center gap-2">
           <LanguageSwitcher currentLocale={locale} />
           {mounted && !loading && !isInMiniPay && (
-            <ConnectButton label={t("connectWallet")} showBalance={false} />
+            walletReady
+              ? <ConnectButton label={t("connectWallet")} showBalance={false} />
+              : <button
+                  onClick={requestWallet}
+                  onMouseEnter={() => import("@/components/RainbowKitWrapper")}
+                  style={{
+                    padding: "8px 14px",
+                    borderRadius: "12px",
+                    background: "rgba(255,255,255,0.06)",
+                    border: "1px solid rgba(255,255,255,0.15)",
+                    color: "rgba(255,255,255,0.85)",
+                    fontSize: "13px",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {t("connectWallet")}
+                </button>
           )}
         </div>
       </div>
 
-      <LazyMotion features={domAnimation}>
+      <LazyMotion features={loadDomAnimation}>
       <m.div
         variants={containerVariants}
         initial={false}
@@ -473,7 +501,25 @@ export default function Home() {
             >
               <p className="text-white/30 text-sm mb-3">Connect your wallet to start earning</p>
               {mounted && !loading && !isInMiniPay && (
-                <ConnectButton label={t("connectWallet")} showBalance={false} />
+                walletReady
+                  ? <ConnectButton label={t("connectWallet")} showBalance={false} />
+                  : <button
+                      onClick={requestWallet}
+                      onMouseEnter={() => import("@/components/RainbowKitWrapper")}
+                      style={{
+                        padding: "12px 24px",
+                        borderRadius: "12px",
+                        background: "linear-gradient(135deg,#FBCD00,#f0a500)",
+                        border: "none",
+                        color: "#0a0f1e",
+                        fontSize: "15px",
+                        fontWeight: 900,
+                        cursor: "pointer",
+                        width: "100%",
+                      }}
+                    >
+                      {t("connectWallet")}
+                    </button>
               )}
             </div>
           )}

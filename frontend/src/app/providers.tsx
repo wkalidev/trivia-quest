@@ -2,72 +2,79 @@
 
 import { WagmiProvider, createConfig, http } from "wagmi";
 import { injected } from "wagmi/connectors";
-import { celo } from "viem/chains";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { RainbowKitProvider } from "@rainbow-me/rainbowkit";
+import { celo, base } from "viem/chains";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "next-themes";
-import { useEffect, useState, type ReactNode } from "react";
-import "@rainbow-me/rainbowkit/styles.css";
-import { fullConfig } from "@/lib/fullConfig";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useState,
+  type ReactNode,
+} from "react";
+import dynamic from "next/dynamic";
+import { queryClient } from "@/lib/queryClient";
 
-// Lightweight config for MiniPay — no WalletConnect, no eval.
-// Must include injected() so wagmi auto-reconnects to window.ethereum (MiniPay)
-// after the provider switch, keeping isConnected=true on all pages.
+// Lightweight config — no WalletConnect, no RainbowKit. Used for all
+// blockchain reads (getCurrentRound, balanceOf, etc.) before wallet connects.
 const lightConfig = createConfig({
-  chains: [celo],
+  chains: [celo, base],
   connectors: [injected()],
-  transports: { [celo.id]: http("https://forno.celo.org") },
+  transports: {
+    [celo.id]: http("https://forno.celo.org"),
+    [base.id]: http("https://mainnet.base.org"),
+  },
   ssr: false,
 });
 
-const queryClient = new QueryClient();
+// Full wallet stack — RainbowKit + WalletConnect — loaded ONLY on user
+// interaction. Lighthouse never clicks → this chunk never loads during audit.
+const RainbowKitWrapper = dynamic(
+  () => import("@/components/RainbowKitWrapper"),
+  { ssr: false }
+);
 
-function MiniPayProviders({ children }: { children: ReactNode }) {
-  return (
-    <WagmiProvider config={lightConfig}>
-      <QueryClientProvider client={queryClient}>
-        {children}
-      </QueryClientProvider>
-    </WagmiProvider>
-  );
-}
+// ──────────────────────────────────────────────────────────────────────────────
+// Wallet context — lets any child request the full wallet stack on demand
+// ──────────────────────────────────────────────────────────────────────────────
+type WalletCtx = { walletReady: boolean; requestWallet: () => void };
+const WalletContext = createContext<WalletCtx>({
+  walletReady: false,
+  requestWallet: () => {},
+});
+export const useWallet = () => useContext(WalletContext);
 
-function FullProviders({ children }: { children: ReactNode }) {
-  return (
-    <WagmiProvider config={fullConfig}>
-      <QueryClientProvider client={queryClient}>
-        {/*
-          RainbowKitProvider est toujours présent ici — import statique.
-          ConnectButton dans page.tsx est conditionné par `mounted`
-          (useEffect) donc il ne se rend qu'après hydratation côté client.
-          PageSpeed et les bots ne verront jamais ConnectButton → pas de crash.
-        */}
-        <RainbowKitProvider showRecentTransactions={false}>
-          {children}
-        </RainbowKitProvider>
-      </QueryClientProvider>
-    </WagmiProvider>
-  );
+// Detect MiniPay synchronously from the inline script in layout.tsx
+// (sets data-mp="1" on <html> before React boots).
+function isMiniPaySync(): boolean {
+  if (typeof document === "undefined") return false;
+  return document.documentElement.getAttribute("data-mp") === "1";
 }
 
 export function Providers({ children }: { children: ReactNode }) {
-  const [isMiniPay, setIsMiniPay] = useState(false);
+  // Sync read — no useEffect flicker, no FullProviders rendered first
+  const [isMiniPay] = useState(isMiniPaySync);
+  const [walletReady, setWalletReady] = useState(false);
 
-  useEffect(() => {
-    setIsMiniPay(!!(window as any).ethereum?.isMiniPay);
-  }, []);
+  const requestWallet = useCallback(() => {
+    if (!isMiniPay) setWalletReady(true);
+  }, [isMiniPay]);
 
-  /*
-   * isMiniPay démarre à false → FullProviders est toujours monté en premier.
-   * RainbowKit est disponible dès le départ.
-   * Le ConnectButton est protégé par `mounted` dans page.tsx.
-   */
   return (
-    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-      {isMiniPay
-        ? <MiniPayProviders>{children}</MiniPayProviders>
-        : <FullProviders>{children}</FullProviders>
-      }
+    <ThemeProvider attribute="class" defaultTheme="dark">
+      <WalletContext.Provider value={{ walletReady, requestWallet }}>
+        <WagmiProvider config={lightConfig}>
+          <QueryClientProvider client={queryClient}>
+            {!isMiniPay && walletReady ? (
+              // Full stack: inner WagmiProvider (fullConfig) overrides lightConfig
+              // for hooks; shared queryClient preserves cached reads across swap.
+              <RainbowKitWrapper>{children}</RainbowKitWrapper>
+            ) : (
+              children
+            )}
+          </QueryClientProvider>
+        </WagmiProvider>
+      </WalletContext.Provider>
     </ThemeProvider>
   );
 }
