@@ -190,14 +190,15 @@ No external DEX page needed — swap directly inside the Mini App.
 
 ## ⚡ Performance
 
-Ongoing PageSpeed optimisations — target score: **95+**:
+PageSpeed scores (mobile):
 
-| Metric | Before | After round 1 | After round 2 |
-|---|---|---|---|
-| Performance | 47 | 75 | TBD |
-| FCP | — | 0.9s | — |
-| LCP | 9.2s | 2.4s | — |
-| TBT | 950ms | 840ms | — |
+| Metric | Score |
+|---|---|
+| Performance | **98** |
+| Accessibility | **100** |
+| FCP | 0.9s |
+| LCP | 0.9s |
+| TBT | 60ms |
 
 | Fix | Impact |
 |---|---|
