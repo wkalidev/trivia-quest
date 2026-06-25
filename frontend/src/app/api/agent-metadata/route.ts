@@ -2,14 +2,14 @@ import { NextResponse } from 'next/server'
 
 export async function GET() {
   return NextResponse.json({
-    "@context": "https://erc8004.xyz/schema/v1",
+    "@context": "https://trivia-quest-eight.vercel.app/api/agent-schema",
     "@type": "Agent",
     name: "TriviaQ AI Agent",
     type: "agent",
     image: "https://trivia-quest-eight.vercel.app/icon-512.png",
     github: "https://github.com/wkalidev/trivia-quest",
     project: "TriviaQ",
-    version: "1.0.0",
+    version: "3.2.0",
     services: [
       {
         type: "mcp",
