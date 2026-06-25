@@ -12,8 +12,7 @@ export function SupportButton() {
   return (
     <a
       href={SUPPORT_URL}
-      target="_blank"
-      rel="noopener noreferrer"
+      rel="noopener"
       aria-label="Support"
       style={{
         position: "fixed",

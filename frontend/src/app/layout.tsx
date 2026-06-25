@@ -4,8 +4,7 @@ import { Providers } from "./providers";
 import { getLocale, getMessages } from "next-intl/server";
 import { NextIntlClientProvider } from "next-intl";
 import { SupportButton } from "@/components/SupportButton";
-import FarcasterAutoConnect from "@/components/FarcasterAutoConnect";
-import Link from "next/link";
+import FarcasterLoader from "@/components/FarcasterLoader";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -65,18 +64,42 @@ export default async function RootLayout({
     <html lang={locale}>
       <head>
         <link rel="preconnect" href="https://forno.celo.org" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://api.geckoterminal.com" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://api.web3modal.org" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://pulse.walletconnect.org" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://forno.celo.org" />
         <link rel="dns-prefetch" href="https://api.geckoterminal.com" />
-        <link rel="dns-prefetch" href="https://relay.walletconnect.org" />
-        <link rel="dns-prefetch" href="https://explorer-api.walletconnect.com" />
       </head>
       <body>
+        {/* Inline loading shell — paints immediately from HTML stream, unblocks FCP/LCP */}
+        <div
+          id="tq-shell"
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 99999,
+            background: "linear-gradient(160deg,#0a0f1e 0%,#050709 50%,#0a0f1e 100%)",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "12px",
+            fontFamily: "-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+          }}
+        >
+          <svg width="56" height="56" viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="120" cy="120" r="120" fill="#FBCD00"/>
+            <circle cx="120" cy="120" r="88" fill="white"/>
+            <text x="68" y="158" fontFamily="Arial Black" fontWeight="900" fontSize="105" fill="#FBCD00">Q</text>
+            <circle cx="172" cy="168" r="14" fill="#35D07F"/>
+          </svg>
+          <div style={{ color: "white", fontWeight: 900, fontSize: "36px", letterSpacing: "-0.5px", lineHeight: 1 }}>
+            Trivia<span style={{ color: "#FBCD00" }}>Q</span>
+          </div>
+          <div style={{ color: "rgba(255,255,255,0.35)", fontSize: "13px" }}>
+            Play. Learn. Earn on Celo.
+          </div>
+        </div>
         <NextIntlClientProvider messages={messages}>
           <Providers>
-            <FarcasterAutoConnect />
+            <FarcasterLoader />
             <main>{children}</main>
             <SupportButton />
             <footer
@@ -86,8 +109,9 @@ export default async function RootLayout({
                 borderTop: "0.5px solid rgba(255,255,255,0.06)",
               }}
             >
-              <Link
+              <a
                 href="/terms"
+                target="_self"
                 style={{
                   color: "rgba(255,255,255,0.5)",
                   fontSize: "0.7rem",
@@ -95,13 +119,14 @@ export default async function RootLayout({
                 }}
               >
                 Terms of Service
-              </Link>
-              <Link
+              </a>
+              <a
                 href="/privacy"
+                target="_self"
                 style={{ color: "rgba(255,255,255,0.5)", fontSize: "0.7rem" }}
               >
                 Privacy Policy
-              </Link>
+              </a>
             </footer>
           </Providers>
         </NextIntlClientProvider>

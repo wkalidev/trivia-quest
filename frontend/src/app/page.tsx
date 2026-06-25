@@ -200,6 +200,12 @@ export default function Home() {
 
   useEffect(() => {
     sdk.actions.ready();
+    const shell = document.getElementById("tq-shell");
+    if (shell) {
+      shell.style.opacity = "0";
+      shell.style.transition = "opacity 0.2s";
+      setTimeout(() => { shell.style.display = "none"; }, 200);
+    }
   }, []);
 
   useEffect(() => {

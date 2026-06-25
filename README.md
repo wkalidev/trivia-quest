@@ -190,16 +190,18 @@ No external DEX page needed — swap directly inside the Mini App.
 
 ## ⚡ Performance
 
-PageSpeed optimisations applied to reach a mobile score of **75+**:
+Ongoing PageSpeed optimisations — current mobile score: **53** (was 47):
 
 | Fix | Impact |
 |---|---|
+| Inline HTML loading shell in `layout.tsx` | FCP/LCP: content visible before any JS executes |
+| `FarcasterAutoConnect` deferred (`dynamic ssr:false`) | Removes `@farcaster/miniapp-sdk` from initial bundle |
+| Removed unused preconnects (web3modal, WalletConnect) | Eliminates 4 unnecessary DNS/TCP connections |
 | framer-motion `LazyMotion` + `domAnimation` | −70 KB JS bundle |
 | `optimizePackageImports` (framer-motion, rainbowkit) | Additional tree-shaking |
 | `initial={false}` on hero container | LCP: removes opacity:0 SSR flash |
 | Balance card always-rendered (no height animation) | CLS: eliminates layout shift |
 | `@keyframes shimmer` moved to static CSS | Removes runtime style injection |
-| `dns-prefetch` for WalletConnect & GeckoTerminal | Saves ~100ms DNS lookup |
 
 ## 🔐 Security Audit
 
@@ -215,10 +217,11 @@ Known transitive dependency advisories (all via `@metamask/connect-evm`):
 | Auto wallet connect (`window.ethereum.isMiniPay`) | ✅ |
 | Connect button hidden inside MiniPay | ✅ |
 | Force Celo mainnet (`wallet_switchEthereumChain`) | ✅ |
-| Support button on all pages (mailto) | ✅ |
-| Terms of Service accessible in-app | ✅ |
-| Privacy Policy accessible in-app | ✅ |
+| Support button — opens in-context (no `target="_blank"`) | ✅ |
+| Terms of Service — `<a target="_self">` in-app navigation | ✅ |
+| Privacy Policy — `<a target="_self">` in-app navigation | ✅ |
 | Mobile viewport 360×640 minimum | ✅ |
+| Graceful error handling on chain switch / account request | ✅ |
 
 ## 🎯 Proof of Ship Checklist
 
