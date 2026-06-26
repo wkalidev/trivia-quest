@@ -1,0 +1,66 @@
+{
+  "name": "TriviaQ AI Agent",
+  "description": "AI agent that generates trivia questions on Celo, powers 1v1 duels and provides blockchain quiz game services. Powered by Groq LLaMA 3.1.",
+  "url": "https://trivia-quest-eight.vercel.app/api/a2a",
+  "version": "3.2.0",
+  "documentationUrl": "https://github.com/wkalidev/trivia-quest",
+  "provider": {
+    "organization": "wkalidev",
+    "url": "https://github.com/wkalidev"
+  },
+  "capabilities": {
+    "streaming": false,
+    "pushNotifications": false,
+    "stateTransitionHistory": false
+  },
+  "authentication": {
+    "schemes": ["none", "x402"]
+  },
+  "defaultInputModes": ["text"],
+  "defaultOutputModes": ["text"],
+  "skills": [
+    {
+      "id": "generate_question",
+      "name": "Generate Trivia Question",
+      "description": "Generate an AI trivia question using Groq LLaMA 3.1. Returns question, 4 options, correct answer index, and category. Premium: requires x402 payment for external access.",
+      "tags": ["trivia", "quiz", "ai", "education", "groq", "premium"],
+      "examples": [
+        "Generate a trivia question about African Geography",
+        "Ask me a Web3 & Crypto question",
+        "Give me a Sports trivia question in French"
+      ]
+    },
+    {
+      "id": "get_stats",
+      "name": "Get TriviaQ Live Stats",
+      "description": "Get live on-chain statistics for TriviaQ: total players, current round, prize pool, check-ins. Free access.",
+      "tags": ["stats", "blockchain", "celo", "live"],
+      "examples": [
+        "How many players are on TriviaQ?",
+        "What is the current prize pool?",
+        "Show me TriviaQ live statistics"
+      ]
+    },
+    {
+      "id": "get_leaderboard",
+      "name": "Get Leaderboard",
+      "description": "Get the current TriviaQ leaderboard with top players and their scores. Free access.",
+      "tags": ["leaderboard", "ranking", "top-players"],
+      "examples": [
+        "Show me the top 5 TriviaQ players",
+        "Who is winning TriviaQ this round?"
+      ]
+    },
+    {
+      "id": "get_duel_info",
+      "name": "Get Duel Info",
+      "description": "Get information about TriviaQ 1v1 duel mode: how to create duels, wager amounts, contract address. Free access.",
+      "tags": ["duel", "pvp", "gaming", "wager", "celo"],
+      "examples": [
+        "How do duels work in TriviaQ?",
+        "What is the duel contract address?",
+        "How much can I wager in a duel?"
+      ]
+    }
+  ]
+}

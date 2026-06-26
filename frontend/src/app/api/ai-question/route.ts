@@ -91,7 +91,7 @@ export async function GET(req: NextRequest) {
       status: "healthy",
       service: "ai-question",
       model: "llama-3.1-8b-instant",
-      categories: CATEGORIES
+      categories: CATEGORIES,
     });
   }
 
@@ -100,8 +100,21 @@ export async function GET(req: NextRequest) {
   // ✅ Self Agent vérifié → bypass rate limit
   const agentVerified = await isSelfAgent(req);
 
-  // x402 enforcement for external agent calls
+  // x402 enforcement for external agent calls.
+  // External callers with no category param get a service manifest (200) so health
+  // probers (e.g. 8004scan) see a healthy service rather than a 402.
+  // External callers that supply ?category= are making a real question request and
+  // must include X-Payment. Internal callers (game, MCP, A2A) always bypass.
   if (!isInternalCall(req) && !agentVerified) {
+    if (!searchParams.get("category")) {
+      return NextResponse.json({
+        status: "healthy",
+        service: "ai-question",
+        model: "llama-3.1-8b-instant",
+        categories: CATEGORIES,
+        x402: X402_PAYMENT_DETAILS,
+      });
+    }
     const payment = req.headers.get("x-payment");
     if (!payment) {
       return NextResponse.json(X402_PAYMENT_DETAILS, { status: 402 });

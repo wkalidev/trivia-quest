@@ -6,7 +6,8 @@ export async function GET() {
     "@type": "Agent",
     name: "TriviaQ AI Agent",
     type: "agent",
-    status: "active",
+    // spec field names: active (bool), updatedAt (unix timestamp)
+    active: true,
     image: "https://trivia-quest-eight.vercel.app/icon-512.png",
     github: "https://github.com/wkalidev/trivia-quest",
     project: "TriviaQ",
@@ -14,8 +15,7 @@ export async function GET() {
     homepage: "https://trivia-quest-eight.vercel.app",
     documentation: "https://github.com/wkalidev/trivia-quest",
     license: "MIT",
-    created: "2026-05-01",
-    updated: "2026-06-26",
+    updatedAt: 1782432000,
     provider: {
       name: "wkalidev",
       url: "https://github.com/wkalidev",
@@ -26,28 +26,30 @@ export async function GET() {
       support: "mailto:wkalidev@gmail.com"
     },
     supportUrl: "mailto:wkalidev@gmail.com",
+    // spec: services use "name" + "endpoint" (not "type" + "url")
     services: [
       {
-        type: "mcp",
-        url: "https://trivia-quest-eight.vercel.app/api/mcp",
+        name: "MCP",
+        endpoint: "https://trivia-quest-eight.vercel.app/api/mcp",
+        version: "2024-11-05",
         description: "TriviaQ MCP Server — generate questions, get stats, leaderboard, duel info"
       },
       {
-        type: "a2a",
-        url: "https://trivia-quest-eight.vercel.app/api/a2a",
-        agentCard: "https://trivia-quest-eight.vercel.app/.well-known/agent.json",
+        name: "A2A",
+        endpoint: "https://trivia-quest-eight.vercel.app/api/a2a",
+        version: "0.3.0",
+        agentCard: "https://trivia-quest-eight.vercel.app/.well-known/agent-card.json",
         description: "TriviaQ A2A Agent — Agent-to-Agent protocol endpoint"
       },
       {
-        type: "rest",
-        url: "https://trivia-quest-eight.vercel.app/api/ai-question",
-        description: "AI trivia question generator powered by Groq LLaMA 3.1",
-        x402: true
+        name: "agentWallet",
+        endpoint: "eip155:42220:0xffe22d3d1b63866ac9da8ac92fdb9ceddeadb0bb",
+        description: "TriviaQ prize pool wallet on Celo Mainnet — x402 payment recipient"
       },
       {
-        type: "rest",
-        url: "https://trivia-quest-eight.vercel.app/api/stats",
-        description: "TriviaQ public stats API — live on-chain data"
+        name: "web",
+        endpoint: "https://trivia-quest-eight.vercel.app",
+        description: "TriviaQ app — Play. Learn. Earn on Celo."
       }
     ],
     registrations: [
@@ -63,20 +65,14 @@ export async function GET() {
     category: "gaming",
     subcategory: "quiz",
     supportedChains: [42220, 8453],
-    x402: {
-      enabled: true,
-      endpoint: "https://trivia-quest-eight.vercel.app/api/ai-question",
-      network: "celo",
-      asset: "0x471EcE3750Da237f93B8E339c536989b8978a438",
-      payTo: "0xffe22d3d1b63866ac9da8ac92fdb9ceddeadb0bb",
-      maxAmountRequired: "1000000000000000"
-    },
-    agentCard: "https://trivia-quest-eight.vercel.app/.well-known/agent.json",
+    // spec field name: x402Support (boolean)
+    x402Support: true,
+    agentCard: "https://trivia-quest-eight.vercel.app/.well-known/agent-card.json",
     openapi: "https://trivia-quest-eight.vercel.app/.well-known/openapi.json",
   }, {
     headers: {
       'Content-Type': 'application/json',
-      'Cache-Control': 'public, max-age=3600',
+      'Cache-Control': 'no-store',
     }
   })
 }
