@@ -51,6 +51,38 @@ async function isSelfAgent(req: NextRequest): Promise<boolean> {
   }
 }
 
+const X402_PAYMENT_DETAILS = {
+  x402Version: 1,
+  accepts: [
+    {
+      scheme: "exact",
+      network: "celo",
+      maxAmountRequired: "1000000000000000",
+      resource: "https://trivia-quest-eight.vercel.app/api/ai-question",
+      description: "AI trivia question generation — Groq LLaMA 3.1",
+      mimeType: "application/json",
+      payTo: "0xffe22d3d1b63866ac9da8ac92fdb9ceddeadb0bb",
+      maxTimeoutSeconds: 300,
+      asset: "0x471EcE3750Da237f93B8E339c536989b8978a438",
+    },
+  ],
+  error: "X-Payment header required for external agent access",
+};
+
+function isInternalCall(req: NextRequest): boolean {
+  const referer = req.headers.get("referer") ?? "";
+  const origin = req.headers.get("origin") ?? "";
+  const mcpCaller = req.headers.get("x-mcp-caller") ?? "";
+  const gameSession = req.headers.get("x-game-session") ?? "";
+  return (
+    referer.startsWith("https://trivia-quest-eight.vercel.app") ||
+    origin === "https://trivia-quest-eight.vercel.app" ||
+    mcpCaller === "triviaq-mcp" ||
+    mcpCaller === "triviaq-a2a" ||
+    gameSession === "1"
+  );
+}
+
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
 
@@ -67,6 +99,14 @@ export async function GET(req: NextRequest) {
 
   // ✅ Self Agent vérifié → bypass rate limit
   const agentVerified = await isSelfAgent(req);
+
+  // x402 enforcement for external agent calls
+  if (!isInternalCall(req) && !agentVerified) {
+    const payment = req.headers.get("x-payment");
+    if (!payment) {
+      return NextResponse.json(X402_PAYMENT_DETAILS, { status: 402 });
+    }
+  }
 
   if (!agentVerified && isRateLimited(ip)) {
     return NextResponse.json(

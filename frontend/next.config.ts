@@ -56,6 +56,14 @@ const nextConfig: NextConfig = {
         ],
       },
       {
+        source: "/.well-known/:path*",
+        headers: [
+          { key: "Access-Control-Allow-Origin", value: "*" },
+          { key: "Content-Type", value: "application/json" },
+          { key: "Cache-Control", value: "public, max-age=3600" },
+        ],
+      },
+      {
         source: "/_next/static/(.*)",
         headers: [
           {

@@ -9,6 +9,7 @@
 [![Live Demo](https://img.shields.io/badge/Live-trivia--quest--eight.vercel.app-FBCD00?style=for-the-badge)](https://trivia-quest-eight.vercel.app)
 [![npm](https://img.shields.io/badge/SDK_v3.2.0-npm-CB3837?style=for-the-badge&logo=npm)](https://www.npmjs.com/package/@wkalidev/trivia-quest-sdk)
 [![Self Agent](https://img.shields.io/badge/Self_Agent-ID_%23103-6366f1?style=for-the-badge)](https://app.ai.self.xyz/agents)
+[![8004scan](https://img.shields.io/badge/8004scan-27.6→target_70%2B-orange?style=for-the-badge)](https://8004scan.io/agents/celo/9055)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 
 ## 🌍 Why Africa?
@@ -24,8 +25,12 @@ Celo's mission is financial inclusion for the unbanked. With **57% of African ad
 | SDK v3.2.0 | `npm install @wkalidev/trivia-quest-sdk` |
 | Stats API | `GET /api/stats` |
 | MCP Server | https://trivia-quest-eight.vercel.app/api/mcp |
+| A2A Agent | https://trivia-quest-eight.vercel.app/api/a2a |
+| AgentCard | https://trivia-quest-eight.vercel.app/.well-known/agent.json |
+| OpenAPI | https://trivia-quest-eight.vercel.app/.well-known/openapi.json |
 | GitHub | https://github.com/wkalidev/trivia-quest |
 | Whitepaper | https://github.com/wkalidev/trivia-quest/blob/main/WHITEPAPER.md |
+| 8004scan | https://8004scan.io/agents/celo/9055 |
 
 ## 🎮 Features
 
@@ -51,6 +56,10 @@ Celo's mission is financial inclusion for the unbanked. With **57% of African ad
 - 🆕 Discord AI Agent — /ask /askcat
 - 🆕 Self Agent ID — verified onchain AI agent (#103)
 - 🆕 Farcaster Push Notifications — daily check-in reminders
+- 🆕 A2A Agent endpoint — Google Agent-to-Agent protocol
+- 🆕 x402 payment enforcement — premium AI questions gate
+- 🆕 OASF OpenAPI spec at /.well-known/openapi.json
+- 🆕 Full compliance metadata — license, provider, contact, dates
 
 ## 🤖 AI Mode (NEW — May 2026)
 
@@ -273,6 +282,11 @@ Known transitive dependency advisories (all via `@metamask/connect-evm`):
 - [x] Inline CELO→TRIVQ swap via Ubeswap V3 Universal Router 🆕
 - [x] MiniPay full compatibility audit — wagmi injected() connector, address aliasing, checkin fallback 🆕
 - [x] PageSpeed performance optimisation — LazyMotion, LCP fix, CLS fix, dns-prefetch 🆕
+- [x] A2A AgentCard at /.well-known/agent.json + /api/a2a endpoint 🆕
+- [x] x402 payment enforcement on /api/ai-question (external agent calls) 🆕
+- [x] OASF /.well-known/openapi.json with x402Payment security scheme 🆕
+- [x] Full compliance metadata — status, license, homepage, supportUrl, provider, contact, created, updated 🆕
+- [x] Custom service type fixed (rest/a2a) — resolves 8004scan "Unknown" service 🆕
 
 ## 👤 Author
 

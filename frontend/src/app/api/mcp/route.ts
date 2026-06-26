@@ -5,7 +5,7 @@ const APP_URL = "https://trivia-quest-eight.vercel.app";
 const TOOLS = [
   {
     name: "generate_question",
-    description: "Generate an AI trivia question using Groq LLaMA 3.1. Returns question, options (4), correct answer index, and category.",
+    description: "Generate an AI trivia question using Groq LLaMA 3.1. Returns question, options (4), correct answer index, and category. Premium tool — direct REST access requires x402 payment (0.001 CELO).",
     inputSchema: {
       type: "object",
       properties: {
@@ -22,6 +22,15 @@ const TOOLS = [
         }
       },
       required: []
+    },
+    x402: {
+      required: true,
+      directEndpoint: "https://trivia-quest-eight.vercel.app/api/ai-question",
+      network: "celo",
+      asset: "0x471EcE3750Da237f93B8E339c536989b8978a438",
+      payTo: "0xffe22d3d1b63866ac9da8ac92fdb9ceddeadb0bb",
+      maxAmountRequired: "1000000000000000",
+      description: "Pay 0.001 CELO per AI question to the TriviaQ prize pool"
     }
   },
   {

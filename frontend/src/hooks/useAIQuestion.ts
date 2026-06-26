@@ -17,7 +17,7 @@ export function useAIQuestion() {
         const url = category
           ? `/api/ai-question?category=${encodeURIComponent(category)}`
           : "/api/ai-question";
-        const res = await fetch(url);
+        const res = await fetch(url, { headers: { "x-game-session": "1" } });
         if (!res.ok) throw new Error("AI unavailable");
         const data = await res.json();
         return data as AIQuestion;
