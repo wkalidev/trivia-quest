@@ -24,7 +24,8 @@ function isSafeHttpsUrl(raw: unknown): boolean {
     /^172\.(1[6-9]|2\d|3[01])\./.test(h) ||
     /^169\.254\./.test(h) ||
     h === "0.0.0.0" ||
-    h === "[::1]"
+    // Block all raw IPv6 literals (covers ::1, ::ffff:127.0.0.1, fc00::, fe80::, etc.)
+    h.startsWith("[")
   ) return false;
   return true;
 }
