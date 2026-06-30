@@ -40,21 +40,11 @@ export async function GET() {
         version: "0.3.0",
         agentCard: "https://trivia-quest-eight.vercel.app/.well-known/agent-card.json",
         description: "TriviaQ A2A Agent — Agent-to-Agent protocol endpoint"
-      },
-      {
-        name: "agentWallet",
-        endpoint: "eip155:42220:0xffe22d3d1b63866ac9da8ac92fdb9ceddeadb0bb",
-        description: "TriviaQ prize pool wallet on Celo Mainnet — x402 payment recipient"
-      },
-      {
-        name: "web",
-        endpoint: "https://trivia-quest-eight.vercel.app",
-        description: "TriviaQ app — Play. Learn. Earn on Celo."
       }
     ],
     registrations: [
       {
-        chainId: 42220,
+        network: "eip155:42220",
         address: "0xdeacde6ec27fd0cd972c1232c4f0d4171dda2357"
       }
     ],
