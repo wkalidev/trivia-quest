@@ -1,4 +1,4 @@
-export declare const SDK_VERSION = "3.2.0";
+export declare const SDK_VERSION = "3.3.0";
 export declare const TRIVIA_QUEST_ADDRESS_CELO: "0xffe22d3d1b63866ac9da8ac92fdb9ceddeadb0bb";
 export declare const TRIVQ_TOKEN_ADDRESS_CELO: "0xe65fc5cacaf9a5aebbc0e151dee08a53f24a05c5";
 export declare const CHECKIN_ADDRESS_CELO: "0x8650e6c477f8ae3933dc6d61d85e65c90cf71828";
@@ -577,9 +577,16 @@ export type GeneratedQuestion = {
 };
 /**
  * Fetches an AI-generated question from the TriviaQ AI endpoint.
- * @param category Optional category (e.g. "Web3 & Crypto"). Uses random if omitted.
+ *
+ * **Note:** Direct external calls to `/api/ai-question` with a `category` param require
+ * an `X-Payment` header (x402 micropayment, 0.001 CELO on Celo Mainnet). Calls from
+ * within the TriviaQ app (browser same-origin) are exempt. Use the MCP endpoint
+ * (`/api/mcp`, tool: `generate_question`) for free-tier server-side access (30 req/min).
+ *
+ * @param category Optional category — must be one of the 6 supported categories.
+ * @param xPayment Optional x402 payment header value for external server-side callers.
  */
-export declare function generateQuestion(category?: string): Promise<GeneratedQuestion>;
+export declare function generateQuestion(category?: string, xPayment?: string): Promise<GeneratedQuestion>;
 export type StatsResponse = {
     players: number;
     roundId: number;

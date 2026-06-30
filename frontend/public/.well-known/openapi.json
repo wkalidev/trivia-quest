@@ -3,7 +3,7 @@
   "info": {
     "title": "TriviaQ API",
     "description": "Blockchain quiz game API on Celo & Base. Generate AI trivia questions, get live on-chain stats, leaderboard and duel info. Premium endpoints enforce x402 micropayments.",
-    "version": "3.2.0",
+    "version": "3.3.0",
     "contact": {
       "name": "wkalidev",
       "url": "https://github.com/wkalidev",

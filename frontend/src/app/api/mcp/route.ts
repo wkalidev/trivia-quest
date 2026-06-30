@@ -2,6 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 
 const APP_URL = "https://trivia-quest-eight.vercel.app";
 
+const mcpRateLimit = new Map<string, { count: number; resetTime: number }>();
+function isMcpRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const limit = mcpRateLimit.get(ip);
+  if (!limit || now > limit.resetTime) {
+    mcpRateLimit.set(ip, { count: 1, resetTime: now + 60_000 });
+    return false;
+  }
+  if (limit.count >= 30) return true;
+  limit.count++;
+  return false;
+}
+
 const TOOLS = [
   {
     name: "generate_question",
@@ -69,6 +82,22 @@ const TOOLS = [
 ];
 
 export async function POST(req: NextRequest) {
+  const ip = req.headers.get("x-forwarded-for") ?? "unknown";
+  if (isMcpRateLimited(ip)) {
+    return NextResponse.json(
+      { jsonrpc: "2.0", id: null, error: { code: -32000, message: "Rate limit exceeded" } },
+      { status: 429 }
+    );
+  }
+
+  const contentLength = parseInt(req.headers.get("content-length") ?? "0", 10);
+  if (contentLength > 65536) {
+    return NextResponse.json(
+      { jsonrpc: "2.0", id: null, error: { code: -32700, message: "Request too large" } },
+      { status: 413 }
+    );
+  }
+
   try {
     const body = await req.json();
     const { method, params, id } = body;
@@ -82,7 +111,7 @@ export async function POST(req: NextRequest) {
           capabilities: { tools: {} },
           serverInfo: {
             name: "triviaq-mcp",
-            version: "1.0.0",
+            version: "3.3.0",
           }
         }
       });
@@ -103,7 +132,7 @@ export async function POST(req: NextRequest) {
         const category = args?.category || "General Knowledge";
         const res = await fetch(
           `${APP_URL}/api/ai-question?category=${encodeURIComponent(category)}`,
-          { headers: { "x-mcp-caller": "triviaq-mcp" } }
+          { headers: { "x-internal-key": process.env.CRON_SECRET ?? "" } }
         );
         const data = await res.json();
         return NextResponse.json({

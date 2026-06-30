@@ -2,6 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 
 const APP_URL = "https://trivia-quest-eight.vercel.app";
 
+const a2aRateLimit = new Map<string, { count: number; resetTime: number }>();
+function isA2ARateLimited(ip: string): boolean {
+  const now = Date.now();
+  const limit = a2aRateLimit.get(ip);
+  if (!limit || now > limit.resetTime) {
+    a2aRateLimit.set(ip, { count: 1, resetTime: now + 60_000 });
+    return false;
+  }
+  if (limit.count >= 20) return true;
+  limit.count++;
+  return false;
+}
+
 function a2aResult(id: unknown, text: string) {
   return NextResponse.json({
     jsonrpc: "2.0",
@@ -22,6 +35,22 @@ function a2aResult(id: unknown, text: string) {
 }
 
 export async function POST(req: NextRequest) {
+  const ip = req.headers.get("x-forwarded-for") ?? "unknown";
+  if (isA2ARateLimited(ip)) {
+    return NextResponse.json(
+      { jsonrpc: "2.0", id: null, error: { code: -32000, message: "Rate limit exceeded" } },
+      { status: 429 }
+    );
+  }
+
+  const contentLength = parseInt(req.headers.get("content-length") ?? "0", 10);
+  if (contentLength > 65536) {
+    return NextResponse.json(
+      { jsonrpc: "2.0", id: null, error: { code: -32700, message: "Request too large" } },
+      { status: 413 }
+    );
+  }
+
   try {
     const body = await req.json();
     const { id, method, params } = body;
@@ -85,7 +114,7 @@ export async function POST(req: NextRequest) {
 
       const res = await fetch(
         `${APP_URL}/api/ai-question?category=${encodeURIComponent(category)}`,
-        { headers: { "x-mcp-caller": "triviaq-a2a" } }
+        { headers: { "x-internal-key": process.env.CRON_SECRET ?? "" } }
       );
       const data = await res.json();
       return a2aResult(id, JSON.stringify(data, null, 2));
@@ -116,7 +145,7 @@ export async function GET() {
   return NextResponse.json({
     name: "TriviaQ A2A Agent",
     protocol: "A2A",
-    version: "3.2.0",
+    version: "3.3.0",
     skills: ["generate_question", "get_stats", "get_leaderboard", "get_duel_info"],
     agentCard: `${APP_URL}/.well-known/agent.json`,
     status: "healthy",

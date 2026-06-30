@@ -5,11 +5,7 @@
   "main": "sdk/index.js",
   "types": "sdk/index.d.ts",
   "files": [
-    "sdk/index.js",
-    "sdk/index.d.ts",
-    "sdk/index.js.map",
-    "sdk/index.d.ts.map",
-    "README.md"
+    "sdk"
   ],
   "scripts": {
     "build:sdk": "tsc -p tsconfig.sdk.json"

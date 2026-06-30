@@ -118,7 +118,8 @@ export async function POST(request: Request) {
       return Response.json({ error: "Server config error" }, { status: 500 });
     }
 
-    const account = privateKeyToAccount(`0x${privateKey}`);
+    const normalizedKey = (privateKey.startsWith("0x") ? privateKey : `0x${privateKey}`) as `0x${string}`;
+    const account = privateKeyToAccount(normalizedKey);
     const walletClient = createWalletClient({
       account,
       chain: celo,

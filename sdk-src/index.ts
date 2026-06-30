@@ -2,7 +2,7 @@
 // Blockchain quiz game on Celo & Base
 // https://trivia-quest-eight.vercel.app
 
-export const SDK_VERSION = "3.2.0";
+export const SDK_VERSION = "3.3.0";
 
 // ── Contract Addresses ─────────────────────────────────────
 
@@ -598,12 +598,24 @@ export type GeneratedQuestion = {
 
 /**
  * Fetches an AI-generated question from the TriviaQ AI endpoint.
- * @param category Optional category (e.g. "Web3 & Crypto"). Uses random if omitted.
+ *
+ * **Note:** Direct external calls to `/api/ai-question` with a `category` param require
+ * an `X-Payment` header (x402 micropayment, 0.001 CELO on Celo Mainnet). Calls from
+ * within the TriviaQ app (browser same-origin) are exempt. Use the MCP endpoint
+ * (`/api/mcp`, tool: `generate_question`) for free-tier server-side access (30 req/min).
+ *
+ * @param category Optional category — must be one of the 6 supported categories.
+ * @param xPayment Optional x402 payment header value for external server-side callers.
  */
-export async function generateQuestion(category?: string): Promise<GeneratedQuestion> {
+export async function generateQuestion(
+  category?: string,
+  xPayment?: string
+): Promise<GeneratedQuestion> {
   const url = new URL(`${APP_URL}/api/ai-question`);
   if (category) url.searchParams.set("category", category);
-  const res = await fetch(url.toString());
+  const headers: Record<string, string> = {};
+  if (xPayment) headers["X-Payment"] = xPayment;
+  const res = await fetch(url.toString(), { headers });
   if (!res.ok) throw new Error(`AI question fetch failed: ${res.status}`);
   const data = await res.json();
   return {

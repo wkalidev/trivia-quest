@@ -39,6 +39,18 @@ const nextConfig: NextConfig = {
             value: "nosniff",
           },
           {
+            key: "Strict-Transport-Security",
+            value: "max-age=63072000; includeSubDomains; preload",
+          },
+          {
+            key: "Referrer-Policy",
+            value: "strict-origin-when-cross-origin",
+          },
+          {
+            key: "Permissions-Policy",
+            value: "camera=(), microphone=(), geolocation=()",
+          },
+          {
             key: "Link",
             value: [
               "<https://forno.celo.org>; rel=preconnect",
@@ -46,6 +58,14 @@ const nextConfig: NextConfig = {
               "<https://api.web3modal.org>; rel=preconnect",
             ].join(", "),
           },
+        ],
+      },
+      {
+        source: "/api/:path*",
+        headers: [
+          { key: "Access-Control-Allow-Origin", value: "*" },
+          { key: "Access-Control-Allow-Methods", value: "GET, POST, OPTIONS" },
+          { key: "Access-Control-Allow-Headers", value: "Content-Type, X-Payment, X-Internal-Key" },
         ],
       },
       {

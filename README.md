@@ -7,7 +7,7 @@
 > Play. Learn. Earn on Celo & Base.
 
 [![Live Demo](https://img.shields.io/badge/Live-trivia--quest--eight.vercel.app-FBCD00?style=for-the-badge)](https://trivia-quest-eight.vercel.app)
-[![npm](https://img.shields.io/badge/SDK_v3.2.0-npm-CB3837?style=for-the-badge&logo=npm)](https://www.npmjs.com/package/@wkalidev/trivia-quest-sdk)
+[![npm](https://img.shields.io/badge/SDK_v3.3.0-npm-CB3837?style=for-the-badge&logo=npm)](https://www.npmjs.com/package/@wkalidev/trivia-quest-sdk)
 [![Self Agent](https://img.shields.io/badge/Self_Agent-ID_%23103-6366f1?style=for-the-badge)](https://app.ai.self.xyz/agents)
 [![8004scan](https://img.shields.io/badge/8004scan-27.6→target_70%2B-orange?style=for-the-badge)](https://8004scan.io/agents/celo/9055)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
@@ -22,7 +22,7 @@ Celo's mission is financial inclusion for the unbanked. With **57% of African ad
 |---|---|
 | App | https://trivia-quest-eight.vercel.app |
 | Duel 1v1 | https://trivia-quest-eight.vercel.app/duel |
-| SDK v3.2.0 | `npm install @wkalidev/trivia-quest-sdk` |
+| SDK v3.3.0 | `npm install @wkalidev/trivia-quest-sdk` |
 | Stats API | `GET /api/stats` |
 | MCP Server | https://trivia-quest-eight.vercel.app/api/mcp |
 | A2A Agent | https://trivia-quest-eight.vercel.app/api/a2a |
@@ -76,6 +76,15 @@ Questions generated in real-time by Groq AI (LLaMA 3.1-8b-instant):
 - Rate limited: 5 submissions/hour per wallet
 - Cron endpoint protected by CRON_SECRET
 - AI endpoint rate limited: 10 req/min (Self Agents bypass)
+- MCP/A2A endpoints rate limited: 30/20 req/min per IP
+- Internal server-to-server calls authenticated via `CRON_SECRET` (`X-Internal-Key` header) — replaces spoofable `x-mcp-caller`/`x-game-session` headers
+- AI question `category` param validated against allowlist before LLM interpolation (prompt injection prevention)
+- Farcaster webhook input fully validated: event type, FID range, token length, HTTPS-only URL
+- SSRF protection: all outbound fetches to Farcaster notification URLs validated (no private/loopback addresses)
+- Security headers: `Strict-Transport-Security`, `Referrer-Policy`, `Permissions-Policy` added globally
+- CORS headers added globally to `/api/*` routes for 8004scan / agent scanner access
+- `/api/round` IP rate limited (5 req/min) to prevent gas-cost flooding
+- Private key `0x` prefix normalized in all signing code paths
 
 **Agent registration note:** The ERC-8004 `register-agent.ts` script only supports initial registration. To update the on-chain `agentURI` to `https://trivia-quest-eight.vercel.app/api/agent-metadata`, the owner must call `updateAgent` directly on the ERC-8004 Identity Registry (`0x8004A169FB4a3325136EB29fA0ceB6D2e539a432`) on Celo Mainnet.
 
@@ -279,6 +288,7 @@ Known transitive dependency advisories (all via `@metamask/connect-evm`):
 - [x] 8 i18n languages (FR, EN, ES, IT, PT, AR, ZH, SW) 🆕
 - [x] 1200+ questions (446 base + 754 extra) 🆕
 - [x] SDK v3.2.0 — SDK_VERSION constant fixed, TRIVQ logo, all 9 contract addresses verified 🆕
+- [x] SDK v3.3.0 — security audit: SSRF fix, prompt injection, rate limits, CRON_SECRET internal auth 🆕
 - [x] Inline CELO→TRIVQ swap via Ubeswap V3 Universal Router 🆕
 - [x] MiniPay full compatibility audit — wagmi injected() connector, address aliasing, checkin fallback 🆕
 - [x] PageSpeed performance optimisation — LazyMotion, LCP fix, CLS fix, dns-prefetch 🆕

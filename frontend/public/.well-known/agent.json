@@ -2,7 +2,7 @@
   "name": "TriviaQ AI Agent",
   "description": "AI agent that generates trivia questions on Celo, powers 1v1 duels and provides blockchain quiz game services. Powered by Groq LLaMA 3.1.",
   "url": "https://trivia-quest-eight.vercel.app/api/a2a",
-  "version": "3.2.0",
+  "version": "3.3.0",
   "documentationUrl": "https://github.com/wkalidev/trivia-quest",
   "provider": {
     "organization": "wkalidev",

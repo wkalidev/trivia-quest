@@ -22,6 +22,18 @@ export async function POST(req: NextRequest) {
 
   const results = await Promise.allSettled(
     users.map(async (user) => {
+      // SSRF guard: only fetch https:// URLs, no private/internal addresses
+      let parsed: URL;
+      try { parsed = new URL(user.url); } catch { throw new Error(`Invalid URL for fid ${user.fid}`); }
+      if (parsed.protocol !== "https:") throw new Error(`Non-HTTPS URL for fid ${user.fid}`);
+      const h = parsed.hostname;
+      if (
+        h === "localhost" || h.endsWith(".local") || h.endsWith(".internal") ||
+        /^127\./.test(h) || /^10\./.test(h) || /^192\.168\./.test(h) ||
+        /^172\.(1[6-9]|2\d|3[01])\./.test(h) || /^169\.254\./.test(h) ||
+        h === "0.0.0.0" || h === "[::1]"
+      ) throw new Error(`Private URL for fid ${user.fid}`);
+
       const res = await fetch(user.url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

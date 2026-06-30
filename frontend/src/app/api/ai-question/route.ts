@@ -70,17 +70,16 @@ const X402_PAYMENT_DETAILS = {
 };
 
 function isInternalCall(req: NextRequest): boolean {
+  // Browser game: Referer is enforced by browsers, cannot be set by browser JS
   const referer = req.headers.get("referer") ?? "";
-  const origin = req.headers.get("origin") ?? "";
-  const mcpCaller = req.headers.get("x-mcp-caller") ?? "";
-  const gameSession = req.headers.get("x-game-session") ?? "";
-  return (
-    referer.startsWith("https://trivia-quest-eight.vercel.app") ||
-    origin === "https://trivia-quest-eight.vercel.app" ||
-    mcpCaller === "triviaq-mcp" ||
-    mcpCaller === "triviaq-a2a" ||
-    gameSession === "1"
-  );
+  if (referer.startsWith("https://trivia-quest-eight.vercel.app")) return true;
+
+  // Server-to-server (MCP, A2A): shared secret via env — not guessable by external callers
+  const internalKey = req.headers.get("x-internal-key") ?? "";
+  const secret = process.env.CRON_SECRET;
+  if (secret && internalKey === secret) return true;
+
+  return false;
 }
 
 export async function GET(req: NextRequest) {
@@ -128,9 +127,16 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  const category =
-    searchParams.get("category") ??
-    CATEGORIES[Math.floor(Math.random() * CATEGORIES.length)];
+  const rawCategory = searchParams.get("category");
+  const category = rawCategory
+    ? (CATEGORIES.includes(rawCategory as (typeof CATEGORIES)[number])
+        ? rawCategory
+        : null)
+    : CATEGORIES[Math.floor(Math.random() * CATEGORIES.length)];
+
+  if (rawCategory && !category) {
+    return NextResponse.json({ error: "Invalid category" }, { status: 400 });
+  }
 
   const prompt = `Génère une question de quiz sur le thème "${category}".
 Réponds UNIQUEMENT avec du JSON valide, sans markdown, sans explication :

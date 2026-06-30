@@ -83,7 +83,7 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json({
     project: 'TriviaQ',
-    version: '3.1',
+    version: '3.3.0',
     description: 'Blockchain quiz game on Celo & Base — earn TRIVQ tokens by answering questions',
     chains: { celo: true, base: true },
     live_stats: {
@@ -134,7 +134,7 @@ export async function GET(req: NextRequest) {
     sdk: {
       npm: '@wkalidev/trivia-quest-sdk',
       install: 'npm install @wkalidev/trivia-quest-sdk',
-      version: '3.1.0',
+      version: '3.3.0',
     },
     links: {
       app: 'https://trivia-quest-eight.vercel.app',

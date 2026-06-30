@@ -11,11 +11,11 @@ export async function GET() {
     image: "https://trivia-quest-eight.vercel.app/icon-512.png",
     github: "https://github.com/wkalidev/trivia-quest",
     project: "TriviaQ",
-    version: "3.2.0",
+    version: "3.3.0",
     homepage: "https://trivia-quest-eight.vercel.app",
     documentation: "https://github.com/wkalidev/trivia-quest",
     license: "MIT",
-    updatedAt: 1782432000,
+    updatedAt: 1782820800,
     provider: {
       name: "wkalidev",
       url: "https://github.com/wkalidev",
@@ -73,6 +73,7 @@ export async function GET() {
     headers: {
       'Content-Type': 'application/json',
       'Cache-Control': 'no-store',
+      'Access-Control-Allow-Origin': '*',
     }
   })
 }
