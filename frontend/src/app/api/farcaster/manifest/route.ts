@@ -31,7 +31,11 @@ const manifest = {
     token: "eip155:42220/erc20:0xe65fc5cacaf9a5aebbc0e151dee08a53f24a05c5",
     ogImageUrl: "https://trivia-quest-eight.vercel.app/opengraph-image",
     castShareUrl: "https://trivia-quest-eight.vercel.app",
-    screenshotUrls: [],
+    screenshotUrls: [
+      "https://trivia-quest-eight.vercel.app/screenshots/screen-1-home.png",
+      "https://trivia-quest-eight.vercel.app/screenshots/screen-2-quiz.png",
+      "https://trivia-quest-eight.vercel.app/screenshots/screen-3-results.png",
+    ],
   },
 };
 

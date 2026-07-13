@@ -1,5 +1,5 @@
 "use strict";
-// TriviaQuest SDK v3.2.0
+// TriviaQuest SDK v3.4.0
 // Blockchain quiz game on Celo & Base
 // https://trivia-quest-eight.vercel.app
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -26,7 +26,7 @@ exports.calculateRewards = calculateRewards;
 exports.getMCPEndpoint = getMCPEndpoint;
 exports.generateQuestion = generateQuestion;
 exports.getStats = getStats;
-exports.SDK_VERSION = "3.3.0";
+exports.SDK_VERSION = "3.4.0";
 // ── Contract Addresses ─────────────────────────────────────
 // Celo Mainnet
 exports.TRIVIA_QUEST_ADDRESS_CELO = "0xffe22d3d1b63866ac9da8ac92fdb9ceddeadb0bb";
@@ -83,12 +83,25 @@ exports.CELO_TESTNET = {
     },
 };
 // ── Helper: get contract address by chainId ────────────────
+/**
+ * Returns the deployed address for a given contract on a given chain.
+ *
+ * @throws {Error} if the contract is not deployed on that chain (e.g. `duel` on
+ * Base, or `token`/`checkin`/`referral` on Celo Sepolia). Earlier SDK versions
+ * silently returned `""` typed as `0x${string}`, which let bad addresses reach
+ * viem/wagmi calls and fail with a confusing low-level error far from the real
+ * cause — callers should catch this and check `chainId`/`contract` support
+ * up front (e.g. via `CELO_MAINNET.contracts`) instead.
+ */
 function getAddress(chainId, contract) {
-    if (chainId === 42220)
-        return exports.CELO_MAINNET.contracts[contract];
-    if (chainId === 8453)
-        return exports.BASE_MAINNET.contracts[contract];
-    return exports.CELO_TESTNET.contracts[contract];
+    const network = chainId === 42220 ? exports.CELO_MAINNET :
+        chainId === 8453 ? exports.BASE_MAINNET :
+            exports.CELO_TESTNET;
+    const address = network.contracts[contract];
+    if (!address) {
+        throw new Error(`[trivia-quest-sdk] "${contract}" is not deployed on chain ${chainId} (${network.name}).`);
+    }
+    return address;
 }
 // ── TriviaQuest ABI ────────────────────────────────────────
 exports.CONTRACT_ABI = [
@@ -451,15 +464,15 @@ exports.REFERRAL_ABI = [
     },
 ];
 // ── Network Stats Fetcher ──────────────────────────────────
+/**
+ * @deprecated Use {@link getStats} instead — same data plus the `chains` field.
+ * Kept only so existing integrations that import `fetchNetworkStats` keep working;
+ * both now share one implementation instead of two independently-maintained fetches
+ * that could silently drift out of sync.
+ */
 async function fetchNetworkStats() {
-    const res = await fetch("https://trivia-quest-eight.vercel.app/api/stats");
-    const data = await res.json();
-    return {
-        players: data.live_stats?.players ?? 0,
-        roundId: data.live_stats?.round_id ?? 0,
-        prizePool: data.live_stats?.prize_pool ?? "0",
-        totalCheckins: data.live_stats?.total_checkins ?? 0,
-    };
+    const { players, roundId, prizePool, totalCheckins } = await getStats();
+    return { players, roundId, prizePool, totalCheckins };
 }
 // ── Streak Utils ───────────────────────────────────────────
 function getStreakBonus(streak) {
@@ -491,7 +504,11 @@ function calculateRewards(params) {
     let trivq = 0;
     let celoWin = BigInt(0);
     if (params.score > 0) {
-        trivq += params.score * 100 * getMultiplier(params.streak);
+        // Use streak + 1 to match calculatePoints()'s multiplier semantics — this
+        // previously used getMultiplier(streak) directly, which under-multiplied
+        // relative to the actual in-game scoring and made this helper's reward
+        // preview diverge from what players really earned.
+        trivq += params.score * 100 * getMultiplier(params.streak + 1);
     }
     if (params.isCheckIn) {
         trivq += 100;

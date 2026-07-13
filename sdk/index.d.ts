@@ -1,4 +1,4 @@
-export declare const SDK_VERSION = "3.3.0";
+export declare const SDK_VERSION = "3.4.0";
 export declare const TRIVIA_QUEST_ADDRESS_CELO: "0xffe22d3d1b63866ac9da8ac92fdb9ceddeadb0bb";
 export declare const TRIVQ_TOKEN_ADDRESS_CELO: "0xe65fc5cacaf9a5aebbc0e151dee08a53f24a05c5";
 export declare const CHECKIN_ADDRESS_CELO: "0x8650e6c477f8ae3933dc6d61d85e65c90cf71828";
@@ -49,6 +49,16 @@ export declare const CELO_TESTNET: {
         duel: "0xd9456518d7acbe6bcab494aa5894ce4cdf7c5ad7";
     };
 };
+/**
+ * Returns the deployed address for a given contract on a given chain.
+ *
+ * @throws {Error} if the contract is not deployed on that chain (e.g. `duel` on
+ * Base, or `token`/`checkin`/`referral` on Celo Sepolia). Earlier SDK versions
+ * silently returned `""` typed as `0x${string}`, which let bad addresses reach
+ * viem/wagmi calls and fail with a confusing low-level error far from the real
+ * cause — callers should catch this and check `chainId`/`contract` support
+ * up front (e.g. via `CELO_MAINNET.contracts`) instead.
+ */
 export declare function getAddress(chainId: number, contract: "game" | "token" | "checkin" | "referral" | "duel"): `0x${string}`;
 export declare const CONTRACT_ABI: readonly [{
     readonly name: "joinRound";
@@ -491,6 +501,12 @@ export type NetworkStats = {
     prizePool: string;
     totalCheckins: number;
 };
+/**
+ * @deprecated Use {@link getStats} instead — same data plus the `chains` field.
+ * Kept only so existing integrations that import `fetchNetworkStats` keep working;
+ * both now share one implementation instead of two independently-maintained fetches
+ * that could silently drift out of sync.
+ */
 export declare function fetchNetworkStats(): Promise<NetworkStats>;
 export declare function getStreakBonus(streak: number): number;
 export declare function getNextStreakMilestone(streak: number): number;
