@@ -87,8 +87,9 @@ Questions generated in real-time by Groq AI (LLaMA 3.1-8b-instant):
 - CORS headers added globally to `/api/*` routes for 8004scan / agent scanner access
 - `/api/round` IP rate limited (5 req/min) to prevent gas-cost flooding
 - Private key `0x` prefix normalized in all signing code paths
+- `/api/ai-question` x402 payments are genuinely verified and settled on-chain (`POST /verify` then `POST /settle` against the Celo facilitator, x402.celo.org) — priced in USDC ($0.001/question, EIP-3009), paid to the treasury wallet. Previously this only checked that an `X-Payment` header was *present*, never that it was valid — anyone could send a garbage header and get the paid content for free 🆕
 
-**Known residual limitation:** rate limiting and nonce tracking on `/api/submit-score`, `/api/submit-duel-score`, `/api/ai-question` and `/api/mcp` are in-process (`Map`-based), not shared across serverless instances. This is a reasonable soft limit today; a durable store (Upstash/Vercel KV, or a Supabase table) is recommended if abuse is observed. `isInternalCall()` in `/api/ai-question` also still trusts the `Referer` header as one signal for the x402 bypass — a non-browser client can spoof it to skip the payment gate (capped at 10 req/min/IP either way, so worst case is a bounded free-tier leak, not an open rate-limit bypass).
+**Known residual limitation:** rate limiting and nonce tracking on `/api/submit-score`, `/api/submit-duel-score`, `/api/ai-question` and `/api/mcp` are in-process (`Map`-based), not shared across serverless instances. This is a reasonable soft limit today; a durable store (Upstash/Vercel KV, or a Supabase table) is recommended if abuse is observed. `isInternalCall()` in `/api/ai-question` also still trusts the `Referer` header as one signal to skip the x402 gate entirely — a non-browser client can spoof it to get free access without paying (capped at 10 req/min/IP either way, so worst case is a bounded free-tier leak, not unlimited access).
 
 **Agent registration:** `register-agent.ts` performs the initial ERC-8004 registration only. `update-agent.ts` now points the on-chain `agentURI` at the live, always-current `https://trivia-quest-eight.vercel.app/api/agent-metadata` endpoint instead of a frozen snapshot — run it once (`npx hardhat run scripts/update-agent.ts --network celo`) any time the registered identity needs to be (re)synced after being changed manually.
 
@@ -243,6 +244,7 @@ PageSpeed scores (mobile):
 
 - Fixed: duel score submission had no wallet signature check — closed (see Security section above)
 - Fixed: submit-score signature had no replay protection — closed with nonce + expiry
+- Fixed: `/api/ai-question` x402 gate only checked that an `X-Payment` header existed, never verified it — real `verify`/`settle` against x402.celo.org now enforced, re-priced from 0.001 CELO (~$0.00006, and unenforced) to $0.001 USDC (genuinely charged, EIP-3009). `payTo` moved off the `TriviaQuest` contract address (no ERC-20 rescue function — USDC sent there would be locked forever) to the treasury EOA
 - Fixed: on-chain ERC-8004 `agentURI` was a frozen snapshot from an earlier `update-agent.ts` run, out of sync with the live metadata endpoint since — `update-agent.ts` now points at the live endpoint permanently
 - Fixed: agent metadata version drift (`3.3.0` vs actual `3.4.0`) across `agent.json`, `agent-card.json`, `/api/a2a`, `/api/mcp`, `/api/stats`
 - Fixed: `agent-metadata`'s `updatedAt` was a hardcoded past date — now real-time

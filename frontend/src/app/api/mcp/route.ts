@@ -18,7 +18,7 @@ function isMcpRateLimited(ip: string): boolean {
 const TOOLS = [
   {
     name: "generate_question",
-    description: "Generate an AI trivia question using Groq LLaMA 3.1. Returns question, options (4), correct answer index, and category. Premium tool — direct REST access requires x402 payment (0.001 CELO).",
+    description: "Generate an AI trivia question using Groq LLaMA 3.1. Returns question, options (4), correct answer index, and category. Premium tool — direct REST access requires x402 payment ($0.001 USDC on Celo).",
     inputSchema: {
       type: "object",
       properties: {
@@ -39,11 +39,11 @@ const TOOLS = [
     x402: {
       required: true,
       directEndpoint: "https://trivia-quest-eight.vercel.app/api/ai-question",
-      network: "celo",
-      asset: "0x471EcE3750Da237f93B8E339c536989b8978a438",
-      payTo: "0xffe22d3d1b63866ac9da8ac92fdb9ceddeadb0bb",
-      maxAmountRequired: "1000000000000000",
-      description: "Pay 0.001 CELO per AI question to the TriviaQ prize pool"
+      network: "eip155:42220",
+      asset: "0xcebA9300f2b948710d2653dD7B07f33A8B32118C",
+      payTo: "0x995aC10d5B6778B90eF060b7ab585D854C1Ed914",
+      maxAmountRequired: "1000",
+      description: "Pay $0.001 USDC per AI question — settled via the Celo x402 facilitator (x402.celo.org)"
     }
   },
   {

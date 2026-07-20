@@ -51,23 +51,96 @@ async function isSelfAgent(req: NextRequest): Promise<boolean> {
   }
 }
 
+// ── x402 payment settlement ──────────────────────────────────────────────
+// Celo's official facilitator (x402.celo.org) only settles USDC/USDT via
+// EIP-3009 transferWithAuthorization — CELO and cUSD are not supported
+// (cUSD only implements EIP-2612 permit). See docs.celo.org/build-on-celo/
+// build-with-ai/x402. Priced in USDC accordingly.
+const X402_FACILITATOR_URL = "https://x402.celo.org";
+const USDC_CELO_MAINNET = "0xcebA9300f2b948710d2653dD7B07f33A8B32118C";
+// payTo = protocol treasury (EOA, can freely move funds) — NOT a contract
+// address, since none of the deployed contracts have an ERC-20 rescue
+// function and USDC sent to one would be locked forever.
+const X402_PAYTO = "0x995aC10d5B6778B90eF060b7ab585D854C1Ed914";
+
+const X402_PAYMENT_REQUIREMENT = {
+  scheme: "exact",
+  network: "eip155:42220", // Celo mainnet
+  maxAmountRequired: "1000", // 1000 * 10^-6 = $0.001 USDC
+  resource: "https://trivia-quest-eight.vercel.app/api/ai-question",
+  description: "AI trivia question generation — Groq LLaMA 3.1",
+  mimeType: "application/json",
+  payTo: X402_PAYTO,
+  maxTimeoutSeconds: 300,
+  asset: USDC_CELO_MAINNET,
+  extra: { name: "USDC", version: "2" },
+};
+
 const X402_PAYMENT_DETAILS = {
   x402Version: 1,
-  accepts: [
-    {
-      scheme: "exact",
-      network: "celo",
-      maxAmountRequired: "1000000000000000",
-      resource: "https://trivia-quest-eight.vercel.app/api/ai-question",
-      description: "AI trivia question generation — Groq LLaMA 3.1",
-      mimeType: "application/json",
-      payTo: "0xffe22d3d1b63866ac9da8ac92fdb9ceddeadb0bb",
-      maxTimeoutSeconds: 300,
-      asset: "0x471EcE3750Da237f93B8E339c536989b8978a438",
-    },
-  ],
+  accepts: [X402_PAYMENT_REQUIREMENT],
   error: "X-Payment header required for external agent access",
 };
+
+interface X402VerifyResult {
+  ok: boolean;
+  reason?: string;
+  settleTx?: string;
+}
+
+// ✅ Verifies AND settles an x402 payment against Celo's official facilitator.
+// Fails closed on any error, malformed payload, or non-2xx/false response —
+// never serves paid content unless the facilitator explicitly confirms success.
+async function verifyAndSettleX402Payment(paymentHeader: string): Promise<X402VerifyResult> {
+  let paymentPayload: unknown;
+  try {
+    const decoded = Buffer.from(paymentHeader, "base64").toString("utf-8");
+    paymentPayload = JSON.parse(decoded);
+  } catch {
+    return { ok: false, reason: "Malformed X-PAYMENT header" };
+  }
+
+  const body = JSON.stringify({
+    x402Version: 1,
+    paymentPayload,
+    paymentRequirements: X402_PAYMENT_REQUIREMENT,
+  });
+
+  try {
+    const verifyRes = await fetch(`${X402_FACILITATOR_URL}/verify`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body,
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!verifyRes.ok) {
+      return { ok: false, reason: `Facilitator /verify HTTP ${verifyRes.status}` };
+    }
+    const verifyData = await verifyRes.json();
+    if (verifyData?.isValid !== true) {
+      return { ok: false, reason: verifyData?.invalidReason ?? "Payment not valid" };
+    }
+
+    const settleRes = await fetch(`${X402_FACILITATOR_URL}/settle`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body,
+      signal: AbortSignal.timeout(15000),
+    });
+    if (!settleRes.ok) {
+      return { ok: false, reason: `Facilitator /settle HTTP ${settleRes.status}` };
+    }
+    const settleData = await settleRes.json();
+    if (settleData?.success !== true) {
+      return { ok: false, reason: settleData?.error ?? "Settlement failed" };
+    }
+
+    return { ok: true, settleTx: settleData?.transaction };
+  } catch (e) {
+    console.error("[ai-question] x402 facilitator error:", e);
+    return { ok: false, reason: "Facilitator unreachable" };
+  }
+}
 
 function isInternalCall(req: NextRequest): boolean {
   // Browser game: Referer is enforced by browsers, cannot be set by browser JS
@@ -118,6 +191,15 @@ export async function GET(req: NextRequest) {
     if (!payment) {
       return NextResponse.json(X402_PAYMENT_DETAILS, { status: 402 });
     }
+    const settlement = await verifyAndSettleX402Payment(payment);
+    if (!settlement.ok) {
+      console.warn(`[ai-question] x402 payment rejected: ${settlement.reason}`);
+      return NextResponse.json(
+        { ...X402_PAYMENT_DETAILS, error: settlement.reason ?? X402_PAYMENT_DETAILS.error },
+        { status: 402 }
+      );
+    }
+    console.log(`[ai-question] x402 payment settled: ${settlement.settleTx ?? "(no tx hash returned)"}`);
   }
 
   if (!agentVerified && isRateLimited(ip)) {
