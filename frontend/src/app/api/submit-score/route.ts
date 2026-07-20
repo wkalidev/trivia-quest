@@ -16,6 +16,17 @@ function isScoreRateLimited(player: string): boolean {
   return false;
 }
 
+// ✅ Anti-replay — nonces vus, single-use, expirés après leur fenêtre de validité.
+// Empêche qu'une signature capturée soit rejouée pour re-mint des récompenses.
+const usedNonces = new Map<string, number>(); // nonce -> expiry (ms)
+const MAX_SIGNATURE_WINDOW_SECONDS = 10 * 60; // refuse tout exp trop éloigné dans le futur
+
+function cleanupExpiredNonces(now: number) {
+  for (const [nonce, expiresAt] of usedNonces) {
+    if (now > expiresAt) usedNonces.delete(nonce);
+  }
+}
+
 const CHAIN_CONFIG: Record<number, { chain: typeof celo | typeof base; rpc: string }> = {
   [celo.id]: { chain: celo, rpc: "https://forno.celo.org" },
   [base.id]: { chain: base, rpc: "https://mainnet.base.org" },
@@ -24,7 +35,7 @@ const CHAIN_CONFIG: Record<number, { chain: typeof celo | typeof base; rpc: stri
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { player, score, points, signature, message, chainId } = body;
+    const { player, score, points, signature, message, chainId, exp, nonce } = body;
 
     if (!player || score === undefined || points === undefined) {
       return Response.json({ error: "Missing params" }, { status: 400 });
@@ -43,6 +54,27 @@ export async function POST(request: Request) {
       return Response.json({ error: "Invalid message" }, { status: 401 });
     }
 
+    // ✅ Anti-replay (exp + nonce). Backward-compatible: clients on an old cached
+    // bundle (PWA/service worker) that don't send exp/nonce yet still fall back
+    // to the legacy check below rather than being hard-rejected mid-rollout.
+    const now = Date.now();
+    if (exp !== undefined && nonce !== undefined) {
+      if (!message.includes(`exp: ${exp}`) || !message.includes(`nonce: ${nonce}`)) {
+        return Response.json({ error: "Invalid message" }, { status: 401 });
+      }
+      const expMs = Number(exp) * 1000;
+      if (!Number.isFinite(expMs) || now > expMs) {
+        return Response.json({ error: "Signature expired" }, { status: 401 });
+      }
+      if (expMs - now > MAX_SIGNATURE_WINDOW_SECONDS * 1000) {
+        return Response.json({ error: "Invalid expiry" }, { status: 401 });
+      }
+      cleanupExpiredNonces(now);
+      if (usedNonces.has(nonce)) {
+        return Response.json({ error: "Signature already used" }, { status: 401 });
+      }
+    }
+
     const isValid = await verifyMessage({
       address: player as `0x${string}`,
       message,
@@ -54,6 +86,12 @@ export async function POST(request: Request) {
 
     if (isScoreRateLimited(player)) {
       return Response.json({ error: "Rate limit exceeded" }, { status: 429 });
+    }
+
+    // Mark nonce as consumed only once signature + rate limit both pass —
+    // avoids burning a legitimate nonce on a request that fails for another reason.
+    if (exp !== undefined && nonce !== undefined) {
+      usedNonces.set(nonce, Number(exp) * 1000);
     }
 
     const privateKey = process.env.PRIVATE_KEY;

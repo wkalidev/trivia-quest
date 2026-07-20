@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { useAccount, useWriteContract, useReadContract, useChainId } from "wagmi";
+import { useAccount, useWriteContract, useReadContract, useChainId, useSignMessage } from "wagmi";
 import { useRouter, useSearchParams } from "next/navigation";
 import { parseEther } from "viem";
 import { CONTRACT_ABI, getContractAddress } from "@/lib/contract";
@@ -69,6 +69,7 @@ export default function QuizPage() {
 
   const { playCorrect, playWrong, playStreak, playTick } = useGameSounds();
   const { writeContract, isPending } = useWriteContract();
+  const { signMessageAsync } = useSignMessage();
 
   const { data: entryFee } = useReadContract({
     address: CONTRACT_ADDRESS,
@@ -133,19 +134,34 @@ export default function QuizPage() {
       setIsCorrectAnswer(null);
       if (current + 1 >= questions.length) {
         setFinished(true);
-        // ✅ Mode Duel — soumet le score on-chain puis redirige vers le détail
+        // ✅ Mode Duel — signe le score puis le soumet on-chain avant de rediriger.
+        // La signature prouve que c'est bien `address` qui a joué ce score —
+        // sans elle, n'importe qui connaissant duelId + adresse pourrait
+        // soumettre un faux score pour un joueur (les deux adresses sont
+        // publiques on-chain) et truquer l'issue d'un duel avec mise réelle.
         if (isDuelMode && duelId && address) {
-          fetch("/api/submit-duel-score", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              player: address,
-              duelId: parseInt(duelId),
-              score: finalScore,
-            }),
-          }).finally(() => {
-            router.push(`/duel/${duelId}?scored=1`);
-          });
+          const duelIdNum = parseInt(duelId);
+          (async () => {
+            try {
+              const message = `TriviaQ duel score: duel:${duelIdNum} score:${finalScore} player:${address.toLowerCase()}`;
+              const signature = await signMessageAsync({ account: address as `0x${string}`, message });
+              await fetch("/api/submit-duel-score", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  player: address,
+                  duelId: duelIdNum,
+                  score: finalScore,
+                  signature,
+                  message,
+                }),
+              });
+            } catch (error) {
+              console.error("Failed to submit duel score:", error);
+            } finally {
+              router.push(`/duel/${duelId}?scored=1`);
+            }
+          })();
         } else {
           router.push(
             `/results?score=${finalScore}&total=${questions.length}&points=${totalPoints}`
@@ -157,7 +173,7 @@ export default function QuizPage() {
       }
       return null;
     });
-  }, [questions, current, score, totalPoints, router, aiMode, prefetchNextAIQuestion, isDuelMode, duelId, address]);
+  }, [questions, current, score, totalPoints, router, aiMode, prefetchNextAIQuestion, isDuelMode, duelId, address, signMessageAsync]);
 
   // Reset lock when question advances
   useEffect(() => {

@@ -1,4 +1,4 @@
-import { createWalletClient, createPublicClient, http } from "viem";
+import { createWalletClient, createPublicClient, http, verifyMessage } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { celo } from "viem/chains";
 import { getContractAddress } from "@/lib/contract";
@@ -55,7 +55,7 @@ const submitted = new Map<string, boolean>();
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { player, duelId, score } = body;
+    const { player, duelId, score, signature, message } = body;
 
     // ── 1. Validation basique ──────────────────────────
     if (!player || duelId === undefined || score === undefined) {
@@ -66,6 +66,26 @@ export async function POST(request: Request) {
     }
     if (!/^0x[a-fA-F0-9]{40}$/.test(player)) {
       return Response.json({ error: "Invalid player address" }, { status: 400 });
+    }
+
+    // ── 1b. Signature wallet — prouve que `player` a bien soumis ce score lui-même.
+    // Sans ça, n'importe qui connaissant duelId + adresse (publiques on-chain)
+    // pouvait soumettre un score au nom de l'un ou l'autre joueur d'un duel
+    // avec mise réelle en CELO.
+    if (!signature || !message) {
+      return Response.json({ error: "Missing signature" }, { status: 401 });
+    }
+    const expectedMessage = `TriviaQ duel score: duel:${duelId} score:${score} player:${player.toLowerCase()}`;
+    if (message !== expectedMessage) {
+      return Response.json({ error: "Invalid message" }, { status: 401 });
+    }
+    const validSignature = await verifyMessage({
+      address: player as `0x${string}`,
+      message,
+      signature: signature as `0x${string}`,
+    });
+    if (!validSignature) {
+      return Response.json({ error: "Invalid signature" }, { status: 401 });
     }
 
     // ── 2. Rate limit — 1 soumission par wallet par duel ──

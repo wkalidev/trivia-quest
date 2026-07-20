@@ -1,8 +1,26 @@
 import hre from "hardhat";
 import { formatEther } from "viem";
 
+// ── ERC-8004 Identity Registry — Celo Mainnet ─────────────
+// Same address as register-agent.ts (vanity-deployed at the same address on
+// every chain the 8004 team supports — see erc-8004/erc-8004-contracts).
 const IDENTITY_REGISTRY = "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432" as `0x${string}`;
+
+// Agent ID from register-agent.ts — same one shown at
+// https://8004scan.io/agents/celo/9055
 const AGENT_ID = 9055n;
+
+// ✅ v2 of this script: previously (commit 63f7f87) this baked the metadata into
+// a `data:application/json;base64,...` URI and pushed it on-chain as a frozen
+// snapshot (v3.2.0). Every time agent-metadata/route.ts was corrected afterwards
+// (df41de0, 63f7f87 itself, and this security-audit round bumping to v3.4.0 with
+// a live `updatedAt`), that on-chain snapshot did NOT follow — 8004scan has been
+// reading a stale, pre-correction copy ever since.
+//
+// Fix: point agentURI at the live HTTPS endpoint instead of a static snapshot.
+// From now on, any edit to agent-metadata/route.ts is reflected on-chain
+// automatically, with zero further gas cost.
+const NEW_AGENT_URI = "https://trivia-quest-eight.vercel.app/api/agent-metadata";
 
 const IDENTITY_ABI = [
   {
@@ -31,94 +49,20 @@ const IDENTITY_ABI = [
   },
 ] as const;
 
-const METADATA = {
-  type: "https://eips.ethereum.org/EIPS/eip-8004#registration-v1",
-  name: "TriviaQ AI Agent",
-  description:
-    "AI agent that generates trivia questions on Celo, powers 1v1 duels and runs Discord commands /ask /askcat. Powered by Groq LLaMA 3.1.",
-  image: "https://trivia-quest-eight.vercel.app/icon-512.png",
-  version: "3.2.0",
-  homepage: "https://trivia-quest-eight.vercel.app",
-  documentation: "https://github.com/wkalidev/trivia-quest",
-  license: "MIT",
-  updatedAt: 1782432000,
-  provider: {
-    name: "wkalidev",
-    url: "https://github.com/wkalidev",
-    email: "wkalidev@gmail.com",
-  },
-  contact: {
-    email: "wkalidev@gmail.com",
-    support: "mailto:wkalidev@gmail.com",
-  },
-  supportUrl: "mailto:wkalidev@gmail.com",
-  services: [
-    {
-      name: "MCP",
-      endpoint: "https://trivia-quest-eight.vercel.app/api/mcp",
-      version: "2024-11-05",
-      description: "TriviaQ MCP Server — generate questions, stats, leaderboard, duel info",
-    },
-    {
-      name: "A2A",
-      endpoint: "https://trivia-quest-eight.vercel.app/api/a2a",
-      version: "0.3.0",
-      agentCard: "https://trivia-quest-eight.vercel.app/.well-known/agent-card.json",
-      description: "TriviaQ A2A Agent — Agent-to-Agent protocol endpoint",
-    },
-    {
-      name: "agentWallet",
-      endpoint: "eip155:42220:0xffe22d3d1b63866ac9da8ac92fdb9ceddeadb0bb",
-      description: "TriviaQ prize pool wallet on Celo Mainnet — x402 payment recipient",
-    },
-    {
-      name: "web",
-      endpoint: "https://trivia-quest-eight.vercel.app",
-      description: "TriviaQ app — Play. Learn. Earn on Celo.",
-    },
-  ],
-  registrations: [
-    {
-      chainId: 42220,
-      agentRegistry: "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
-      tokenId: 9055,
-      address: "0xdeacde6ec27fd0cd972c1232c4f0d4171dda2357",
-    },
-  ],
-  supportedTrusts: ["reputation"],
-  active: true,
-  x402Support: true,
-  category: "gaming",
-  subcategory: "quiz",
-  supportedChains: [42220, 8453],
-  capabilities: ["trivia", "quiz", "ai-questions", "1v1-duel", "blockchain", "earn", "a2a", "x402"],
-  tags: ["trivia", "quiz", "celo", "blockchain", "earn", "minipay", "farcaster", "ai", "a2a", "x402"],
-  agentCard: "https://trivia-quest-eight.vercel.app/.well-known/agent-card.json",
-  openapi: "https://trivia-quest-eight.vercel.app/.well-known/openapi.json",
-};
-
-function buildDataURI(metadata: typeof METADATA): string {
-  const json = JSON.stringify(metadata);
-  const b64 = Buffer.from(json, "utf-8").toString("base64");
-  return `data:application/json;base64,${b64}`;
-}
-
 async function main() {
-  console.log("Updating TriviaQ AI Agent on-chain tokenURI (agent #9055)...");
-
-  const dataURI = buildDataURI(METADATA);
-  console.log(`New URI length: ${dataURI.length} chars`);
-  console.log(`URI prefix: ${dataURI.slice(0, 50)}...`);
+  console.log("🤖 Updating TriviaQ agentURI on ERC-8004 Identity Registry...");
+  console.log(`🆔 Agent ID: ${AGENT_ID}`);
+  console.log(`📋 New URI: ${NEW_AGENT_URI}`);
 
   const { viem } = await hre.network.connect();
   const publicClient = await viem.getPublicClient();
   const [walletClient] = await viem.getWalletClients();
   const account = walletClient.account;
 
-  console.log(`Wallet: ${account.address}`);
+  console.log(`👤 Wallet: ${account.address}`);
 
   const balance = await publicClient.getBalance({ address: account.address });
-  console.log(`Balance: ${formatEther(balance)} CELO`);
+  console.log(`💰 Balance: ${formatEther(balance)} CELO`);
 
   const owner = await publicClient.readContract({
     address: IDENTITY_REGISTRY,
@@ -126,34 +70,58 @@ async function main() {
     functionName: "ownerOf",
     args: [AGENT_ID],
   });
-  console.log(`Token owner: ${owner}`);
+  console.log(`👑 Token owner: ${owner}`);
 
   if (owner.toLowerCase() !== account.address.toLowerCase()) {
-    throw new Error(`Wallet ${account.address} is NOT the owner of agent #9055 (owner: ${owner})`);
+    throw new Error(`Wallet ${account.address} is NOT the owner of agent #${AGENT_ID} (owner: ${owner})`);
   }
 
-  console.log("Sending setAgentURI transaction...");
+  const currentUri = await publicClient.readContract({
+    address: IDENTITY_REGISTRY,
+    abi: IDENTITY_ABI,
+    functionName: "tokenURI",
+    args: [AGENT_ID],
+  });
+  console.log(`📋 Current on-chain agentURI (${currentUri.length} chars): ${currentUri.slice(0, 80)}${currentUri.length > 80 ? "..." : ""}`);
+
+  if (currentUri === NEW_AGENT_URI) {
+    console.log("✅ Already pointing at the live endpoint — nothing to do.");
+    return;
+  }
+
+  // ── Simulate first (staticCall) so a bad ABI/args reverts here, not on-chain ──
+  await publicClient.simulateContract({
+    address: IDENTITY_REGISTRY,
+    abi: IDENTITY_ABI,
+    functionName: "setAgentURI",
+    args: [AGENT_ID, NEW_AGENT_URI],
+    account,
+  });
+  console.log("✅ Simulation passed — safe to broadcast.");
+
+  console.log("📡 Sending setAgentURI transaction...");
   const hash = await walletClient.writeContract({
     address: IDENTITY_REGISTRY,
     abi: IDENTITY_ABI,
     functionName: "setAgentURI",
-    args: [AGENT_ID, dataURI],
+    args: [AGENT_ID, NEW_AGENT_URI],
     chain: undefined,
     account,
   });
 
-  console.log(`Transaction: ${hash}`);
-  console.log("Waiting for confirmation...");
+  console.log(`⏳ Transaction: ${hash}`);
+  console.log("⏳ Waiting for confirmation...");
 
   const receipt = await publicClient.waitForTransactionReceipt({ hash });
-  console.log(`Confirmed in block: ${receipt.blockNumber}`);
-  console.log(`Celoscan: https://celoscan.io/tx/${hash}`);
+  console.log(`✅ Confirmed in block: ${receipt.blockNumber}`);
+  console.log(`🔗 Celoscan: https://celoscan.io/tx/${hash}`);
   console.log("");
-  console.log("Agent metadata updated. 8004scan should rescan within minutes.");
-  console.log("Check score at: https://8004scan.io/agents/celo/9055");
+  console.log("Agent metadata now points at the live endpoint — it will never");
+  console.log("go stale again. 8004scan should re-index within minutes:");
+  console.log(`https://8004scan.io/agents/celo/${AGENT_ID}`);
 }
 
 main().catch((e) => {
-  console.error("Error:", e.message);
+  console.error("❌ Error:", e.message);
   process.exit(1);
 });

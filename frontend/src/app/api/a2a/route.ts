@@ -145,7 +145,7 @@ export async function GET() {
   return NextResponse.json({
     name: "TriviaQ A2A Agent",
     protocol: "A2A",
-    version: "3.3.0",
+    version: "3.4.0",
     skills: ["generate_question", "get_stats", "get_leaderboard", "get_duel_info"],
     agentCard: `${APP_URL}/.well-known/agent.json`,
     status: "healthy",

@@ -111,7 +111,7 @@ export async function POST(req: NextRequest) {
           capabilities: { tools: {} },
           serverInfo: {
             name: "triviaq-mcp",
-            version: "3.3.0",
+            version: "3.4.0",
           }
         }
       });

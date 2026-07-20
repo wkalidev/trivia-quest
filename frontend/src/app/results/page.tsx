@@ -44,12 +44,16 @@ function ResultsContent() {
     if (!address || submitted) return;
     const submitScore = async () => {
       try {
-        const message = `TriviaQ score: ${score} points: ${points} player: ${address.toLowerCase()}`;
+        // exp/nonce bind the signature to a short-lived, single-use window —
+        // prevents a captured signature from being replayed later to re-mint rewards.
+        const exp = Math.floor(Date.now() / 1000) + 5 * 60; // 5 min validity
+        const nonce = crypto.randomUUID();
+        const message = `TriviaQ score: ${score} points: ${points} player: ${address.toLowerCase()} exp: ${exp} nonce: ${nonce}`;
         const signature = await signMessageAsync({ account: address as `0x${string}`, message });
         const res = await fetch("/api/submit-score", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ player: address, score, points, signature, message, chainId }),
+          body: JSON.stringify({ player: address, score, points, signature, message, chainId, exp, nonce }),
         });
         const data = await res.json();
         if (data?.rank) setRank(data.rank);

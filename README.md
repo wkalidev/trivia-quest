@@ -73,20 +73,24 @@ Questions generated in real-time by Groq AI (LLaMA 3.1-8b-instant):
 ## 🔐 Security
 
 - Submit score requires ECDSA wallet signature (prevents fake scores)
+- Submit score signature is single-use: bound to a nonce + 5-minute expiry, so a captured signature can't be replayed later to re-mint TRIVQ 🆕
+- Duel score submission (`/api/submit-duel-score`) now requires an ECDSA wallet signature from the submitting player — previously anyone who knew a `duelId` and a player's address (both public on-chain) could post a fake score for either side of a real-money duel 🆕
 - Rate limited: 5 submissions/hour per wallet
 - Cron endpoint protected by CRON_SECRET
 - AI endpoint rate limited: 10 req/min (Self Agents bypass)
 - MCP/A2A endpoints rate limited: 30/20 req/min per IP
 - Internal server-to-server calls authenticated via `CRON_SECRET` (`X-Internal-Key` header) — replaces spoofable `x-mcp-caller`/`x-game-session` headers
 - AI question `category` param validated against allowlist before LLM interpolation (prompt injection prevention)
-- Farcaster webhook input fully validated: event type, FID range, token length, HTTPS-only URL, JSON Farcaster Signature (JFS) verified via Neynar when `NEYNAR_API_KEY` is set 🆕
+- Farcaster webhook input fully validated: event type, FID range, token length, HTTPS-only URL, JSON Farcaster Signature (JFS) verified via Neynar when `NEYNAR_API_KEY` is set
 - SSRF protection: all outbound fetches to Farcaster notification URLs validated (no private/loopback addresses)
 - Security headers: `Strict-Transport-Security`, `Referrer-Policy`, `Permissions-Policy` added globally
 - CORS headers added globally to `/api/*` routes for 8004scan / agent scanner access
 - `/api/round` IP rate limited (5 req/min) to prevent gas-cost flooding
 - Private key `0x` prefix normalized in all signing code paths
 
-**Agent registration note:** The ERC-8004 `register-agent.ts` script only supports initial registration. To update the on-chain `agentURI` to `https://trivia-quest-eight.vercel.app/api/agent-metadata`, the owner must call `updateAgent` directly on the ERC-8004 Identity Registry (`0x8004A169FB4a3325136EB29fA0ceB6D2e539a432`) on Celo Mainnet.
+**Known residual limitation:** rate limiting and nonce tracking on `/api/submit-score`, `/api/submit-duel-score`, `/api/ai-question` and `/api/mcp` are in-process (`Map`-based), not shared across serverless instances. This is a reasonable soft limit today; a durable store (Upstash/Vercel KV, or a Supabase table) is recommended if abuse is observed. `isInternalCall()` in `/api/ai-question` also still trusts the `Referer` header as one signal for the x402 bypass — a non-browser client can spoof it to skip the payment gate (capped at 10 req/min/IP either way, so worst case is a bounded free-tier leak, not an open rate-limit bypass).
+
+**Agent registration:** `register-agent.ts` performs the initial ERC-8004 registration only. `update-agent.ts` now points the on-chain `agentURI` at the live, always-current `https://trivia-quest-eight.vercel.app/api/agent-metadata` endpoint instead of a frozen snapshot — run it once (`npx hardhat run scripts/update-agent.ts --network celo`) any time the registered identity needs to be (re)synced after being changed manually.
 
 ## 🔐 Self Agent ID (NEW — May 2026)
 
@@ -235,6 +239,19 @@ PageSpeed scores (mobile):
 
 ## 🔐 Security Audit
 
+**2026-07 full audit pass:**
+
+- Fixed: duel score submission had no wallet signature check — closed (see Security section above)
+- Fixed: submit-score signature had no replay protection — closed with nonce + expiry
+- Fixed: on-chain ERC-8004 `agentURI` was a frozen snapshot from an earlier `update-agent.ts` run, out of sync with the live metadata endpoint since — `update-agent.ts` now points at the live endpoint permanently
+- Fixed: agent metadata version drift (`3.3.0` vs actual `3.4.0`) across `agent.json`, `agent-card.json`, `/api/a2a`, `/api/mcp`, `/api/stats`
+- Fixed: `agent-metadata`'s `updatedAt` was a hardcoded past date — now real-time
+- Fixed: `next` bumped `16.2.1` → `16.2.10` (patches several high-severity advisories: DoS via Server Components, Middleware/Proxy bypass, SSRF via WebSocket upgrades — no breaking changes)
+- Fixed: `.gitattributes` added to stop CRLF/LF noise showing 88 files as modified with no real content change
+- Deferred (documented, not fixed — would require a contract redeploy which is out of scope for this pass): `TriviaQuest.finishRound` / `TriviaDuel._resolveDuel` use `.transfer()` (2300 gas stipend) to pay winners — a smart-contract wallet winner whose `receive()` costs more than that would revert the whole payout; `Referral.sol` has no anti-Sybil protection beyond the global `REWARDS_ALLOC` cap
+- Remaining transitive dependency advisories (via `@walletconnect/*`, `@reown/appkit`, `@coinbase/cdp-sdk` — `axios`, `form-data`, `hono`, `protobufjs`, `ws`): not directly reachable from this app's code paths; no fix available without a major upstream bump in the wallet-connector chain. Re-check with `npm audit` after each RainbowKit/wagmi upgrade.
+- No test suite exists yet for the 5 production Solidity contracts (`contracts/test/` only has the default Hardhat `Counter.ts` sample) — recommended follow-up, does not block this pass since it's additive/zero-risk.
+
 Known transitive dependency advisories (all via `@metamask/connect-evm`):
 
 - **protobufjs** (2× critical) — arbitrary code execution in `centrifuge` → `protobufjs < 7.5.5`. Not reachable in browser context; no server-side protobuf parsing. Upstream fix awaited in `@metamask/connect-evm`.
@@ -289,7 +306,8 @@ Known transitive dependency advisories (all via `@metamask/connect-evm`):
 - [x] 1200+ questions (446 base + 754 extra) 🆕
 - [x] SDK v3.2.0 — SDK_VERSION constant fixed, TRIVQ logo, all 9 contract addresses verified 🆕
 - [x] SDK v3.3.0 — security audit: SSRF fix, prompt injection, rate limits, CRON_SECRET internal auth
-- [x] SDK v3.4.0 — `getAddress()` now throws on unsupported chain/contract instead of silently returning an empty address; `calculateRewards()` streak multiplier aligned with `calculatePoints()`; `fetchNetworkStats`/`getStats` deduplicated 🆕
+- [x] SDK v3.4.0 — `getAddress()` now throws on unsupported chain/contract instead of silently returning an empty address; `calculateRewards()` streak multiplier aligned with `calculatePoints()`; `fetchNetworkStats`/`getStats` deduplicated
+- [x] 2026-07 audit — duel score signature check, submit-score replay protection, agent metadata drift/staleness fixed, Next.js patched, `.gitattributes` added 🆕
 - [x] Inline CELO→TRIVQ swap via Ubeswap V3 Universal Router 🆕
 - [x] MiniPay full compatibility audit — wagmi injected() connector, address aliasing, checkin fallback 🆕
 - [x] PageSpeed performance optimisation — LazyMotion, LCP fix, CLS fix, dns-prefetch 🆕

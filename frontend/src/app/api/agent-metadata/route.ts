@@ -11,11 +11,13 @@ export async function GET() {
     image: "https://trivia-quest-eight.vercel.app/icon-512.png",
     github: "https://github.com/wkalidev/trivia-quest",
     project: "TriviaQ",
-    version: "3.3.0",
+    version: "3.4.0",
     homepage: "https://trivia-quest-eight.vercel.app",
     documentation: "https://github.com/wkalidev/trivia-quest",
     license: "MIT",
-    updatedAt: 1782820800,
+    // Real-time timestamp (response is no-store, never cached) so scanners see
+    // an accurate freshness signal instead of a hardcoded past date.
+    updatedAt: Math.floor(Date.now() / 1000),
     provider: {
       name: "wkalidev",
       url: "https://github.com/wkalidev",
