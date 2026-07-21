@@ -407,18 +407,19 @@ export default function Home() {
                   <p className="text-white/40 text-xs mt-0.5">{tokenLabel}</p>
                 </div>
               </div>
-              {/* Network badge hidden inside the Startale host — the host already
-                  shows its own chain context, and there's no user-facing chain
-                  switch inside a Mini App (wallet_switchEthereumChain unavailable). */}
-              {!isStartale && (
-                <div className="text-right">
-                  <div className="text-white/20 text-xs mb-1">Network</div>
-                  <div className="flex items-center gap-1.5 justify-end">
-                    <div className="w-1.5 h-1.5 rounded-full bg-[#35D07F] animate-pulse"/>
-                    <span className="text-[#35D07F] text-xs font-bold">{chainLabel}</span>
-                  </div>
+              {/* Previously hidden inside the Startale host on the reasoning that
+                  there's no user-facing chain switch there (wallet_switchEthereumChain
+                  unavailable) — but that made mainnet (1868) and Minato (1946) visually
+                  identical, since tokenLabel above shows "TRIVQ · Soneium" for both.
+                  This is read-only info, not a switcher, so it's safe (and necessary
+                  for testing) to always show it. */}
+              <div className="text-right">
+                <div className="text-white/20 text-xs mb-1">Network</div>
+                <div className="flex items-center gap-1.5 justify-end">
+                  <div className="w-1.5 h-1.5 rounded-full bg-[#35D07F] animate-pulse"/>
+                  <span className="text-[#35D07F] text-xs font-bold">{chainLabel}</span>
                 </div>
-              )}
+              </div>
             </div>
 
             <div className="grid grid-cols-3 gap-2">
