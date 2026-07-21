@@ -9,9 +9,13 @@ export async function GET(request: Request) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const [celoResult, baseResult] = await Promise.allSettled([
+  // Soneium Mainnet (1868) intentionally excluded until the mainnet deploy lands —
+  // finishExpiredRound() throws cleanly on a missing contract address, but no
+  // point calling it every cron tick before then.
+  const [celoResult, baseResult, minatoResult] = await Promise.allSettled([
     finishExpiredRound(42220),
     finishExpiredRound(8453),
+    finishExpiredRound(1946),
   ]);
 
   return Response.json({
@@ -24,5 +28,9 @@ export async function GET(request: Request) {
       baseResult.status === "fulfilled"
         ? baseResult.value
         : { error: (baseResult as PromiseRejectedResult).reason?.message },
+    soneiumMinato:
+      minatoResult.status === "fulfilled"
+        ? minatoResult.value
+        : { error: (minatoResult as PromiseRejectedResult).reason?.message },
   });
 }

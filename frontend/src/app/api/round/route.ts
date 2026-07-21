@@ -31,7 +31,13 @@ export async function GET(request: NextRequest) {
 
   const { searchParams } = new URL(request.url);
   const rawChain = searchParams.get("chain");
-  const chainId = rawChain === "8453" ? 8453 : 42220;
+  // Soneium Mainnet (1868) deliberately not whitelisted yet — no contract deployed
+  // there until the mainnet deploy lands (see contracts/DEPLOY.md).
+  const SUPPORTED_CHAIN_IDS = [42220, 8453, 1946] as const;
+  const parsedChain = Number(rawChain);
+  const chainId = (SUPPORTED_CHAIN_IDS as readonly number[]).includes(parsedChain)
+    ? parsedChain
+    : 42220;
 
   const last = lastAttemptMs.get(chainId);
   if (last && Date.now() - last < DEBOUNCE_MS) {
@@ -43,7 +49,7 @@ export async function GET(request: NextRequest) {
   try {
     // Don't wait for receipt — tx is submitted and will mine; client refetches
     // via wagmi's 15s interval. Keeps well under Hobby's 10s function limit.
-    const result = await finishExpiredRound(chainId as 42220 | 8453, {
+    const result = await finishExpiredRound(chainId, {
       waitForReceipt: false,
     });
     return Response.json({ ok: true, ...result });

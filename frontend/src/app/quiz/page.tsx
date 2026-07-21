@@ -79,12 +79,21 @@ export default function QuizPage() {
     query: { enabled: !!CONTRACT_ADDRESS },
   });
 
-  const nativeToken = chainId === 8453 ? "ETH" : "CELO";
-  const fallbackFee = chainId === 8453
+  // Soneium (Mainnet 1868 + Minato 1946) is ETH-denominated like Base, not
+  // CELO-denominated — grouped with Base for token label + fallback fee display.
+  const isEthChain = chainId === 8453 || chainId === 1868 || chainId === 1946;
+  const nativeToken = isEthChain ? "ETH" : "CELO";
+  // Display-only fallback shown before the real on-chain entryFee() read resolves.
+  // NOTE: TriviaQuest's on-chain default is 0.01 ether regardless of chain — Base's
+  // was brought down to 0.00001 ETH post-deploy via setEntryFee. The freshly
+  // deployed Minato contract has NOT had that same call made yet, so its real
+  // on-chain entryFee is still 0.01 ETH (~$19) until setEntryFee is called —
+  // worth doing before E2E testing, not just for this fallback label.
+  const fallbackFee = isEthChain
     ? parseEther("0.00001")
     : parseEther("0.01");
   const fee = (entryFee as bigint | undefined) ?? fallbackFee;
-  const feeDisplay = chainId === 8453 ? "0.00001" : "0.01";
+  const feeDisplay = isEthChain ? "0.00001" : "0.01";
 
   useEffect(() => {
     if (!isConnected) router.push("/");

@@ -189,7 +189,7 @@ export default function Home() {
   const { isConnected, address } = useAccount();
   const router = useRouter();
   const { isInMiniPay, miniPayAddress, loading } = useMiniPay();
-  const { walletReady, requestWallet } = useWallet();
+  const { walletReady, requestWallet, isStartale } = useWallet();
   const t = useTranslations("home");
   const tNav = useTranslations("nav");
   const locale = useLocale() as Locale;
@@ -202,8 +202,15 @@ export default function Home() {
   const CONTRACT_ADDRESS = getContractAddress(chainId, "game");
   const TRIVQ_ADDR = getContractAddress(chainId, "token");
 
-  const chainLabel = chainId === 8453 ? "Base Mainnet" : "Celo Mainnet";
-  const tokenLabel = chainId === 8453 ? "TRIVQ · Base" : "TRIVQ · Celo";
+  const chainLabel =
+    chainId === 1868 ? "Soneium Mainnet"
+    : chainId === 1946 ? "Soneium Minato"
+    : chainId === 8453 ? "Base Mainnet"
+    : "Celo Mainnet";
+  const tokenLabel =
+    chainId === 1868 || chainId === 1946 ? "TRIVQ · Soneium"
+    : chainId === 8453 ? "TRIVQ · Base"
+    : "TRIVQ · Celo";
 
   const isReady = isConnected || !!miniPayAddress;
   const walletAddress = address ?? miniPayAddress;
@@ -323,7 +330,7 @@ export default function Home() {
         </div>
         <div className="flex items-center gap-2">
           <LanguageSwitcher currentLocale={locale} />
-          {mounted && !loading && !isInMiniPay && (
+          {mounted && !loading && !isInMiniPay && !isStartale && (
             walletReady
               ? <ConnectButton label={t("connectWallet")} showBalance={false} />
               : <button
@@ -380,13 +387,18 @@ export default function Home() {
                   <p className="text-white/40 text-xs mt-0.5">{tokenLabel}</p>
                 </div>
               </div>
-              <div className="text-right">
-                <div className="text-white/20 text-xs mb-1">Network</div>
-                <div className="flex items-center gap-1.5 justify-end">
-                  <div className="w-1.5 h-1.5 rounded-full bg-[#35D07F] animate-pulse"/>
-                  <span className="text-[#35D07F] text-xs font-bold">{chainLabel}</span>
+              {/* Network badge hidden inside the Startale host — the host already
+                  shows its own chain context, and there's no user-facing chain
+                  switch inside a Mini App (wallet_switchEthereumChain unavailable). */}
+              {!isStartale && (
+                <div className="text-right">
+                  <div className="text-white/20 text-xs mb-1">Network</div>
+                  <div className="flex items-center gap-1.5 justify-end">
+                    <div className="w-1.5 h-1.5 rounded-full bg-[#35D07F] animate-pulse"/>
+                    <span className="text-[#35D07F] text-xs font-bold">{chainLabel}</span>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
 
             <div className="grid grid-cols-3 gap-2">
@@ -500,7 +512,7 @@ export default function Home() {
               style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}
             >
               <p className="text-white/30 text-sm mb-3">Connect your wallet to start earning</p>
-              {mounted && !loading && !isInMiniPay && (
+              {mounted && !loading && !isInMiniPay && !isStartale && (
                 walletReady
                   ? <ConnectButton label={t("connectWallet")} showBalance={false} />
                   : <button
@@ -555,9 +567,15 @@ export default function Home() {
           <ActionButton onClick={copyReferral} variant="blue">
             {copied ? "✅ Copied!" : "🔗 Invite & Earn"}
           </ActionButton>
-          <div>
-            <SwapWidget />
-          </div>
+          {/* Ubeswap is Celo-only — hide entirely inside the Startale host rather
+              than show a "switch to Celo" dead end (no chain switch available
+              inside a Mini App). SwapWidget already degrades gracefully on Base
+              standalone; this only adds the Startale case. */}
+          {!isStartale && (
+            <div>
+              <SwapWidget />
+            </div>
+          )}
         </m.div>
 
         <m.div variants={itemVariants} className="grid grid-cols-2 gap-2">

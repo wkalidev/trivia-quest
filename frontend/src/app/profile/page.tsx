@@ -20,7 +20,8 @@ export default function ProfilePage() {
   const router = useRouter();
   const chainId = useChainId();
   const CONTRACT_ADDRESS = getContractAddress(chainId, "game");
-  const isBase = chainId === base.id;
+  // Soneium is ETH-denominated like Base — grouped together for the "X Won" label.
+  const isEthChain = chainId === base.id || chainId === 1868 || chainId === 1946;
 
   const { data: ensName } = useEnsName({
     address: address,
@@ -67,7 +68,7 @@ export default function ProfilePage() {
     { label: "Total Points", value: pts.toLocaleString(), color: "text-[#FBCD00]" },
     { label: "Games Played", value: stats?.gamesPlayed?.toString() ?? "0", color: "text-[#35D07F]" },
     { label: "Best Score", value: `${stats?.bestScore?.toString() ?? "0"}/10`, color: "text-white" },
-    { label: isBase ? "ETH Won" : "CELO Won", value: stats?.totalWinnings ? (Number(stats.totalWinnings) / 1e18).toFixed(4) : "0", color: "text-purple-400" },
+    { label: isEthChain ? "ETH Won" : "CELO Won", value: stats?.totalWinnings ? (Number(stats.totalWinnings) / 1e18).toFixed(4) : "0", color: "text-purple-400" },
   ];
 
   return (

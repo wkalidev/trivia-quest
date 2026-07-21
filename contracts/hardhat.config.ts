@@ -48,6 +48,19 @@ const config: HardhatUserConfig & { verify?: any } = {
       accounts: [process.env.PRIVATE_KEY!],
       chainId: 84532,
     },
+    // Soneium — chain IDs + public RPCs per docs.startale.com/concepts/networks
+    soneiumMinato: {
+      type: "http",
+      url: process.env.MINATO_RPC ?? "https://rpc.minato.soneium.org/",
+      accounts: [process.env.PRIVATE_KEY!],
+      chainId: 1946,
+    },
+    soneium: {
+      type: "http",
+      url: process.env.SONEIUM_RPC ?? "https://rpc.soneium.org/",
+      accounts: [process.env.PRIVATE_KEY!],
+      chainId: 1868,
+    },
   },
   verify: {
     etherscan: {

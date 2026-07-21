@@ -1,6 +1,6 @@
-import { createWalletClient, createPublicClient, http, verifyMessage } from "viem";
+import { createWalletClient, createPublicClient, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { celo, base } from "viem/chains";
+import { celo, base, soneium, soneiumMinato } from "viem/chains";
 import { CONTRACTS, CONTRACT_ABI } from "@/lib/contract";
 
 const scoreRateLimit = new Map<string, { count: number; resetTime: number }>();
@@ -27,10 +27,18 @@ function cleanupExpiredNonces(now: number) {
   }
 }
 
-const CHAIN_CONFIG: Record<number, { chain: typeof celo | typeof base; rpc: string }> = {
+type SupportedChain = typeof celo | typeof base | typeof soneium | typeof soneiumMinato;
+const CHAIN_CONFIG: Record<number, { chain: SupportedChain; rpc: string }> = {
   [celo.id]: { chain: celo, rpc: "https://forno.celo.org" },
   [base.id]: { chain: base, rpc: "https://mainnet.base.org" },
+  [soneium.id]: { chain: soneium, rpc: "https://rpc.soneium.org/" },
+  [soneiumMinato.id]: { chain: soneiumMinato, rpc: "https://rpc.minato.soneium.org/" },
 };
+
+function resolveChainId(rawChainId: unknown): number {
+  const n = Number(rawChainId);
+  return n in CHAIN_CONFIG ? n : celo.id;
+}
 
 export async function POST(request: Request) {
   try {
@@ -75,7 +83,23 @@ export async function POST(request: Request) {
       }
     }
 
-    const isValid = await verifyMessage({
+    // Chain is resolved before verification (not just before the write) because
+    // ERC-1271/6492 signature validation is on-chain and needs the client for the
+    // chain the signer's smart account actually lives on.
+    const resolvedChainId = resolveChainId(chainId);
+    const { chain, rpc } = CHAIN_CONFIG[resolvedChainId];
+    const contractAddress = CONTRACTS[resolvedChainId].game;
+
+    const verifyClient = createPublicClient({ chain, transport: http(rpc) });
+
+    // ✅ verifyMessage bound to a client (not the bare top-level import) resolves
+    // ERC-1271/ERC-6492 signatures on-chain in addition to plain ECDSA — required
+    // for Startale users, whose signer is always a smart account, never an EOA.
+    // The bare `viem` top-level verifyMessage only recovers ECDSA and silently
+    // rejects every valid smart-account signature. See docs.startale.com/concepts/
+    // smart-accounts: "Signatures returned by the SDK are ERC-1271 compatible...
+    // Before the smart account is deployed, signatures are wrapped per ERC-6492."
+    const isValid = await verifyClient.verifyMessage({
       address: player as `0x${string}`,
       message,
       signature: signature as `0x${string}`,
@@ -99,10 +123,6 @@ export async function POST(request: Request) {
       return Response.json({ error: "Server config error" }, { status: 500 });
     }
 
-    const resolvedChainId = Number(chainId) === base.id ? base.id : celo.id;
-    const { chain, rpc } = CHAIN_CONFIG[resolvedChainId];
-    const contractAddress = CONTRACTS[resolvedChainId].game;
-
     console.log(`[submit-score] chainId=${resolvedChainId} contract=${contractAddress}`);
 
     const normalizedKey = (privateKey.startsWith("0x") ? privateKey : `0x${privateKey}`) as `0x${string}`;
@@ -114,10 +134,8 @@ export async function POST(request: Request) {
       transport: http(rpc),
     });
 
-    const publicClient = createPublicClient({
-      chain,
-      transport: http(rpc),
-    });
+    // Reuse the same client used for verification — same chain, one fewer client.
+    const publicClient = verifyClient;
 
     const hash = await walletClient.writeContract({
       address: contractAddress,

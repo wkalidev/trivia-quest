@@ -5,6 +5,7 @@ import { getLocale, getMessages } from "next-intl/server";
 import { NextIntlClientProvider } from "next-intl";
 import { SupportButton } from "@/components/SupportButton";
 import FarcasterLoader from "@/components/FarcasterLoader";
+import StartaleLoader from "@/components/StartaleLoader";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -121,6 +122,7 @@ export default async function RootLayout({
         <NextIntlClientProvider messages={messages}>
           <Providers>
             <FarcasterLoader />
+            <StartaleLoader />
             <main>{children}</main>
             <SupportButton />
             <footer

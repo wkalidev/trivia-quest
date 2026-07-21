@@ -1,7 +1,16 @@
 import { createWalletClient, createPublicClient, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { celo, base } from "viem/chains";
+import { celo, base, soneium, soneiumMinato } from "viem/chains";
 import { CONTRACTS, CONTRACT_ABI } from "@/lib/contract";
+
+type SupportedChain = typeof celo | typeof base | typeof soneium | typeof soneiumMinato;
+const CHAIN_CONFIG: Record<number, { chain: SupportedChain; rpc: string }> = {
+  [celo.id]: { chain: celo, rpc: "https://forno.celo.org" },
+  [base.id]: { chain: base, rpc: "https://mainnet.base.org" },
+  [soneium.id]: { chain: soneium, rpc: "https://rpc.soneium.org/" },
+  [soneiumMinato.id]: { chain: soneiumMinato, rpc: "https://rpc.minato.soneium.org/" },
+};
+export type FinishRoundChainId = keyof typeof CHAIN_CONFIG;
 
 export const PLACEHOLDER_WINNER =
   "0x000000000000000000000000000000000000dEaD" as `0x${string}`;
@@ -20,15 +29,14 @@ interface Options {
 }
 
 export async function finishExpiredRound(
-  chainId: 42220 | 8453,
+  chainId: FinishRoundChainId,
   opts: Options = {}
 ): Promise<FinishResult> {
   const { waitForReceipt = true } = opts;
 
-  const isBase = chainId === 8453;
-  const chain = isBase ? base : celo;
-  const rpc = isBase ? "https://mainnet.base.org" : "https://forno.celo.org";
-  const gameAddress = isBase ? CONTRACTS[base.id].game : CONTRACTS[celo.id].game;
+  const { chain, rpc } = CHAIN_CONFIG[chainId];
+  const gameAddress = CONTRACTS[chainId].game;
+  if (!gameAddress) throw new Error(`No game contract deployed for chainId ${chainId}`);
 
   const publicClient = createPublicClient({ chain, transport: http(rpc) });
 
@@ -62,9 +70,25 @@ export async function finishExpiredRound(
 
   let topWinners: `0x${string}`[];
 
+  const isSoneiumChain = chainId === soneium.id || chainId === soneiumMinato.id;
+
   if (leaderboard.length === 0 || prizePool === BigInt(0)) {
     topWinners = [PLACEHOLDER_WINNER];
+  } else if (isSoneiumChain) {
+    // TriviaQuestSoneium.sol handles smart-account (and any other) payout
+    // failures on-chain via _payOrCredit()/pendingWithdrawals — no need for the
+    // off-chain bytecode-redirect workaround below, and applying it here would
+    // actively defeat that fix by substituting real winners with the treasury
+    // address before finishRound() ever runs. Real winners go through unchanged.
+    topWinners = leaderboard.slice(0, 3).map((e) => e.player);
   } else {
+    // TriviaQuest.finishRound() (Celo/Base, unmodified) pays winners with a bare
+    // payable(w).transfer(prize) — a fixed 2300-gas stipend. Any winner whose
+    // address has bytecode gets redirected to BASE_TREASURY here instead, to stop
+    // that transfer() from reverting the whole finishRound() tx (and freezing the
+    // round permanently). Celo/Base players are overwhelmingly EOAs, so this only
+    // ever catches rare contract-wallet players there — see TriviaQuestSoneium.sol
+    // for why this workaround doesn't extend to Soneium.
     const candidates = leaderboard.slice(0, 3).map((e) => e.player);
     topWinners = await Promise.all(
       candidates.map(async (addr) => {

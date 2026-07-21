@@ -136,6 +136,29 @@ Every AI request made by the bot is cryptographically signed with ECDSA — veri
 | Referral | `0x4fb5285263354e1e75f044c65166ab22c3840074` |
 | Treasury (fee recipient) | `0x995aC10d5B6778B90eF060b7ab585D854C1Ed914` |
 
+### Soneium Minato (Testnet — Startale Mini App)
+| Contract | Address |
+|---|---|
+| TriviaQToken ($TRIVQ) | `0x50b20728ba0ad803679b5428f267c89aede9a378` |
+| TriviaQuestSoneium | `0x617dc22fec22d5681de90f025fe5b6f2b5ec70bd` |
+| DailyCheckIn | `0xa3da79f30ae5ff551643bdbe55d27ff4f13eeffb` |
+| Referral | `0x161b192d2b52830abb5fb7c09f5df5f6396d58d8` |
+
+**TriviaQuestSoneium.sol vs. TriviaQuest.sol — deliberate divergence.** Soneium runs a
+forked contract (`contracts/contracts/TriviaQuestSoneium.sol`), not the same
+`TriviaQuest.sol` deployed on Celo/Base. The only functional difference: every native
+payout (round prizes, protocol fee) is sent via a low-level `.call{value:}` with a
+`pendingWithdrawals` pull-pattern fallback, instead of Solidity's `payable(...).transfer()`
+(fixed 2300-gas stipend). Reason: inside the Startale Mini App host, every recipient is an
+ERC-4337 smart account, never an EOA, and `.transfer()` reverts on most smart-account
+`receive()`/`fallback()` implementations — which would have taken the entire
+`finishRound()` tx down with it, for every round, permanently freezing prize payouts on
+that chain. Celo and Base players are overwhelmingly EOAs, so `.transfer()` remains
+correct there and those deployments are intentionally left untouched. If a payout ever
+fails to push (rare — a smart account rejecting native transfers outright), the recipient
+calls `withdraw()` themselves to pull it. See the contract's header comment for the full
+rationale.
+
 ## 💎 $TRIVQ Tokenomics
 
 | Allocation | Amount | % |
@@ -186,6 +209,10 @@ cd trivia-quest
 cd frontend && yarn install
 # Add GROQ_API_KEY to .env.local
 yarn dev
+# npm install works too — frontend/.npmrc sets legacy-peer-deps=true, needed
+# because @startale/app-sdk (Startale Mini App support) declares a peerOptional
+# on @farcaster/miniapp-sdk ^0.2.3 while this repo is pinned to 0.3.0. No actual
+# runtime incompatibility; Vercel picks up the same .npmrc automatically.
 
 # Bot
 cd ../bot && npm install

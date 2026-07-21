@@ -2,7 +2,7 @@
 
 import { WagmiProvider, createConfig, http } from "wagmi";
 import { injected } from "wagmi/connectors";
-import { celo, base } from "viem/chains";
+import { celo, base, soneium, soneiumMinato } from "viem/chains";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "next-themes";
 import {
@@ -17,12 +17,17 @@ import { queryClient } from "@/lib/queryClient";
 
 // Lightweight config — no WalletConnect, no RainbowKit. Used for all
 // blockchain reads (getCurrentRound, balanceOf, etc.) before wallet connects.
+// Soneium chains are included here (read-only metadata + transport, no
+// @startale/app-sdk import) so useReadContract/useChainId work immediately
+// inside the Startale host even before StartaleWagmiWrapper mounts.
 const lightConfig = createConfig({
-  chains: [celo, base],
+  chains: [celo, base, soneium, soneiumMinato],
   connectors: [injected()],
   transports: {
     [celo.id]: http("https://forno.celo.org"),
     [base.id]: http("https://mainnet.base.org"),
+    [soneium.id]: http("https://rpc.soneium.org/"),
+    [soneiumMinato.id]: http("https://rpc.minato.soneium.org/"),
   },
   ssr: false,
 });
@@ -34,13 +39,30 @@ const RainbowKitWrapper = dynamic(
   { ssr: false }
 );
 
+// Startale wallet stack — @startale/app-sdk's startaleConnector() on its own
+// wagmi config (soneium + soneiumMinato) — loaded ONLY once StartaleAutoConnect
+// confirms sdk.context.startale is populated. Never loaded for Celo/Base/MiniPay/
+// Farcaster/Base App sessions.
+const StartaleWagmiWrapper = dynamic(
+  () => import("@/components/StartaleWagmiWrapper"),
+  { ssr: false }
+);
+
 // ──────────────────────────────────────────────────────────────────────────────
-// Wallet context — lets any child request the full wallet stack on demand
+// Wallet context — lets any child request the full wallet stack on demand,
+// and lets StartaleAutoConnect report back that we're inside the Startale host.
 // ──────────────────────────────────────────────────────────────────────────────
-type WalletCtx = { walletReady: boolean; requestWallet: () => void };
+type WalletCtx = {
+  walletReady: boolean;
+  requestWallet: () => void;
+  isStartale: boolean;
+  markStartale: () => void;
+};
 const WalletContext = createContext<WalletCtx>({
   walletReady: false,
   requestWallet: () => {},
+  isStartale: false,
+  markStartale: () => {},
 });
 export const useWallet = () => useContext(WalletContext);
 
@@ -55,17 +77,28 @@ export function Providers({ children }: { children: ReactNode }) {
   // Sync read — no useEffect flicker, no FullProviders rendered first
   const [isMiniPay] = useState(isMiniPaySync);
   const [walletReady, setWalletReady] = useState(false);
+  // Flipped async by StartaleAutoConnect once sdk.context.startale resolves.
+  // Starts false so non-Startale sessions (the overwhelming majority) never wait
+  // on it or pay any Startale-related bundle cost — see StartaleAutoConnect.tsx.
+  const [isStartale, setIsStartale] = useState(false);
+  const markStartale = useCallback(() => setIsStartale(true), []);
 
   const requestWallet = useCallback(() => {
-    if (!isMiniPay) setWalletReady(true);
-  }, [isMiniPay]);
+    if (!isMiniPay && !isStartale) setWalletReady(true);
+  }, [isMiniPay, isStartale]);
 
   return (
     <ThemeProvider attribute="class" defaultTheme="dark">
-      <WalletContext.Provider value={{ walletReady, requestWallet }}>
+      <WalletContext.Provider value={{ walletReady, requestWallet, isStartale, markStartale }}>
         <WagmiProvider config={lightConfig}>
           <QueryClientProvider client={queryClient}>
-            {!isMiniPay && walletReady ? (
+            {isStartale ? (
+              // Startale host: its own wagmi config (startaleConnector, Soneium
+              // chains). RainbowKit never mounts here — wallet_switchEthereumChain
+              // isn't available inside the host, so RainbowKit's chain-mismatch UI
+              // would just be a dead end. See docs.startale.com/miniapps/wallet-integration.
+              <StartaleWagmiWrapper>{children}</StartaleWagmiWrapper>
+            ) : !isMiniPay && walletReady ? (
               // Full stack: inner WagmiProvider (fullConfig) overrides lightConfig
               // for hooks; shared queryClient preserves cached reads across swap.
               <RainbowKitWrapper>{children}</RainbowKitWrapper>

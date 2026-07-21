@@ -16,6 +16,12 @@ export default function FarcasterAutoConnect() {
     const timer = new Promise<null>(res => setTimeout(() => res(null), 1500));
     Promise.race([sdk.context, timer]).then((ctx) => {
       if (!ctx) return;
+      // Inside the Startale host, StartaleWagmiWrapper (its own wagmi config +
+      // startaleConnector) owns the connect flow — bail here so we don't race it
+      // with a second, competing connect() call. See useStartale.ts for how
+      // `startale` is the signal that distinguishes Startale from other
+      // Farcaster-protocol hosts (Warpcast, Base App).
+      if ((ctx as { startale?: unknown }).startale) return;
       // Build connector from sdk.wallet.ethProvider, NOT window.ethereum.
       // This bypasses MetaMask (which claims window.ethereum in Warpcast web)
       // and routes directly to the Farcaster embedded wallet via postMessage.

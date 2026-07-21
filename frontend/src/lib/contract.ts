@@ -1,4 +1,4 @@
-import { celo, base, celoAlfajores } from "viem/chains";
+import { celo, base, celoAlfajores, soneium, soneiumMinato } from "viem/chains";
 
 // ✅ Adresses par chain
 export const CONTRACTS = {
@@ -24,6 +24,24 @@ export const CONTRACTS = {
     referral:"" as `0x${string}`,
     duel: "0xd9456518d7acbe6bcab494aa5894ce4cdf7c5ad7" as `0x${string}`,
 
+  },
+  // Soneium Minato (1946) — deployed via contracts/DEPLOY.md.
+  // `game` is TriviaQuestSoneium (payout fix), not TriviaQuest — see README "Smart
+  // Contracts" section. TriviaDuel is intentionally excluded — separate PR later.
+  [soneiumMinato.id]: {
+    game:    "0x617dc22fec22d5681de90f025fe5b6f2b5ec70bd" as `0x${string}`,
+    token:   "0x50b20728ba0ad803679b5428f267c89aede9a378" as `0x${string}`,
+    checkin: "0xa3da79f30ae5ff551643bdbe55d27ff4f13eeffb" as `0x${string}`,
+    referral:"0x161b192d2b52830abb5fb7c09f5df5f6396d58d8" as `0x${string}`,
+    duel:    "" as `0x${string}`,
+  },
+  // Soneium Mainnet (1868) — filled in after the mainnet deploy, once Minato E2E is green.
+  [soneium.id]: {
+    game:    "" as `0x${string}`,
+    token:   "" as `0x${string}`,
+    checkin: "" as `0x${string}`,
+    referral:"" as `0x${string}`,
+    duel:    "" as `0x${string}`,
   },
 } as const;
 
