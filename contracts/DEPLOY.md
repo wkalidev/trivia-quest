@@ -112,9 +112,33 @@ of what's connected (pre-existing behavior, not introduced by Soneium). Left as-
 noted here rather than fixed silently since which chain it should default to is a
 product call, not a mechanical one.
 
-## Verification (optional)
+## Verification
 
-`hardhat.config.ts` already has `sourcify.enabled: true`, which Blockscout supports —
-no extra config needed if you want to verify source on
-[soneium-minato.blockscout.com](https://soneium-minato.blockscout.com/) /
-[soneium.blockscout.com](https://soneium.blockscout.com/).
+✅ `TriviaQuestSoneium` (`0x617dc22fec22d5681de90f025fe5b6f2b5ec70bd`) verified on both
+Blockscout and Sourcify for Minato:
+
+```bash
+cd contracts
+npx hardhat verify --network soneiumMinato 0x617dc22fec22d5681de90f025fe5b6f2b5ec70bd
+```
+
+No constructor args (zero-arg constructor). This tries Etherscan / Blockscout / Sourcify
+in sequence — Etherscan errors out (`BASESCAN_API_KEY` doesn't cover chain 1946, expected
+and harmless), Blockscout auto-discovers the Minato explorer by chain ID via
+`chains.blockscout.com` (no API key needed), Sourcify also verified. Overall exit code is
+non-zero because of the Etherscan leg — check the Blockscout section specifically for
+`✅ Contract verified successfully`. Repeat with `--network soneium` after the mainnet
+deploy.
+
+## Round state / timing check
+
+`scripts/checkRoundMinato.ts` reads `getCurrentRound()` read-only (does not call
+`finishRound`) and reports whether the round has ended yet:
+
+```bash
+cd contracts
+npx hardhat run scripts/checkRoundMinato.ts --network soneiumMinato
+```
+
+Round #1 ends **2026-07-22T07:53:56Z**. `finishRound()` reverts with "Round not ended"
+before that — this is the gate for E2E step 8 (the payout-path test).
