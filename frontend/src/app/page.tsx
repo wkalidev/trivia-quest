@@ -78,10 +78,16 @@ function addressToAlias(address: string): string {
   return `Player #${num.toString().padStart(4, "0")}`;
 }
 
-const Countdown = memo(function Countdown({ endTime }: { endTime: bigint }) {
+const Countdown = memo(function Countdown({ endTime }: { endTime: bigint | undefined }) {
   const [display, setDisplay] = useState("—");
 
   useEffect(() => {
+    // endTime undefined means "no round data yet" (query loading, disabled, or
+    // still resolving on the current chain) — NOT "expired". Rendering "Expired"
+    // here was the bug: a bigint fallback of 0n upstream made every loading
+    // frame look identical to a genuinely-ended round. Show the neutral "—"
+    // placeholder instead until real on-chain data arrives.
+    if (endTime === undefined) { setDisplay("—"); return; }
     const compute = () => {
       const now = Math.floor(Date.now() / 1000);
       const diff = Number(endTime) - now;
@@ -237,11 +243,22 @@ export default function Home() {
     query: { enabled: !!walletAddress },
   });
 
+  // Explicit chainId + enabled guard (matching quiz/page.tsx's entryFee read) —
+  // without these, this query implicitly follows wagmi's ambient active-chain
+  // resolution, which is fragile with two nested WagmiProvider configs
+  // (lightConfig outside, StartaleWagmiWrapper's startaleConfig inside): if
+  // CONTRACT_ADDRESS is ever momentarily "" (e.g. resolved against a chain with
+  // no deployed contract) the query still fires with an invalid address and
+  // its result — currentRound === undefined — falls back to endTime = 0n below,
+  // which the Countdown then reports as permanently "Expired" regardless of the
+  // real on-chain round state. Pinning chainId and gating on a non-empty address
+  // makes the query key unambiguous and keeps it disabled until it's valid.
   const { data: currentRound, refetch: refetchRound } = useReadContract({
     address: CONTRACT_ADDRESS,
     abi: CONTRACT_ABI,
     functionName: "getCurrentRound",
-    query: { refetchInterval: 15_000 },
+    chainId,
+    query: { enabled: !!CONTRACT_ADDRESS, refetchInterval: 15_000 },
   });
 
   // On-demand round management: when the client detects an expired round, hit
@@ -274,7 +291,8 @@ export default function Home() {
     address: CONTRACT_ADDRESS,
     abi: CONTRACT_ABI,
     functionName: "getTotalPlayers",
-    query: { refetchInterval: 30_000 },
+    chainId,
+    query: { enabled: !!CONTRACT_ADDRESS, refetchInterval: 30_000 },
   });
 
   const { data: rewardsRemaining } = useReadContract({
@@ -286,7 +304,9 @@ export default function Home() {
 
   const trivqFormatted = trivqBalance ? formatTrivq(trivqBalance as bigint) : "—";
   const prizePool = currentRound ? formatCelo(currentRound[1]) : "0";
-  const endTime = currentRound ? currentRound[3] : BigInt(0);
+  // No 0n fallback here on purpose — see Countdown's comment. currentRound[3]
+  // stays undefined (not "1970") until the read actually resolves.
+  const endTime = currentRound ? currentRound[3] : undefined;
   const players = totalPlayers ? totalPlayers.toString() : "0";
   const APP_URL = "https://trivia-quest-eight.vercel.app";
   const referralLink = address ? `${APP_URL}?ref=${address}` : APP_URL;
