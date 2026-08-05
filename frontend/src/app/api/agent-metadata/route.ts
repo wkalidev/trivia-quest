@@ -5,7 +5,7 @@ export async function GET() {
     "@context": "https://trivia-quest-eight.vercel.app/api/agent-schema",
     "@type": "Agent",
     name: "TriviaQ AI Agent",
-    type: "agent",
+    type: "https://eips.ethereum.org/EIPS/eip-8004#registration-v1",
     // spec field names: active (bool), updatedAt (unix timestamp)
     active: true,
     image: "https://trivia-quest-eight.vercel.app/icon-512.png",
@@ -46,6 +46,8 @@ export async function GET() {
     ],
     registrations: [
       {
+        agentId: 9055,
+        agentRegistry: "eip155:42220:0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
         network: "eip155:42220",
         address: "0xdeacde6ec27fd0cd972c1232c4f0d4171dda2357"
       }
