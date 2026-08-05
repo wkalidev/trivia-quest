@@ -1,5 +1,6 @@
 node_modules/
-sdk/
+sdk/*
+!sdk/package.json
 *.log
 .env
 .vercel
