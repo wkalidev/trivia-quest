@@ -96,7 +96,7 @@ function ResultsContent() {
   const handleGoodDollarJoin = () => {
     localStorage.setItem("gooddollar_joined", "1");
     setShowGoodDollar(false);
-    window.open("http://goodwallet.xyz?inviteCode=39UwSxN3yv&chainId=122", "_blank");
+    window.open("https://goodwallet.xyz?inviteCode=39UwSxN3yv&chainId=122", "_blank");
   };
 
   // Native share (mobile)
