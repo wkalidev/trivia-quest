@@ -76,7 +76,8 @@ contract TriviaQuest is Ownable, ReentrancyGuard {
 
         if (fee > 0 && treasury != address(0)) {
             totalFeesCollected += fee;
-            payable(treasury).transfer(fee);
+            (bool feeSent, ) = payable(treasury).call{value: fee}("");
+            require(feeSent, "Fee transfer failed");
             emit FeeCollected(fee, treasury);
         }
 
@@ -129,13 +130,15 @@ contract TriviaQuest is Ownable, ReentrancyGuard {
         if (topWinners.length == 1) {
             prizes[0] = prize;
             players[topWinners[0]].totalWinnings += prize;
-            payable(topWinners[0]).transfer(prize);
+            (bool sent0, ) = payable(topWinners[0]).call{value: prize}("");
+            require(sent0, "Prize transfer failed");
         } else if (topWinners.length == 2) {
             prizes[0] = (prize * 60) / 100;
             prizes[1] = (prize * 40) / 100;
             for (uint256 i = 0; i < 2; i++) {
                 players[topWinners[i]].totalWinnings += prizes[i];
-                payable(topWinners[i]).transfer(prizes[i]);
+                (bool sent, ) = payable(topWinners[i]).call{value: prizes[i]}("");
+                require(sent, "Prize transfer failed");
             }
         } else {
             prizes[0] = (prize * 50) / 100;
@@ -143,7 +146,8 @@ contract TriviaQuest is Ownable, ReentrancyGuard {
             prizes[2] = (prize * 20) / 100;
             for (uint256 i = 0; i < 3; i++) {
                 players[topWinners[i]].totalWinnings += prizes[i];
-                payable(topWinners[i]).transfer(prizes[i]);
+                (bool sent, ) = payable(topWinners[i]).call{value: prizes[i]}("");
+                require(sent, "Prize transfer failed");
             }
         }
 
