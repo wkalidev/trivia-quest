@@ -216,14 +216,17 @@ contract TriviaDuel is Ownable, ReentrancyGuard {
         // Envoie les frais au treasury
         if (fee > 0 && treasury != address(0)) {
             totalFeesCollected += fee;
-            payable(treasury).transfer(fee);
+            (bool feeSent, ) = payable(treasury).call{value: fee}("");
+            require(feeSent, "Fee transfer failed");
         }
 
         // ✅ Égalité — remboursement (- frais partagés)
         if (duel.scoreA == duel.scoreB) {
             uint256 refundEach = netPrize / 2;
-            payable(duel.playerA).transfer(refundEach);
-            payable(duel.playerB).transfer(refundEach);
+            (bool sentA, ) = payable(duel.playerA).call{value: refundEach}("");
+            require(sentA, "Refund transfer failed");
+            (bool sentB, ) = payable(duel.playerB).call{value: refundEach}("");
+            require(sentB, "Refund transfer failed");
             emit DuelTie(duelId, refundEach);
             return;
         }
@@ -231,7 +234,8 @@ contract TriviaDuel is Ownable, ReentrancyGuard {
         // ✅ Vainqueur
         address winner = duel.scoreA > duel.scoreB ? duel.playerA : duel.playerB;
         duel.winner = winner;
-        payable(winner).transfer(netPrize);
+        (bool sentWinner, ) = payable(winner).call{value: netPrize}("");
+        require(sentWinner, "Prize transfer failed");
 
         emit DuelFinished(duelId, winner, netPrize);
     }
@@ -250,7 +254,8 @@ contract TriviaDuel is Ownable, ReentrancyGuard {
         );
 
         duel.status = DuelStatus.Cancelled;
-        payable(duel.playerA).transfer(duel.wager);
+        (bool sent, ) = payable(duel.playerA).call{value: duel.wager}("");
+        require(sent, "Refund transfer failed");
 
         emit DuelCancelled(duelId, duel.playerA);
     }
