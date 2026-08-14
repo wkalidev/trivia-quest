@@ -55,7 +55,6 @@ const nextConfig: NextConfig = {
             value: [
               "<https://forno.celo.org>; rel=preconnect",
               "<https://api.geckoterminal.com>; rel=preconnect",
-              "<https://api.web3modal.org>; rel=preconnect",
             ].join(", "),
           },
         ],

@@ -222,7 +222,7 @@ export async function POST(req: NextRequest) {
 export async function GET() {
   return NextResponse.json({
     name: "TriviaQ MCP Server",
-    version: "1.0.0",
+    version: "3.4.0",
     protocol: "MCP 2024-11-05",
     tools: TOOLS.map(t => ({ name: t.name, description: t.description })),
     status: "healthy",
