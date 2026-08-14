@@ -38,7 +38,7 @@ Every game action that affects a player's on-chain state — joining a round, su
 
 Key differentiators:
 - MiniPay injected connector with automatic wallet aliasing (`injected()` + address fallback)
-- ECDSA score signature verification — the server signs the score before the contract mints
+- ECDSA score signature verification — the player signs the score client-side; the API (`/api/submit-score`, `/api/submit-duel-score`) verifies that signature off-chain before its server-held key calls the contract's `onlyOwner submitScore` — the contract itself performs no signature check (see §9)
 - Rate limiting on score submissions (5/hour per wallet) enforced server-side
 - AI-generated questions via Groq (LLaMA 3.1-8b-instant) for infinite variety
 - Inline CELO → TRIVQ swap via Ubeswap V3 Universal Router, no external DEX needed
@@ -64,7 +64,7 @@ Key differentiators:
 - 10 random questions per game, 15-second timer per question
 - Questions drawn from 1,200+ pool across 6 categories, or generated live by AI
 - Streak multiplier: 3+ consecutive correct answers = x2; 5+ = x3
-- Score submitted on-chain via `submitScore(player, score, points)` with ECDSA server signature
+- Score submitted on-chain via `submitScore(player, score, points)`, an `onlyOwner` function called by the API server after it verifies the player's ECDSA signature off-chain — see §9 for the full security model
 
 ### Prize Pools
 - Players join a round by paying an entry fee in CELO
@@ -143,7 +143,7 @@ $TRIVQ has three concrete on-chain use cases enforced by deployed contracts:
 
 **Who can mint:** The `TriviaQToken` contract exposes a `mint(to, amount)` function restricted to a designated minter address. The minter role is set by the contract owner via `setMinter(address)` (script: `set-minter.ts`).
 
-**Current minter:** The TriviaQuest game contract (`0xffe22d3d1b63866ac9da8ac92fdb9ceddeadb0bb` on Celo, `0x1e2c209412ec30915ccf922654f0593faf61fcfb` on Base). Minting is triggered exclusively by the on-chain `submitScore` function, which requires a valid ECDSA server signature.
+**Current minter:** The TriviaQuest game contract (`0xffe22d3d1b63866ac9da8ac92fdb9ceddeadb0bb` on Celo, `0x1e2c209412ec30915ccf922654f0593faf61fcfb` on Base). Minting is triggered exclusively by the `submitScore` function, which is `onlyOwner` — callable only by the address holding the server's private key. The API verifies the player's ECDSA signature off-chain before calling it; the contract itself performs no signature check (see §9).
 
 **Supply ceiling:** Minting is capped at a maximum total supply of 500,000,000 TRIVQ. The token contract enforces this cap via a `require(totalSupply() + amount <= MAX_SUPPLY)` check.
 
@@ -169,7 +169,7 @@ $TRIVQ has three concrete on-chain use cases enforced by deployed contracts:
 
 | Control | Detail |
 |---|---|
-| ECDSA score verification | The server signs `(player, score, points)` with a private key before `submitScore` is called. The contract verifies the signature on-chain — fake scores cannot be submitted without the server key. |
+| ECDSA score verification (off-chain) | The player signs the score client-side; the API verifies that signature with `viem.verifyMessage()` before calling `submitScore`, which is `onlyOwner` and performs no signature check itself. Fake scores can't be submitted without the server's private key — but that's an access-control guarantee (only the owner key can call the function), not an on-chain cryptographic verification of the player's signature. |
 | Rate limiting | 5 score submissions per wallet per hour, enforced server-side before signing. |
 | OpenZeppelin base | All contracts inherit from audited OpenZeppelin v4/v5 contracts: `ERC20`, `ERC1155`, `Ownable`, `ReentrancyGuard`. |
 | Cron secret | The `finishRound` cron endpoint is protected by a `CRON_SECRET` environment variable; unauthenticated calls are rejected. |
@@ -181,6 +181,8 @@ $TRIVQ has three concrete on-chain use cases enforced by deployed contracts:
 - No timelock on minter role transfer
 - No multisig on owner functions (planned for Q1 2027 governance phase)
 - Server signing key is a single point of failure for score minting
+- Score/duel verification is entirely off-chain (API-layer); the smart contracts have no on-chain signature check of their own, only `onlyOwner` access control on `submitScore`
+- The `TriviaDuel` contract on Celo (the only chain it's deployed on) predates a later `submitScoreVerified` addition to this repo's source and has no on-chain signature-verification path at all, not even an optional one
 
 ---
 

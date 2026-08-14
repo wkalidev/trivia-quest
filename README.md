@@ -74,7 +74,7 @@ Questions generated in real-time by Groq AI (LLaMA 3.1-8b-instant):
 
 - Submit score requires ECDSA wallet signature (prevents fake scores)
 - Submit score signature is single-use: bound to a nonce + 5-minute expiry, so a captured signature can't be replayed later to re-mint TRIVQ 🆕
-- Duel score submission (`/api/submit-duel-score`) now requires an ECDSA wallet signature from the submitting player — previously anyone who knew a `duelId` and a player's address (both public on-chain) could post a fake score for either side of a real-money duel 🆕
+- Duel score submission (`/api/submit-duel-score`) requires an ECDSA wallet signature from the submitting player — verified **off-chain**, in the API route (`viem.verifyMessage`), before the server's own key calls the contract's `onlyOwner submitScore`. **The deployed `TriviaDuel` contract on Celo (the only chain it's deployed on — no Base duel contract exists) does not verify any signature on-chain itself**; it has no `submitScoreVerified`/ECDSA path — that was added to this repo after the Celo deployment and was never redeployed (see [Contract Verification](#-contract-verification)). Protection today is entirely API-layer: real, but it depends on the server and `PRIVATE_KEY` behaving correctly, not on a trustless on-chain guarantee 🆕
 - Rate limited: 5 submissions/hour per wallet
 - Cron endpoint protected by CRON_SECRET
 - AI endpoint rate limited: 10 req/min (Self Agents bypass)
@@ -135,6 +135,30 @@ Every AI request made by the bot is cryptographically signed with ECDSA — veri
 | DailyCheckIn | `0x0f19851d5cd905d110c000a7d26d74a2f21f8ff9` |
 | Referral | `0x4fb5285263354e1e75f044c65166ab22c3840074` |
 | Treasury (fee recipient) | `0x995aC10d5B6778B90eF060b7ab585D854C1Ed914` |
+
+## 🔎 Contract Verification
+
+Checked directly against Celoscan/Basescan (not assumed from deploy logs). **9/9 deployed contracts have verified source code**, confirmed by reopening each explorer page after verification, not just a successful CLI exit code:
+
+| Contract | Chain | Verified? | Explorer |
+|---|---|---|---|
+| TriviaQToken ($TRIVQ) v2 | Celo | ✅ Exact Match | [Celoscan](https://celoscan.io/address/0xe65fc5cacaf9a5aebbc0e151dee08a53f24a05c5#code) |
+| TriviaQuest v3 | Celo | ✅ Exact Match | [Celoscan](https://celoscan.io/address/0xffe22d3d1b63866ac9da8ac92fdb9ceddeadb0bb#code) |
+| TriviaDuel v1 | Celo | ✅ Exact Match | [Celoscan](https://celoscan.io/address/0xee7be00cd5454b9bea56d864d82076b8b5de5ca1#code) |
+| DailyCheckIn v2 | Celo | ✅ Exact Match | [Celoscan](https://celoscan.io/address/0x8650e6c477f8ae3933dc6d61d85e65c90cf71828#code) |
+| Referral v2 | Celo | ✅ Exact Match | [Celoscan](https://celoscan.io/address/0xa0fcd85a25ecb71ca1ea9d63da058c832c27c62e#code) |
+| TriviaQToken ($TRIVQ) | Base | ✅ Exact Match | [Basescan](https://basescan.org/address/0x8ecc1dc70f3bc5be941b61b42707eb7dbddb54c3#code) |
+| TriviaQuest | Base | ✅ Exact Match | [Basescan](https://basescan.org/address/0x1e2c209412ec30915ccf922654f0593faf61fcfb#code) |
+| DailyCheckIn | Base | ✅ Exact Match | [Basescan](https://basescan.org/address/0x0f19851d5cd905d110c000a7d26d74a2f21f8ff9#code) |
+| Referral | Base | ✅ Exact Match | [Basescan](https://basescan.org/address/0x4fb5285263354e1e75f044c65166ab22c3840074#code) |
+
+The 6 previously-unverified contracts were verified via Sourcify (no API key needed; the 2 Base ones were additionally verified on Basescan directly via the existing `BASESCAN_API_KEY`, which works as a unified Etherscan V2 key across chains). No contract was redeployed and no address changed — this only publishes the source code that already matches the bytecode running on-chain.
+
+**Important finding from this process, not just a formality:** before verifying, the locally-compiled bytecode was diffed against the live on-chain bytecode (`eth_getCode`) for every contract. Two did **not** match the current repository `HEAD`:
+- **TriviaDuel (Celo)** matches commit `3a80636` — the initial deploy, before the ECDSA-signature-verification work (`acb6bc2`→`162d757`) was added to the source.
+- **DailyCheckIn (Celo)** matches commit `45d418d` — the very first version, before the streak-freeze mechanism (`b092bbf`) and a later fix (`cc4f76f`) were added.
+
+Both were verified using that exact historical source (not current `HEAD`), because that's what's actually deployed. **See the Security section below for what this means in practice** — the code currently in this repo for `TriviaDuel.sol` and `DailyCheckIn.sol` is not what's running on Celo mainnet today. Base's `DailyCheckIn` and both chains' `TriviaQuest`/`Referral`/`TriviaQToken` do match current `HEAD`.
 
 ## 💎 $TRIVQ Tokenomics
 
@@ -250,8 +274,8 @@ PageSpeed scores (mobile):
 - Fixed: `agent-metadata`'s `updatedAt` was a hardcoded past date — now real-time
 - Fixed (superseded 2026-08, see below): `next` bumped `16.2.1` → `16.2.10` — this bump was believed to close several high-severity advisories, but `16.2.10` was still inside the vulnerable range for a later batch of disclosures (`>=16.0.0 <16.2.11`); see the 2026-08 pass for the actual fix
 - Fixed: `.gitattributes` added to stop CRLF/LF noise showing 88 files as modified with no real content change
-- Deferred (documented, not fixed — would require a contract redeploy which is out of scope for this pass): `TriviaQuest.finishRound` / `TriviaDuel._resolveDuel` use `.transfer()` (2300 gas stipend) to pay winners — a smart-contract wallet winner whose `receive()` costs more than that would revert the whole payout; `Referral.sol` has no anti-Sybil protection beyond the global `REWARDS_ALLOC` cap. **Still open as of 2026-08.**
-- No test suite exists yet for the 5 production Solidity contracts (`contracts/test/` only has the default Hardhat `Counter.ts` sample) — recommended follow-up, does not block this pass since it's additive/zero-risk. **Still true as of 2026-08** — same for `frontend/` and `bot/`, neither has a test runner configured.
+- Deferred (documented, not fixed — would require a contract redeploy which is out of scope for this pass): `TriviaQuest.finishRound` / `TriviaDuel._resolveDuel` use `.transfer()` (2300 gas stipend) to pay winners — a smart-contract wallet winner whose `receive()` costs more than that would revert the whole payout; `Referral.sol` has no anti-Sybil protection beyond the global `REWARDS_ALLOC` cap. **Still open as of 2026-08.** — **Source fixed 2026-08-13** (see below), **not yet redeployed**.
+- No test suite exists yet for the 5 production Solidity contracts (`contracts/test/` doesn't currently exist — not even the default Hardhat sample) — recommended follow-up, does not block this pass since it's additive/zero-risk. **Still true as of 2026-08-13** — same for `frontend/` and `bot/`, neither has a test runner configured.
 
 **2026-08 audit pass:**
 
@@ -267,18 +291,39 @@ PageSpeed scores (mobile):
   - `contracts/`: 21 → 13 (0 critical, 1 high, 1 moderate, 11 low) — dev-only Hardhat tooling. Residual: `undici` (high) via `@nomicfoundation/hardhat-ignition` → `hardhat-verify`, no non-breaking fix published yet.
   - None of the residual `frontend/` or `contracts/` highs are reachable from user-facing runtime code paths (wallet-connector UI chain and Hardhat dev-tooling respectively); re-run `npm audit` after the next wagmi major or Hardhat upgrade — and re-test the build if `@coinbase/cdp-sdk`'s pin is ever lifted.
 
+**2026-08-13 audit pass** (re-verified every MiniPay compliance claim against real code/deployment instead of trusting this README):
+
+- Fixed: `TriviaQuest.finishRound`/`joinRound` and `TriviaDuel._resolveDuel`/`cancelExpiredDuel` switched from `.transfer()` to `.call{value:}("")` with a `require(sent, ...)` check — a smart-contract-wallet winner whose `receive()`/`fallback()` costs more than the 2300 gas stipend no longer reverts the whole payout. All call sites are already behind `nonReentrant` and follow checks-effects-interactions (state written before the external call), so this is a safe drop-in change. Compiles cleanly (`npx hardhat compile`). **Source-only — the deployed Celo/Base contracts still run the old `.transfer()` bytecode. Redeploying changes contract addresses and requires migrating `frontend/src/lib/contract.ts`, env vars, and the SDK — not done in this pass, needs an explicit decision.**
+- Fixed: `/api/mcp`'s `GET` handler hardcoded `version: "1.0.0"` while the JSON-RPC `initialize` handler in the same file correctly returned `3.4.0` — the exact version-drift bug the July pass claimed to have closed for this endpoint, just in a spot that was missed. Now `3.4.0`.
+- Fixed: `next.config.ts` still preconnected to `api.web3modal.org`, which the Performance section below claims was removed and which nothing in `frontend/src` references anymore. Removed.
+- Fixed: dependency pinning (`.npmrc`) was frontend-only and, worse, silently inert everywhere — see the MiniPay Compliance table above for the `min-release-age` key-name/unit bug. Now correct and present in `frontend/`, `bot/`, and `contracts/`.
+- Found, not fixed: `SupportButton.tsx` is a `mailto:` link, not an in-context support surface; `checkin/page.tsx`'s check-in transaction has no error UI on failure.
+- Confirmed accurate (checked, not just trusted): live deployment matches `HEAD` (`agentRegistry`/`agentId` fix from `f1b919a` is live), icons are real 512×512/192×192 PNGs, `screenshotUrls` point to real ~400KB screenshots (not placeholders), GoodDollar link is HTTPS, ToS/Privacy links are `target="_self"`, connect button is correctly hidden in MiniPay with no regressions.
+- Not verified this pass (tooling limits, not code issues): live PageSpeed Insights re-run hit a 429 rate limit with no API key available; couldn't independently confirm the "98" performance score is still current. Recommend re-running manually.
+- Confirmed: no trace anywhere in this repo (issues, PRs, commits, notes) of an actual submission via `developer.minipay.to/mini-app-listing`. The 4 open/closed GitHub issues and PRs found are all about contract security features, unrelated to a MiniPay listing submission. **Code compliance is not the same as being listed — nobody has filled out the submission form yet, and that can't be done from this repo.**
+
+**2026-08-14 audit pass:**
+
+- Fixed: 6 of 9 deployed contracts were unverified on Celoscan/Basescan (`TriviaQuest`/`TriviaDuel`/`DailyCheckIn`/`Referral` on Celo, `DailyCheckIn`/`Referral` on Base) — all 9 now verified, see [Contract Verification](#-contract-verification). Verified via Sourcify (no API key needed) plus Basescan directly for the 2 Base contracts, using the existing `BASESCAN_API_KEY` as a unified Etherscan V2 key. No contract was redeployed; no address changed — this only published source code matching what was already on-chain.
+- Found in the process of verifying, not a bug fix: before verifying, local bytecode was diffed against live on-chain bytecode for every contract. `TriviaDuel` and `DailyCheckIn` on Celo did not match current `HEAD` — they matched older commits (`3a80636` and `45d418d` respectively), predating later feature work on those files. Both were verified using that exact historical source, since that's what's actually deployed. Full detail in [Contract Verification](#-contract-verification).
+- Documented as a known, deliberate architecture choice (not a bug, not a newly-introduced issue): score submission — for both the regular game (`/api/submit-score`) and duels (`/api/submit-duel-score`) — relies on a real ECDSA signature check, but that check happens entirely in the API layer, not on-chain. The player signs the score client-side; the Next.js API route verifies that signature with `viem.verifyMessage()`; only after it passes does the API's server-held `PRIVATE_KEY` (the contract `owner`) call `submitScore`, which is a plain `onlyOwner` function with no signature-verification logic of its own in either `TriviaQuest.sol` or `TriviaDuel.sol`. Practical consequence: the security guarantee rests on the API server and `PRIVATE_KEY` being uncompromised, not on a trustless on-chain check — the contracts trust whoever holds the owner key, full stop. `TriviaDuel` on Celo (the only chain it's deployed on) additionally has no on-chain signature-verification path at all, not even an optional one (`submitScoreVerified` was added to this repo after that deployment — see the finding above). `WHITEPAPER.md` previously described this as the contract verifying the signature on-chain, which was inaccurate; corrected in this pass. A more trustless design would move the signature check into the contract itself (e.g. wiring up the already-written `submitScoreVerified`/`ECDSA.recover` path for duels, and an equivalent for the main game), removing the need to trust the API layer — no timeline committed to that here, just noting it as the direction available.
+
 ## 📱 MiniPay Compliance
+
+Re-verified 2026-08-13 against the live code and deployment, not just self-reported checkmarks:
 
 | Requirement | Status |
 |---|---|
-| Auto wallet connect (`window.ethereum.isMiniPay`) | ✅ |
-| Connect button hidden inside MiniPay | ✅ |
-| Force Celo mainnet (`wallet_switchEthereumChain`) | ✅ |
-| Support button — opens in-context (no `target="_blank"`) | ✅ |
-| Terms of Service — `<a target="_self">` in-app navigation | ✅ |
-| Privacy Policy — `<a target="_self">` in-app navigation | ✅ |
-| Mobile viewport 360×640 minimum | ✅ |
-| Graceful error handling on chain switch / account request | ✅ |
+| Auto wallet connect (`window.ethereum.isMiniPay`) | ✅ `useMiniPay.ts` + sync inline-script detection in `layout.tsx`/`providers.tsx`, no regressions found |
+| Connect button hidden inside MiniPay | ✅ only rendered in `app/page.tsx`, gated on `!isInMiniPay` in both spots it appears |
+| Force Celo mainnet (`wallet_switchEthereumChain`) | ✅ `useMiniPay.ts` requests the switch; failure is swallowed silently (empty `catch`), which is safe today only because MiniPay never runs on another chain |
+| Support button — opens in-context (no `target="_blank"`) | ⚠️ no `target="_blank"` (true), but `SupportButton.tsx` is a `mailto:` link — it hands off to the OS mail client, not an in-app/in-context support surface. Passes the literal MiniPay checklist item, arguably doesn't meet its intent |
+| Terms of Service — `<a target="_self">` in-app navigation | ✅ `layout.tsx:134` |
+| Privacy Policy — `<a target="_self">` in-app navigation | ✅ `layout.tsx:145` |
+| Mobile viewport 360×640 minimum | ✅ (static check) `viewport` meta is `width=device-width`, no hardcoded `min-width` over 360px in `globals.css`; not confirmed with an actual 360×640 device/emulator render |
+| Graceful error handling on chain switch / account request | ⚠️ partial — `useMiniPay.ts`'s switch/account-request calls are wrapped in try/catch and degrade cleanly. `app/checkin/page.tsx`'s `writeContract` call for the check-in transaction has no `onError`/error surfaced to the user at all (only `isPending` is read) — a rejected tx or RPC failure fails silently with no UI feedback |
+| Dependency pinning / supply-chain (`.npmrc`) | ❌ was broken repo-wide until this pass: only `frontend/.npmrc` existed (`bot/`, `contracts/` had none), and its `minimum-release-age=10080` key was wrong on both counts — the real npm config is `min-release-age` (not `minimum-release-age`, silently ignored by npm as an unrecognized key) and its unit is **days**, not minutes (`10080` would have meant ~27 years once the key name was fixed, blocking effectively every install). Fixed in this pass: `min-release-age=7` + `ignore-scripts=true` now in all three `.npmrc` files. Still requires npm ≥12 in CI/Vercel to actually take effect — npm 11 and earlier warn and ignore it |
+| Contracts verified on-chain (Celoscan / Basescan) | ✅ 9/9 verified as of 2026-08-14 — see [Contract Verification](#-contract-verification) below (2 of the 9 are verified as an older historical source version, not current `HEAD` — see that section) |
 
 ## 🎯 Proof of Ship Checklist
 
@@ -329,7 +374,9 @@ PageSpeed scores (mobile):
 - [x] fc:miniapp embed tag added alongside legacy fc:frame 🆕
 - [x] Manifest screenshotUrls populated 🆕
 - [x] Farcaster webhook accepts current miniapp_added/miniapp_removed events (was silently dropping them under the legacy frame_added-only filter) 🆕
-- [x] Dependency pinning + .npmrc minimum-release-age for MiniPay supply-chain requirement 🆕
+- [x] Dependency pinning + `.npmrc` `min-release-age` for MiniPay supply-chain requirement — fixed 2026-08-13 (wrong key name/unit, frontend-only; now correct in `frontend/`, `bot/`, `contracts/`, still needs npm ≥12 in CI to actually enforce) 🆕
+- [x] All 9 deployed contracts verified on Celoscan/Basescan — fixed 2026-08-14, see [Contract Verification](#-contract-verification) 🆕
+- [ ] Actual MiniPay listing submission via developer.minipay.to/mini-app-listing — no evidence this has ever been filed; this is a human action, not something fixable in code 🆕
 
 ## 👤 Author
 
